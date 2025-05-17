@@ -1,3 +1,9 @@
+# leehayoon
+.idea/*
+RiderLink/
+
+# include specific content folder - !Content/{~}/
+
 # Visual Studio 2015 user specific files
 .vs/
 
