@@ -81,3 +81,7 @@ DerivedDataCache/*
 
 # Private Plugins
 Plugins/Private
+
+# Temp (for Test)
+Content/Temp
+Source/FlashPoint/Temp
