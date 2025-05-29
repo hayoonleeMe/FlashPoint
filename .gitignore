@@ -80,6 +80,7 @@ Plugins/**/Intermediate/*
 DerivedDataCache/*
 
 # Private Plugins
+Plugins
 Plugins/Private
 
 # Temp (for Test)

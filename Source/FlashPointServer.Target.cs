@@ -3,11 +3,11 @@
 using UnrealBuildTool;
 using System.Collections.Generic;
 
-public class FlashPointEditorTarget : TargetRules
+public class FlashPointServerTarget : TargetRules
 {
-	public FlashPointEditorTarget(TargetInfo Target) : base(Target)
+	public FlashPointServerTarget(TargetInfo Target) : base(Target)
 	{
-		Type = TargetType.Editor;
+		Type = TargetType.Server;
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_4;
 		ExtraModuleNames.AddRange( new string[] { "FlashPoint" } );
