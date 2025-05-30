@@ -86,3 +86,7 @@ Plugins/Private
 # Temp (for Test)
 Content/Temp
 Source/FlashPoint/Temp
+
+Config/DefaultEditor.ini
+Config/DefaultEditorSettings.ini
+Config/DefaultEditorPerProjectUserSettings.ini
