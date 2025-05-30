@@ -7,6 +7,11 @@ public class FlashPoint : ModuleRules
 	public FlashPoint(ReadOnlyTargetRules Target) : base(Target)
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+		
+		PublicIncludePaths.AddRange(new string[]
+		{
+			"FlashPoint"
+		});
 	
 		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
 
