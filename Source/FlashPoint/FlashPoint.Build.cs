@@ -19,7 +19,10 @@ public class FlashPoint : ModuleRules
 			"CoreUObject",
 			"Engine",
 			"InputCore",
-			"EnhancedInput"
+			"EnhancedInput",
+			"GameplayTags",
+			"GameplayAbilities",
+			"GameplayTasks"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
