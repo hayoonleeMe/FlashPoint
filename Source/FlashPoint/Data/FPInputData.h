@@ -41,4 +41,8 @@ public:
 	// 일반적인 입력
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FInputConfig> NativeInputConfigs;
+
+	// 어빌리티를 실행하는 입력
+	UPROPERTY(EditDefaultsOnly)
+	TArray<FInputConfig> AbilityInputConfigs;
 };

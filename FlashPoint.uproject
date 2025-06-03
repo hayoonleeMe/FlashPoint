@@ -36,6 +36,10 @@
 			"Name": "GameLiftPlugin",
 			"Enabled": true
 		},
+		{
+			"Name": "GameplayAbilities",
+			"Enabled": true
+		},
 		}
 	]
 }

@@ -4,6 +4,8 @@
 #include "FPPlayerController.h"
 
 #include "EnhancedInputSubsystems.h"
+#include "FPPlayerState.h"
+#include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Data/FPInputData.h"
 #include "Input/FPInputComponent.h"
 #include "System/FPAssetManager.h"
@@ -13,6 +15,16 @@
 AFPPlayerController::AFPPlayerController()
 {
 	bReplicates = true;
+}
+
+void AFPPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
+{
+	Super::PostProcessInput(DeltaTime, bGamePaused);
+
+	if (UFPAbilitySystemComponent* ASC = GetFPAbilitySystemComponent())
+	{
+		ASC->ProcessAbilityInput();
+	}
 }
 
 void AFPPlayerController::BeginPlay()
@@ -38,4 +50,29 @@ void AFPPlayerController::SetupInputComponent()
 	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
 
 	// Bind Native Inputs
+}
+
+void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)
+{
+	if (UFPAbilitySystemComponent* ASC = GetFPAbilitySystemComponent())
+	{
+		ASC->AbilityInputTagPressed(InputTag);
+	}
+}
+
+void AFPPlayerController::Input_AbilityInputTagReleased(FGameplayTag InputTag)
+{
+	if (UFPAbilitySystemComponent* ASC = GetFPAbilitySystemComponent())
+	{
+		ASC->AbilityInputTagReleased(InputTag);
+	}
+}
+
+UFPAbilitySystemComponent* AFPPlayerController::GetFPAbilitySystemComponent() const
+{
+	if (const AFPPlayerState* PS = GetPlayerState<AFPPlayerState>())
+	{
+		return PS->GetFPAbilitySystemComponent();
+	}
+	return nullptr;
 }
