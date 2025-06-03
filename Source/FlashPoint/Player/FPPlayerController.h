@@ -7,6 +7,7 @@
 #include "GameFramework/PlayerController.h"
 #include "FPPlayerController.generated.h"
 
+class UFPAbilitySystemComponent;
 /**
  * 
  */
@@ -17,6 +18,7 @@ class FLASHPOINT_API AFPPlayerController : public APlayerController
 
 public:
 	AFPPlayerController();
+	virtual void PostProcessInput(const float DeltaTime, const bool bGamePaused) override;
 	
 protected:
 	virtual void BeginPlay() override;
