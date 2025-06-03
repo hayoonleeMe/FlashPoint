@@ -5,6 +5,7 @@
 
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Player/FPPlayerState.h"
+#include "System/FPAssetManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPCharacter)
 
@@ -50,5 +51,18 @@ void AFPCharacter::InitAbilitySystem()
 		AbilitySystemComponent = PS->GetFPAbilitySystemComponent();
 		AbilitySystemComponent->InitAbilityActorInfo(PS, this);
 		AttributeSet = PS->GetFPAttributeSet();
+	}
+
+	ApplyAbilitySystemData(TEXT("ASD_Default"));
+}
+
+void AFPCharacter::ApplyAbilitySystemData(const FName& DataId)
+{
+	if (HasAuthority())
+	{
+		if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
+		{
+			AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+		}
 	}
 }
