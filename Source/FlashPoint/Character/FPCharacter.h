@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
+#include "Data/FPAbilitySystemData.h"
 #include "GameFramework/Character.h"
 #include "FPCharacter.generated.h"
 
@@ -25,11 +26,20 @@ public:
 	UFPAttributeSet* GetFPAttributeSet() const;
 	
 protected:
+	// Initialize Gameplay Ability System
 	void InitAbilitySystem();
+
+	// DataId에 해당하는 UFPAbilitySystemData를 적용한다.
+	// Server Only
+	void ApplyAbilitySystemData(const FName& DataId);
 
 	UPROPERTY()
 	TObjectPtr<UFPAbilitySystemComponent> AbilitySystemComponent;
 
 	UPROPERTY()
 	TObjectPtr<UFPAttributeSet> AttributeSet;
+
+	// AbilitySystemComponent에 부여된 Ability Handle, 적용된 Effect Handle을 저장한다.
+	UPROPERTY()
+	FFPAbilitySystemData_GrantedHandles GrantedHandles;
 };
