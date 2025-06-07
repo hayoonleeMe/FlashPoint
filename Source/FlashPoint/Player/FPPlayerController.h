@@ -28,6 +28,7 @@ protected:
 
 private:
 	void Input_Move(const FInputActionValue& InputValue);
+	void Input_Look(const FInputActionValue& InputValue);
 
 	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
 	void Input_AbilityInputTagReleased(FGameplayTag InputTag);

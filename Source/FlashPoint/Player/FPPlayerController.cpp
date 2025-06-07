@@ -52,6 +52,7 @@ void AFPPlayerController::SetupInputComponent()
 
 	// Bind Native Inputs
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input_Action_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input_Action_Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
 }
 
 void AFPPlayerController::Input_Move(const FInputActionValue& InputValue)
@@ -72,6 +73,13 @@ void AFPPlayerController::Input_Move(const FInputActionValue& InputValue)
 			GetPawn()->AddMovementInput(RightDirection, -MovementVector.Y);	
 		}
 	}
+}
+
+void AFPPlayerController::Input_Look(const FInputActionValue& InputValue)
+{
+	const FVector2D LookAxisVector = InputValue.Get<FVector2D>();
+	AddYawInput(LookAxisVector.X);
+	AddPitchInput(LookAxisVector.Y);		
 }
 
 void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)
