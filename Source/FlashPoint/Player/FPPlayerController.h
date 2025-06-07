@@ -8,6 +8,8 @@
 #include "FPPlayerController.generated.h"
 
 class UFPAbilitySystemComponent;
+struct FInputActionValue;
+
 /**
  * 
  */
@@ -25,6 +27,9 @@ protected:
 	virtual void SetupInputComponent() override;
 
 private:
+	void Input_Move(const FInputActionValue& InputValue);
+	void Input_Look(const FInputActionValue& InputValue);
+	void Input_Crouch(const FInputActionValue& InputValue);
 
 	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
 	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
