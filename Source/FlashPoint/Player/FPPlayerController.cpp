@@ -4,6 +4,7 @@
 #include "FPPlayerController.h"
 
 #include "EnhancedInputSubsystems.h"
+#include "FPGameplayTags.h"
 #include "FPPlayerState.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Data/FPInputData.h"
@@ -50,6 +51,27 @@ void AFPPlayerController::SetupInputComponent()
 	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
 
 	// Bind Native Inputs
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input_Action_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+}
+
+void AFPPlayerController::Input_Move(const FInputActionValue& InputValue)
+{
+	if (GetPawn())
+	{
+		const FVector2D MovementVector = InputValue.Get<FVector2D>();
+		const FRotator YawRotation(0.f, GetControlRotation().Yaw, 0.f);
+
+		if (MovementVector.X != 0.f)
+		{
+			const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			GetPawn()->AddMovementInput(ForwardDirection, MovementVector.X);
+		}
+		if (MovementVector.Y != 0.f)
+		{
+			const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			GetPawn()->AddMovementInput(RightDirection, -MovementVector.Y);	
+		}
+	}
 }
 
 void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)
