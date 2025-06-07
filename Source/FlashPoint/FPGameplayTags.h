@@ -9,4 +9,6 @@ namespace FPGameplayTags
 	extern FNativeGameplayTag Input_Action_Look;
 	extern FNativeGameplayTag Input_Action_Crouch;
 	extern FNativeGameplayTag Input_Action_Jump;
+
+	extern FNativeGameplayTag Ability_Jump;
 }
