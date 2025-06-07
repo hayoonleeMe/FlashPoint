@@ -15,6 +15,7 @@ AFPCharacter::AFPCharacter()
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
 
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 	BaseEyeHeight = 80.f;
 	CrouchedEyeHeight = 50.f;
 	bUseControllerRotationPitch = false;
