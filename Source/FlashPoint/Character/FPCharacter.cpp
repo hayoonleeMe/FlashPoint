@@ -37,6 +37,9 @@ AFPCharacter::AFPCharacter()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(65.f);
+
+	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
+	GetMesh()->SetRelativeRotation(FRotator(0.f, 270.f, 0.f));
 }
 
 void AFPCharacter::PossessedBy(AController* NewController)
@@ -66,6 +69,17 @@ UFPAbilitySystemComponent* AFPCharacter::GetFPAbilitySystemComponent() const
 UFPAttributeSet* AFPCharacter::GetFPAttributeSet() const
 {
 	return AttributeSet;
+}
+
+void AFPCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Initialize Player Skeletal Mesh Component
+	if (USkeletalMesh* SKM = UFPAssetManager::GetAssetById<USkeletalMesh>(TEXT("SKM_Player")))
+	{
+		GetMesh()->SetSkeletalMesh(SKM);
+	}
 }
 
 void AFPCharacter::InitAbilitySystem()

@@ -26,6 +26,8 @@ public:
 	UFPAttributeSet* GetFPAttributeSet() const;
 	
 protected:
+	virtual void BeginPlay() override;
+	
 	// Initialize Gameplay Ability System
 	void InitAbilitySystem();
 
