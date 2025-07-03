@@ -33,7 +33,7 @@
 			"Enabled": true
 		},
 		{
-			"Name": "GameLiftPlugin",
+			"Name": "GameLiftServerSDK",
 			"Enabled": true
 		},
 		{
