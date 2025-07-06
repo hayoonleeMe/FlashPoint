@@ -88,11 +88,11 @@ void AFPPlayerController::Input_Look(const FInputActionValue& InputValue)
 	AddPitchInput(LookAxisVector.Y);		
 }
 
-void AFPPlayerController::Input_Crouch(const FInputActionValue& InputValue)
+void AFPPlayerController::Input_Crouch()
 {
 	if (GetCharacter() && GetCharacter()->GetCharacterMovement()->IsMovingOnGround())
 	{
-		InputValue.Get<bool>() ? GetCharacter()->Crouch() : GetCharacter()->UnCrouch();  
+		GetCharacter()->bIsCrouched ? GetCharacter()->UnCrouch() : GetCharacter()->Crouch();  
 	}
 }
 
