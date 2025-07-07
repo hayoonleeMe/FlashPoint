@@ -85,7 +85,7 @@ void AFPPlayerController::Input_Look(const FInputActionValue& InputValue)
 {
 	const FVector2D LookAxisVector = InputValue.Get<FVector2D>();
 	AddYawInput(LookAxisVector.X);
-	AddPitchInput(LookAxisVector.Y);		
+	AddPitchInput(-LookAxisVector.Y);
 }
 
 void AFPPlayerController::Input_Crouch()

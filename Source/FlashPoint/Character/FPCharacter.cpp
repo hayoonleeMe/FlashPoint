@@ -4,7 +4,9 @@
 #include "FPCharacter.h"
 
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 #include "Player/FPPlayerState.h"
 #include "System/FPAssetManager.h"
 
@@ -12,12 +14,12 @@
 
 AFPCharacter::AFPCharacter()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+	
 	NetUpdateFrequency = 66.f;
 	MinNetUpdateFrequency = 33.f;
 
-	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
-	BaseEyeHeight = 80.f;
-	CrouchedEyeHeight = 50.f;
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
@@ -40,6 +42,36 @@ AFPCharacter::AFPCharacter()
 
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 270.f, 0.f));
+
+	BaseEyeHeight = 80.f;
+	CrouchedEyeHeight = 50.f;
+	CurrentCameraHeight = TargetCameraHeight = BaseEyeHeight * 2.f;
+
+	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("Spring Arm Component"));
+	SpringArmComponent->SetupAttachment(GetMesh());
+	SpringArmComponent->SetRelativeLocation(FVector(-35.f, 0.f, CurrentCameraHeight));
+	SpringArmComponent->SocketOffset = FVector(0.f, 35.f, 0.f);
+	SpringArmComponent->TargetArmLength = 350.f;
+	SpringArmComponent->bDoCollisionTest = true;
+	SpringArmComponent->bUsePawnControlRotation = true;
+	
+	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
+	CameraComponent->SetupAttachment(SpringArmComponent);
+}
+
+void AFPCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	TargetCameraHeight = BaseEyeHeight * 2.f;
+	if (bIsCrouched && IsMovingFromInput())
+	{
+		// Crouch + Walk 하면 캐릭터가 살짝 일어나서 걸으므로 카메라 위치도 높여준다.
+		TargetCameraHeight += 20.f;
+	}
+	CurrentCameraHeight = FMath::FInterpTo(CurrentCameraHeight, TargetCameraHeight, DeltaSeconds, 7.f);
+	const FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
+	SpringArmComponent->SetRelativeLocation(FVector(CameraLocation.X, CameraLocation.Y, CurrentCameraHeight));
 }
 
 void AFPCharacter::PossessedBy(AController* NewController)
@@ -69,6 +101,11 @@ UFPAbilitySystemComponent* AFPCharacter::GetFPAbilitySystemComponent() const
 UFPAttributeSet* AFPCharacter::GetFPAttributeSet() const
 {
 	return AttributeSet;
+}
+
+bool AFPCharacter::IsMovingFromInput() const
+{
+	return GetVelocity().Size2D() > 0.f && GetCharacterMovement()->GetCurrentAcceleration() != FVector::ZeroVector;
 }
 
 void AFPCharacter::BeginPlay()

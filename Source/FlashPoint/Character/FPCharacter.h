@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "FPCharacter.generated.h"
 
+class UCameraComponent;
+class USpringArmComponent;
 class UFPAttributeSet;
 class UFPAbilitySystemComponent;
 
@@ -18,12 +20,16 @@ class FLASHPOINT_API AFPCharacter : public ACharacter, public IAbilitySystemInte
 
 public:
 	AFPCharacter();
+	virtual void Tick(float DeltaSeconds) override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UFPAbilitySystemComponent* GetFPAbilitySystemComponent() const;
 	UFPAttributeSet* GetFPAttributeSet() const;
+
+	// 입력을 통해 캐릭터가 움직이는지 반환
+	bool IsMovingFromInput() const;
 	
 protected:
 	virtual void BeginPlay() override;
@@ -44,4 +50,17 @@ protected:
 	// AbilitySystemComponent에 부여된 Ability Handle, 적용된 Effect Handle을 저장한다.
 	UPROPERTY()
 	FFPAbilitySystemData_GrantedHandles GrantedHandles;
+
+private:
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<USpringArmComponent> SpringArmComponent;
+	
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCameraComponent> CameraComponent;
+
+	// 실제로 Spring Arm Component의 Z Location을 설정하는 데 사용
+	float CurrentCameraHeight = 0.f;
+
+	// CurrentCameraHeight를 Interpolation을 통해 도달할 Target
+	float TargetCameraHeight = 0.f;
 };
