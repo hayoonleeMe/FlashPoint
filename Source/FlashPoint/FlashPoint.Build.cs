@@ -22,7 +22,8 @@ public class FlashPoint : ModuleRules
 			"EnhancedInput",
 			"GameplayTags",
 			"GameplayAbilities",
-			"GameplayTasks"
+			"GameplayTasks",
+			"AnimGraphRuntime",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
