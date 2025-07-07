@@ -11,4 +11,6 @@ namespace FPGameplayTags
 	extern FNativeGameplayTag Input_Action_Jump;
 
 	extern FNativeGameplayTag Ability_Jump;
+
+	extern FNativeGameplayTag CharacterState_IsSprinting;
 }
