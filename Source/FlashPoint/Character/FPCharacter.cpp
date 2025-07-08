@@ -3,6 +3,7 @@
 
 #include "FPCharacter.h"
 
+#include "FPCharacterMovementComponent.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -12,7 +13,8 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPCharacter)
 
-AFPCharacter::AFPCharacter()
+AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UFPCharacterMovementComponent>(CharacterMovementComponentName))
 {
 	PrimaryActorTick.bCanEverTick = true;
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
@@ -106,6 +108,12 @@ UFPAttributeSet* AFPCharacter::GetFPAttributeSet() const
 bool AFPCharacter::IsMovingFromInput() const
 {
 	return GetVelocity().Size2D() > 0.f && GetCharacterMovement()->GetCurrentAcceleration() != FVector::ZeroVector;
+}
+
+bool AFPCharacter::CanJumpInternal_Implementation() const
+{
+	// Crouch 체크 무시
+	return JumpIsAllowedInternal();
 }
 
 void AFPCharacter::BeginPlay()
