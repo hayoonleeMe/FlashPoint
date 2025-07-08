@@ -19,7 +19,7 @@ class FLASHPOINT_API AFPCharacter : public ACharacter, public IAbilitySystemInte
 	GENERATED_BODY()
 
 public:
-	AFPCharacter();
+	AFPCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
@@ -30,6 +30,9 @@ public:
 
 	// 입력을 통해 캐릭터가 움직이는지 반환
 	bool IsMovingFromInput() const;
+
+	// Crouch 체크 무시하도록 오버라이드
+	virtual bool CanJumpInternal_Implementation() const override;
 	
 protected:
 	virtual void BeginPlay() override;
