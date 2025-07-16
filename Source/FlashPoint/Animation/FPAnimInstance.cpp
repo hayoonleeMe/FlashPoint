@@ -5,12 +5,15 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
+#include "FPGameplayTags.h"
 #include "KismetAnimationLibrary.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "Misc/DataValidation.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAnimInstance)
+
+const FVector2D UFPAnimInstance::LandRecoveryAlphaInRange = { 0.f, 0.4f };
+const FVector2D UFPAnimInstance::LandRecoveryAlphaOutRange = { 0.f, 1.f };
 
 UFPAnimInstance::UFPAnimInstance()
 {
@@ -23,7 +26,28 @@ void UFPAnimInstance::NativeInitializeAnimation()
 
 	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwningActor()))
 	{
-		GameplayTagPropertyMap.Initialize(this, ASC);
+		RegisterGameplayTagWithProperty(ASC);
+	}
+}
+
+void UFPAnimInstance::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)
+{
+	RegisterGameplayTagWithProperty(ASC);
+}
+
+void UFPAnimInstance::RegisterGameplayTagWithProperty(UAbilitySystemComponent* ASC)
+{
+	check(ASC);
+
+	FOnGameplayEffectTagCountChanged::FDelegate Delegate = FOnGameplayEffectTagCountChanged::FDelegate::CreateUObject(this, &ThisClass::GameplayTagEventCallback);
+	ASC->RegisterAndCallGameplayTagEvent(FPGameplayTags::CharacterState_IsSprinting, Delegate);
+}
+
+void UFPAnimInstance::GameplayTagEventCallback(const FGameplayTag Tag, int32 NewCount)
+{
+	if (Tag.MatchesTagExact(FPGameplayTags::CharacterState_IsSprinting))
+	{
+		GameplayTag_IsSprinting = NewCount > 0;
 	}
 }
 
@@ -31,7 +55,7 @@ void UFPAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeUpdateAnimation(DeltaSeconds);
 
-	if (const ACharacter* Character = Cast<ACharacter>(GetOwningActor()))
+	if (ACharacter* Character = Cast<ACharacter>(GetOwningActor()))
 	{
 		if (const UCharacterMovementComponent* MoveComponent = Character->GetCharacterMovement())
 		{
@@ -43,39 +67,34 @@ void UFPAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bIsOnGround = MoveComponent->IsMovingOnGround();
 			bIsCrouching = Character->bIsCrouched;
 
-			bIsJumping = bIsFalling = false;
-			if (MoveComponent->IsFalling())
-			{
-				if (Velocity.Z > 0.f)
-				{
-					bIsJumping = true;
-					TimeFalling = 0.f;
-				}
-				else
-				{
-					bIsFalling = true;
-					TimeFalling += DeltaSeconds;
-				}
-			}
-
-			UpdateCurrentDirectionFromAngle();
+			UpdateJumpData(DeltaSeconds, MoveComponent);
+			UpdateCurrentDirection();
 			UpdateBlendWeight(DeltaSeconds);
 		}	
 	}
 }
 
-#if WITH_EDITOR
-EDataValidationResult UFPAnimInstance::IsDataValid(class FDataValidationContext& Context) const
+void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UCharacterMovementComponent* MoveComponent)
 {
-	Super::IsDataValid(Context);
-
-	GameplayTagPropertyMap.IsDataValid(this, Context);
-
-	return Context.GetNumErrors() ? EDataValidationResult::Invalid : EDataValidationResult::Valid;
+	bIsJumping = bIsFalling = false;
+	if (MoveComponent->IsFalling())
+	{
+		if (Velocity.Z > 0.f)
+		{
+			bIsJumping = true;
+			TimeFalling = 0.f;
+		}
+		else
+		{
+			bIsFalling = true;
+			TimeFalling += DeltaSeconds;
+		}
+	}
+	
+	LandRecoveryAlpha = FMath::GetMappedRangeValueClamped(LandRecoveryAlphaInRange, LandRecoveryAlphaOutRange, TimeFalling);
 }
-#endif
 
-void UFPAnimInstance::UpdateCurrentDirectionFromAngle()
+void UFPAnimInstance::UpdateCurrentDirection()
 {
 	const float AbsAngle = FMath::Abs(DirectionAngle);
 	float FwdDeadZone = CardinalDirectionDeadZone;
@@ -118,5 +137,14 @@ void UFPAnimInstance::UpdateCurrentDirectionFromAngle()
 
 void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds)
 {
+	// Update UpperBodyAdditiveWeight
+	if (IsAnyMontagePlaying() && bIsOnGround)
+	{
+		UpperBodyAdditiveWeight = 1.f;
+	}
+	else
+	{
+		UpperBodyAdditiveWeight = FMath::FInterpTo(UpperBodyAdditiveWeight, 0.f, DeltaSeconds, 6.f);
+	}
 	// TODO
 }

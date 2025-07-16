@@ -6,6 +6,8 @@
 #include "FPCharacterMovementComponent.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Data/FPCosmeticData.h"
+#include "Weapon/WeaponManageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Player/FPPlayerState.h"
@@ -31,12 +33,13 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->bAllowPhysicsRotationDuringAnimRootMotion = false;
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
-	GetCharacterMovement()->GravityScale = 1.f;
+	GetCharacterMovement()->GravityScale = 1.2f;
 	GetCharacterMovement()->MaxAcceleration = 2400.f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.f;
 	GetCharacterMovement()->BrakingFriction = 6.f;
 	GetCharacterMovement()->GroundFriction = 8.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 1400.f;
+	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->RotationRate.Yaw = 720.f;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
@@ -59,6 +62,8 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	WeaponManageComponent = CreateDefaultSubobject<UWeaponManageComponent>(TEXT("Weapon Manage Component"));
 }
 
 void AFPCharacter::Tick(float DeltaSeconds)
@@ -124,6 +129,15 @@ void AFPCharacter::BeginPlay()
 	if (USkeletalMesh* SKM = UFPAssetManager::GetAssetById<USkeletalMesh>(TEXT("SKM_Player")))
 	{
 		GetMesh()->SetSkeletalMesh(SKM);
+	}
+	
+	// Link Default Weapon Anim Layer
+	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
+	{
+		if (UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData")))
+		{
+			AnimInstance->LinkAnimClassLayers(CosmeticData->GetDefaultAnimLayer());
+		}
 	}
 }
 

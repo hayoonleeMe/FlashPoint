@@ -2,6 +2,9 @@
 .idea/*
 RiderLink/
 
+# JetBrains Rider files
+*.DotSettings.user
+
 # include specific content folder - !Content/{~}/
 
 # Visual Studio 2015 user specific files
