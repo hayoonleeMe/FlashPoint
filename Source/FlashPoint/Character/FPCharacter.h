@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "FPCharacter.generated.h"
 
+class UWeaponManageComponent;
 class UCameraComponent;
 class USpringArmComponent;
 class UFPAttributeSet;
@@ -36,6 +37,10 @@ public:
 	
 protected:
 	virtual void BeginPlay() override;
+
+	// ============================================================================
+	// Ability System
+	// ============================================================================
 	
 	// Initialize Gameplay Ability System
 	void InitAbilitySystem();
@@ -54,7 +59,10 @@ protected:
 	UPROPERTY()
 	FFPAbilitySystemData_GrantedHandles GrantedHandles;
 
-private:
+	// ============================================================================
+	// Camera
+	// ============================================================================
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 	
@@ -66,4 +74,11 @@ private:
 
 	// CurrentCameraHeight를 Interpolation을 통해 도달할 Target
 	float TargetCameraHeight = 0.f;
+
+	// ============================================================================
+	// Weapon
+	// ============================================================================
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	// TODO : BlueprintReadOnly For Test
+	TObjectPtr<UWeaponManageComponent> WeaponManageComponent;
 };

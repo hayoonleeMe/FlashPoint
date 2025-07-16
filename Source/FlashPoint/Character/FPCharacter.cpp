@@ -59,6 +59,8 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
+
+	WeaponManageComponent = CreateDefaultSubobject<UWeaponManageComponent>(TEXT("Weapon Manage Component"));
 }
 
 void AFPCharacter::Tick(float DeltaSeconds)
