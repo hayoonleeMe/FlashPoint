@@ -4,8 +4,29 @@
 #include "FPAbilitySystemComponent.h"
 
 #include "Abilities/FPGameplayAbility.h"
+#include "Animation/FPAnimInstance.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAbilitySystemComponent)
+
+void UFPAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor)
+{
+	FGameplayAbilityActorInfo* ActorInfo = AbilityActorInfo.Get();
+	check(ActorInfo);
+	check(InOwnerActor);
+
+	bool bHasNewAvatarPawn = InAvatarActor->IsA<APawn>() && InAvatarActor != ActorInfo->AvatarActor;
+	
+	Super::InitAbilityActorInfo(InOwnerActor, InAvatarActor);
+
+	// 이 함수는 컴포넌트 초기화, 외부 호출, Rep Notify 등 여러번 호출되므로 AvatarActor가 실제로 유효한 Pawn으로 등록될 때만 아래 초기화 로직을 수행한다.
+	if (bHasNewAvatarPawn)
+	{
+		if (UFPAnimInstance* FPAnimInstance = Cast<UFPAnimInstance>(ActorInfo->GetAnimInstance()))
+		{
+			FPAnimInstance->InitializeWithAbilitySystem(this);
+		}
+	}
+}
 
 void UFPAbilitySystemComponent::BeginPlay()
 {

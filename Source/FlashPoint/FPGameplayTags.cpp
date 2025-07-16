@@ -11,4 +11,13 @@ namespace FPGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Ability_Jump, "Ability.Jump");
 
 	UE_DEFINE_GAMEPLAY_TAG(CharacterState_IsSprinting, "CharacterState.IsSprinting");
+
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Unarmed, "Weapon.Type.Unarmed");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Pistol, "Weapon.Type.Pistol");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Rifle, "Weapon.Type.Rifle");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Shotgun, "Weapon.Type.Shotgun");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_SMG, "Weapon.Type.SMG");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_SniperRifle, "Weapon.Type.SniperRifle");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_GrenadeLauncher, "Weapon.Type.GrenadeLauncher");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_RocketLauncher, "Weapon.Type.RocketLauncher");
 }

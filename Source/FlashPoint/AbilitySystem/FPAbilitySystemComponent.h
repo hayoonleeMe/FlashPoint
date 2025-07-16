@@ -12,6 +12,9 @@ class FLASHPOINT_API UFPAbilitySystemComponent : public UAbilitySystemComponent
 {
 	GENERATED_BODY()
 
+public:
+	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor) override;
+
 protected:
 	virtual void BeginPlay() override;
 
