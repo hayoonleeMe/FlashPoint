@@ -46,6 +46,7 @@ public:
 	virtual void Destroyed() override;
 
 	const FWeaponEquipInfo& GetEquipInfo() const { return EquipInfo; }
+	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
 
 	// 무기가 장착된 후 호출된다.
 	virtual void OnEquipped();
@@ -67,4 +68,8 @@ protected:
 
 	// 일정 시간 뒤 무기를 다시 표시할 때 사용
 	FTimerHandle ShowWeaponTimerHandle;
+
+	// 무기 타입을 나타내는 태그
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag WeaponTypeTag;
 };
