@@ -6,6 +6,7 @@
 #include "Engine/AssetManager.h"
 #include "FPAssetManager.generated.h"
 
+struct FGameplayTag;
 class UFPAssetData;
 
 // 비동기 애셋 로드가 완료되었을 때 호출되는 델레게이트
@@ -60,6 +61,23 @@ public:
 		return LoadedSubclass;
 	}
 
+	// AssetTag에 해당하는 애셋을 동기적으로 로드하고 반환한다.
+	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
+	static UObject* LoadSyncByTag(const FGameplayTag& AssetTag, bool bKeepInMemory = true);
+	
+	template <typename AssetType>
+	static AssetType* GetAssetByTag(const FGameplayTag& AssetTag, bool bKeepInMemory = true)
+	{
+		return Cast<AssetType>(LoadSyncByTag(AssetTag, bKeepInMemory));
+	}
+
+	template <typename ClassType>
+	static TSubclassOf<ClassType> GetSubclassByTag(const FGameplayTag& AssetTag, bool bKeepInMemory = true)
+	{
+		TSubclassOf<ClassType> LoadedSubclass = Cast<UClass>(LoadSyncByTag(AssetTag, bKeepInMemory));
+		return LoadedSubclass;
+	}
+
 	// AssetPath에 해당하는 애셋을 비동기적으로 로드한다.
 	// 로드가 끝나면 AsyncLoadCompletedDelegate가 실행되고, 애셋을 전달한다.
 	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
@@ -69,6 +87,11 @@ public:
 	// 로드가 끝나면 AsyncLoadCompletedDelegate가 실행되고, 애셋을 전달한다.
 	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
 	static void LoadAsyncById(const FName& AssetId, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate = FAsyncLoadCompletedDelegate(), bool bKeepInMemory = true);
+
+	// AssetTag에 해당하는 애셋을 비동기적으로 로드한다.
+	// 로드가 끝나면 AsyncLoadCompletedDelegate가 실행되고, 애셋을 전달한다.
+	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
+	static void LoadAsyncByTag(const FGameplayTag& AssetTag, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate = FAsyncLoadCompletedDelegate(), bool bKeepInMemory = true);
 
 	// 로드된 모든 애셋을 메모리에서 해제한다.
 	// LoadedAssets에서 제거해 GC에 의해 제거되도록 한다.
