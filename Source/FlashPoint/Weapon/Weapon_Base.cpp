@@ -24,10 +24,13 @@ AWeapon_Base::AWeapon_Base()
 void AWeapon_Base::Destroyed()
 {
 	Super::Destroyed();
-	
-	OnUnEquipped();
-}
 
+	// 실제 게임에서만 수행하도록 방어
+	if (UWorld* World = GetWorld(); World->IsGameWorld())
+	{
+		OnUnEquipped();
+	}
+}
 
 void AWeapon_Base::OnEquipped()
 {
