@@ -48,3 +48,57 @@ void UFPAbilitySystemData::GiveDataToAbilitySystem(UFPAbilitySystemComponent* AS
 		}
 	}
 }
+
+void UFPAbilitySystemData::RemoveDataFromAbilitySystem(UFPAbilitySystemComponent* ASC, FFPAbilitySystemData_GrantedHandles* OutGrantedHandles) const
+{
+	check(ASC);
+
+	if (!ASC->IsOwnerActorAuthoritative())
+	{
+		return;
+	}
+
+	{
+		// Clear Ability and Remove Handle
+		FGameplayTagContainer Tags;
+		for (const FFPAbilitySystemData_Ability& AbilityData : AbilitiesToGrant)
+		{
+			Tags.AddTag(AbilityData.InputTag);
+		}
+
+		TArray<FGameplayAbilitySpecHandle> SpecHandles;
+		ASC->FindAllAbilitiesWithInputTags(SpecHandles, Tags);
+
+		for (const FGameplayAbilitySpecHandle& Handle : SpecHandles)
+		{
+			ASC->ClearAbility(Handle);
+
+			if (OutGrantedHandles)
+			{
+				OutGrantedHandles->RemoveAbilitySpecHandle(Handle);
+			}
+		}
+	}
+
+	{
+		// Remove Effect and Handle
+		FGameplayTagContainer Tags;
+		for (const FFPAbilitySystemData_Effect& EffectData : EffectsToGrant)
+		{
+			UGameplayEffect* EffectCDO = EffectData.EffectClass->GetDefaultObject<UGameplayEffect>();
+			Tags.AppendTags(EffectCDO->GetAssetTags());
+		}
+
+		TArray<FActiveGameplayEffectHandle> EffectHandles = ASC->GetActiveEffectsWithAllTags(Tags);
+
+		for (const FActiveGameplayEffectHandle& Handle : EffectHandles)
+		{
+			ASC->RemoveActiveGameplayEffect(Handle);
+
+			if (OutGrantedHandles)
+			{
+				OutGrantedHandles->RemoveEffectHandle(Handle);
+			}
+		}
+	}
+}

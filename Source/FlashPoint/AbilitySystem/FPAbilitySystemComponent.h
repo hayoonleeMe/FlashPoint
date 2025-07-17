@@ -15,6 +15,9 @@ class FLASHPOINT_API UFPAbilitySystemComponent : public UAbilitySystemComponent
 public:
 	virtual void InitAbilityActorInfo(AActor* InOwnerActor, AActor* InAvatarActor) override;
 
+	// Tags에 해당하는 Input Tag를 가지는 모든 Ability Spec의 Handle을 반환한다. 
+	void FindAllAbilitiesWithInputTags(TArray<FGameplayAbilitySpecHandle>& OutAbilityHandles, const FGameplayTagContainer& Tags) const;
+
 protected:
 	virtual void BeginPlay() override;
 
