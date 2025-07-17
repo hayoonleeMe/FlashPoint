@@ -3,6 +3,7 @@
 
 #include "WeaponManageComponent.h"
 
+#include "Character/FPCharacter.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/Weapon_Base.h"
@@ -104,6 +105,12 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		const FWeaponEquipInfo& EquipInfo = EquippedWeapon->GetEquipInfo();
 		EquippedWeapon->SetActorRelativeTransform(EquipInfo.AttachTransform);
 		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
+
+		// Give Data to Owner ASC
+		if (AFPCharacter* OwningCharacter = Cast<AFPCharacter>(OwningPawn))
+		{
+			OwningCharacter->ApplyAbilitySystemData(EquippedWeapon->GetWeaponTypeTag());
+		}
 		
 		EquippedWeapon->OnEquipped();
 	}
@@ -113,6 +120,12 @@ void UWeaponManageComponent::UnEquipWeapon()
 {
 	if (IsValid(EquippedWeapon))
 	{
+		// Remove Data from Owner ASC
+		if (AFPCharacter* OwningCharacter = GetOwner<AFPCharacter>())
+		{
+			OwningCharacter->RemoveAbilitySystemData(EquippedWeapon->GetWeaponTypeTag());
+		}
+		
 		// 무기를 장착 해제하면 Destroy하고, 무기의 Destroyed()에서 OnUnEquipped() 호출
 		EquippedWeapon->Destroy();
 		EquippedWeapon = nullptr;
