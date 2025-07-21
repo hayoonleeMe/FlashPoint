@@ -9,8 +9,10 @@ namespace FPGameplayTags
 	extern FNativeGameplayTag Input_Action_Look;
 	extern FNativeGameplayTag Input_Action_Crouch;
 	extern FNativeGameplayTag Input_Action_Jump;
+	extern FNativeGameplayTag Input_Action_WeaponFire;
 
 	extern FNativeGameplayTag Ability_Jump;
+	extern FNativeGameplayTag Ability_WeaponFire;
 
 	extern FNativeGameplayTag CharacterState_IsSprinting;
 
