@@ -24,7 +24,6 @@ void UWeaponManageComponent::GetLifetimeReplicatedProps(TArray<class FLifetimePr
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(UWeaponManageComponent, Slots);
 	DOREPLIFETIME(UWeaponManageComponent, ActiveSlotIndex);
 	DOREPLIFETIME(UWeaponManageComponent, EquippedWeapon);
 }
@@ -33,7 +32,10 @@ void UWeaponManageComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	Slots.AddDefaulted(NumSlots);
+	if (HasAuthority())
+	{
+		WeaponSlots.AddDefaulted(NumSlots);
+	}
 }
 
 bool UWeaponManageComponent::HasAuthority() const
@@ -43,7 +45,7 @@ bool UWeaponManageComponent::HasAuthority() const
 
 void UWeaponManageComponent::ServerEquipWeaponAtSlot_Implementation(int32 SlotNumber)
 {
-	check(Slots.IsValidIndex(SlotNumber - 1));
+	check(WeaponSlots.IsValidIndex(SlotNumber - 1));
 
 	if (ActiveSlotIndex == (SlotNumber - 1))
 	{
@@ -52,13 +54,13 @@ void UWeaponManageComponent::ServerEquipWeaponAtSlot_Implementation(int32 SlotNu
 	}
 
 	// 현재 무기 장착 중이면 장착 해제
-	UnEquipWeapon();
+	UnEquipWeapon(false);
 
 	// 현재 슬롯 업데이트
 	ActiveSlotIndex = SlotNumber - 1;
 
 	// 새 슬롯의 무기 장착
-	EquipWeaponInternal(Slots[ActiveSlotIndex]);
+	EquipWeaponInternal(WeaponSlots[ActiveSlotIndex]);
 }
 
 void UWeaponManageComponent::EquipNewWeapon(const TSubclassOf<AWeapon_Base>& WeaponToEquipClass)
@@ -68,8 +70,8 @@ void UWeaponManageComponent::EquipNewWeapon(const TSubclassOf<AWeapon_Base>& Wea
 		return;
 	}
 
-	// 현재 무기 장착 중이면 장착 해제
-	UnEquipWeapon();
+	// 현재 무기 장착 중이면 장착 해제하고 Destroy
+	UnEquipWeapon(true);
 
 	// 현재 슬롯의 무기 장착
 	EquipWeaponInternal(WeaponToEquipClass);
@@ -77,7 +79,7 @@ void UWeaponManageComponent::EquipNewWeapon(const TSubclassOf<AWeapon_Base>& Wea
 
 void UWeaponManageComponent::ServerUnEquipWeapon_Implementation()
 {
-	UnEquipWeapon();
+	UnEquipWeapon(false);
 }
 
 void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>& WeaponClass)
@@ -87,13 +89,12 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		APawn* OwningPawn = GetOwner<APawn>();
 		check(OwningPawn);
 
-		Slots[ActiveSlotIndex] = WeaponClass;
-
 		// Spawn
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = OwningPawn;
 
 		EquippedWeapon = GetWorld()->SpawnActor<AWeapon_Base>(WeaponClass, SpawnParams);
+		WeaponSlots[ActiveSlotIndex] = EquippedWeapon;
 
 		// Attach
 		USceneComponent* AttachTargetComp = OwningPawn->GetRootComponent();
@@ -116,27 +117,71 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 	}
 }
 
-void UWeaponManageComponent::UnEquipWeapon()
+void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
+{
+	if (IsValid(WeaponInSlot))
+	{
+		APawn* OwningPawn = GetOwner<APawn>();
+		check(OwningPawn);
+
+		EquippedWeapon = WeaponInSlot;
+
+		// Attach
+		USceneComponent* AttachTargetComp = OwningPawn->GetRootComponent();
+		if (ACharacter* Character = Cast<ACharacter>(OwningPawn))
+		{
+			AttachTargetComp = Character->GetMesh();
+		}
+
+		const FWeaponEquipInfo& EquipInfo = EquippedWeapon->GetEquipInfo();
+		EquippedWeapon->SetActorRelativeTransform(EquipInfo.AttachTransform);
+		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
+
+		// Give Data to Owner ASC
+		if (AFPCharacter* OwningCharacter = Cast<AFPCharacter>(OwningPawn))
+		{
+			OwningCharacter->ApplyAbilitySystemData(EquippedWeapon->GetWeaponTypeTag());
+		}
+		
+		EquippedWeapon->OnEquipped();
+	}
+}
+
+void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 {
 	if (IsValid(EquippedWeapon))
 	{
+		// Detach
+		EquippedWeapon->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
+		
 		// Remove Data from Owner ASC
 		if (AFPCharacter* OwningCharacter = GetOwner<AFPCharacter>())
 		{
 			OwningCharacter->RemoveAbilitySystemData(EquippedWeapon->GetWeaponTypeTag());
 		}
-		
-		// 무기를 장착 해제하면 Destroy하고, 무기의 Destroyed()에서 OnUnEquipped() 호출
-		EquippedWeapon->Destroy();
+
+		if (bDestroy)
+		{
+			// 클라이언트에서 장착 해제한 무기 액터의 OnUnEquipped() 호출을 보장하기 위해 일정 시간 뒤에 Destroy
+			EquippedWeapon->SetLifeSpan(5.f);
+		}
+
+		EquippedWeapon->OnUnEquipped();
 		EquippedWeapon = nullptr;
 	}
 }
 
-void UWeaponManageComponent::OnRep_EquippedWeapon()
+void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon)
 {
+	if (IsValid(UnEquippedWeapon))
+	{
+		// 클라이언트에서 장착 해제된 무기 처리
+		UnEquippedWeapon->OnUnEquipped();
+	}
+	
 	if (IsValid(EquippedWeapon))
 	{
-		// 클라이언트에서 무기의 OnEquipped() 호출
+		// 클라이언트에서 장착된 무기 처리
 		EquippedWeapon->OnEquipped();
 	}
 }
