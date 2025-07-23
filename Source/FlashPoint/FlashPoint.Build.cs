@@ -24,6 +24,7 @@ public class FlashPoint : ModuleRules
 			"GameplayAbilities",
 			"GameplayTasks",
 			"AnimGraphRuntime",
+			"NetCore",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
