@@ -3,6 +3,7 @@
 
 #include "FPCharacter.h"
 
+#include "FlashPoint.h"
 #include "FPCharacterMovementComponent.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
@@ -47,6 +48,7 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 270.f, 0.f));
+	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile, ECR_Block);
 
 	BaseEyeHeight = 80.f;
 	CrouchedEyeHeight = 50.f;
@@ -150,16 +152,48 @@ void AFPCharacter::InitAbilitySystem()
 		AttributeSet = PS->GetFPAttributeSet();
 	}
 
-	ApplyAbilitySystemData(TEXT("ASD_Default"));
+	if (HasAuthority())
+	{
+		ApplyAbilitySystemData(TEXT("ASD_Default"));
+	}
 }
 
 void AFPCharacter::ApplyAbilitySystemData(const FName& DataId)
 {
-	if (HasAuthority())
+	check(HasAuthority());
+
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
 	{
-		if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
-		{
-			AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent, &GrantedHandles);
-		}
+		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+	}
+}
+
+void AFPCharacter::ApplyAbilitySystemData(const FGameplayTag& DataTag)
+{
+	check(HasAuthority());
+	
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
+	{
+		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+	}
+}
+
+void AFPCharacter::RemoveAbilitySystemData(const FName& DataId)
+{
+	check(HasAuthority());
+	
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
+	{
+		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+	}
+}
+
+void AFPCharacter::RemoveAbilitySystemData(const FGameplayTag& DataTag)
+{
+	check(HasAuthority());
+	
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
+	{
+		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent, &GrantedHandles);
 	}
 }

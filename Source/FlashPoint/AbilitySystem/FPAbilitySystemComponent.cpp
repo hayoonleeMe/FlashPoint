@@ -28,6 +28,19 @@ void UFPAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActo
 	}
 }
 
+void UFPAbilitySystemComponent::FindAllAbilitiesWithInputTags(TArray<FGameplayAbilitySpecHandle>& OutAbilityHandles, const FGameplayTagContainer& Tags) const
+{
+	OutAbilityHandles.Empty();
+
+	for (const FGameplayAbilitySpec& CurrentSpec : ActivatableAbilities.Items)
+	{
+		if (CurrentSpec.DynamicAbilityTags.HasAnyExact(Tags))
+		{
+			OutAbilityHandles.Add(CurrentSpec.Handle);
+		}
+	}
+}
+
 void UFPAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();

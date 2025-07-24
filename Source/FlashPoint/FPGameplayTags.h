@@ -9,10 +9,13 @@ namespace FPGameplayTags
 	extern FNativeGameplayTag Input_Action_Look;
 	extern FNativeGameplayTag Input_Action_Crouch;
 	extern FNativeGameplayTag Input_Action_Jump;
+	extern FNativeGameplayTag Input_Action_WeaponFire;
 
 	extern FNativeGameplayTag Ability_Jump;
+	extern FNativeGameplayTag Ability_WeaponFire;
 
 	extern FNativeGameplayTag CharacterState_IsSprinting;
+	extern FNativeGameplayTag CharacterState_IsFiring;
 
 	extern FNativeGameplayTag Weapon_Type_Unarmed;
 	extern FNativeGameplayTag Weapon_Type_Pistol;
@@ -22,4 +25,7 @@ namespace FPGameplayTags
 	extern FNativeGameplayTag Weapon_Type_SniperRifle;
 	extern FNativeGameplayTag Weapon_Type_GrenadeLauncher;
 	extern FNativeGameplayTag Weapon_Type_RocketLauncher;
+
+	extern FNativeGameplayTag Weapon_Data_Ammo;
+	extern FNativeGameplayTag Weapon_Data_ReserveAmmo;
 }

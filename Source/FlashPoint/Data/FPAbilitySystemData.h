@@ -72,6 +72,22 @@ public:
 			GrantedEffectHandles.Add(Handle);
 		}
 	}
+
+	void RemoveAbilitySpecHandle(const FGameplayAbilitySpecHandle& Handle)
+	{
+		if (Handle.IsValid())
+		{
+			GrantedAbilitySpecHandles.Remove(Handle);
+		}
+	}
+
+	void RemoveEffectHandle(const FActiveGameplayEffectHandle& Handle)
+	{
+		if (Handle.IsValid())
+		{
+			GrantedEffectHandles.Remove(Handle);
+		}
+	}
 		
 protected:
 	// 부여된 Ability Spec Handle
@@ -96,6 +112,11 @@ public:
 	// OutGrantedHandles에 Ability, Effect Handle을 저장한다.
 	// Server Only
 	void GiveDataToAbilitySystem(UFPAbilitySystemComponent* ASC, FFPAbilitySystemData_GrantedHandles* OutGrantedHandles) const;
+
+	// ASC에서 부여된 AbilitiesToGrant 어빌리티와 EffectsToGrant 이펙트를 제거한다.
+	// OutGrantedHandles에서 Ability, Effect Handle을 제거한다.
+	// Server Only
+	void RemoveDataFromAbilitySystem(UFPAbilitySystemComponent* ASC, FFPAbilitySystemData_GrantedHandles* OutGrantedHandles) const;
 
 	// 부여할 어빌리티
 	UPROPERTY(EditDefaultsOnly)

@@ -70,6 +70,15 @@ UObject* UFPAssetManager::LoadSyncById(const FName& AssetId, bool bKeepInMemory)
 	return LoadSyncByPath(AssetPath, bKeepInMemory);
 }
 
+UObject* UFPAssetManager::LoadSyncByTag(const FGameplayTag& AssetTag, bool bKeepInMemory)
+{
+	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	check(AssetData);
+	
+	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag);
+	return LoadSyncByPath(AssetPath, bKeepInMemory);
+}
+
 void UFPAssetManager::LoadAsyncByPath(const FSoftObjectPath& AssetPath, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate, bool bKeepInMemory)
 {
 	if (!IsInitialized())
@@ -107,6 +116,15 @@ void UFPAssetManager::LoadAsyncById(const FName& AssetId, FAsyncLoadCompletedDel
 	check(AssetData);
 	
 	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathById(AssetId);
+	LoadAsyncByPath(AssetPath, MoveTemp(AsyncLoadCompletedDelegate), bKeepInMemory);
+}
+
+void UFPAssetManager::LoadAsyncByTag(const FGameplayTag& AssetTag, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate, bool bKeepInMemory)
+{
+	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	check(AssetData);
+	
+	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag);
 	LoadAsyncByPath(AssetPath, MoveTemp(AsyncLoadCompletedDelegate), bKeepInMemory);
 }
 

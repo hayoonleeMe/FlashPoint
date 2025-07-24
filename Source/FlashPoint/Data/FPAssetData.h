@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "FPAssetData.generated.h"
 
@@ -42,13 +43,25 @@ public:
 	// AssetId에 대한 AssetPath를 반환한다.
 	FSoftObjectPath GetAssetPathById(const FName& AssetId) const;
 
+	// AssetId에 대한 AssetPath를 반환한다.
+	FSoftObjectPath GetAssetPathByTag(const FGameplayTag& AssetTag) const;
+
 	// 모든 Preload할 애셋의 AssetPath TArray를 반환한다.
 	TArray<FSoftObjectPath> GetPreloadAssetPaths() const;
 
 private:
+	// AssetPath가 가리키는 애셋이 BP_, WBP_, ABP_, GA_, GE_로 시작한다면, _C를 붙여 클래스 경로로 저장한다.
+	static void ResolveAssetPath(FSoftObjectPath& AssetPath);
+	
 	UPROPERTY(EditDefaultsOnly)
 	TMap<FName, FAssetEntry> AssetIdToEntry;
 
 	UPROPERTY()
 	TMap<FName, FSoftObjectPath> AssetIdToPath;
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<FGameplayTag, FAssetEntry> AssetTagToEntry;
+
+	UPROPERTY()
+	TMap<FGameplayTag, FSoftObjectPath> AssetTagToPath;
 };
