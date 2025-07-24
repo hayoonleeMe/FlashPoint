@@ -3,6 +3,7 @@
 
 #include "FPCharacter.h"
 
+#include "FlashPoint.h"
 #include "FPCharacterMovementComponent.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
@@ -47,6 +48,7 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 270.f, 0.f));
+	GetMesh()->SetCollisionResponseToChannel(ECC_Projectile, ECR_Block);
 
 	BaseEyeHeight = 80.f;
 	CrouchedEyeHeight = 50.f;
