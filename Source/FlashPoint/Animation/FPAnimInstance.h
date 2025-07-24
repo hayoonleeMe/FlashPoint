@@ -85,6 +85,14 @@ protected:
 
 	void UpdateJumpData(float DeltaSeconds, const UCharacterMovementComponent* MoveComponent);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimYaw;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimPitch;
+
+	void UpdateAimingData(const ACharacter* Character);
+
 	// 캐릭터가 이동할 방향
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	ECardinalDirection CurrentDirection;

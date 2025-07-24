@@ -9,6 +9,7 @@
 #include "KismetAnimationLibrary.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAnimInstance)
 
@@ -68,6 +69,7 @@ void UFPAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bIsCrouching = Character->bIsCrouched;
 
 			UpdateJumpData(DeltaSeconds, MoveComponent);
+			UpdateAimingData(Character);
 			UpdateCurrentDirection();
 			UpdateBlendWeight(DeltaSeconds);
 		}	
@@ -92,6 +94,11 @@ void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UCharacterMovemen
 	}
 	
 	LandRecoveryAlpha = FMath::GetMappedRangeValueClamped(LandRecoveryAlphaInRange, LandRecoveryAlphaOutRange, TimeFalling);
+}
+
+void UFPAnimInstance::UpdateAimingData(const ACharacter* Character)
+{
+	AimPitch = UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch);
 }
 
 void UFPAnimInstance::UpdateCurrentDirection()
