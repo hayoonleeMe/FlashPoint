@@ -114,6 +114,8 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		}
 		
 		EquippedWeapon->OnEquipped();
+
+		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
 	}
 }
 
@@ -144,6 +146,8 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 		}
 		
 		EquippedWeapon->OnEquipped();
+
+		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
 	}
 }
 
@@ -168,6 +172,8 @@ void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 
 		EquippedWeapon->OnUnEquipped();
 		EquippedWeapon = nullptr;
+
+		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
 	}
 }
 
@@ -184,4 +190,6 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 		// 클라이언트에서 장착된 무기 처리
 		EquippedWeapon->OnEquipped();
 	}
+
+	OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
 }

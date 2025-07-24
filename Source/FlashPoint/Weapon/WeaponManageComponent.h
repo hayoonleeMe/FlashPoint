@@ -8,6 +8,10 @@
 
 class AWeapon_Base;
 
+// 장착 중인 무기가 변경될 때를 알리는 델레게이트
+// 서버와 클라 모두에서 호출된다.
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquippedWeaponChangedDelegate, AWeapon_Base*);
+
 /**
  * 무기를 관리하는 액터 컴포넌트
  */
@@ -22,6 +26,8 @@ public:
 	virtual void InitializeComponent() override;
 
 	AWeapon_Base* GetEquippedWeapon() const { return EquippedWeapon; }
+
+	FOnEquippedWeaponChangedDelegate OnEquippedWeaponChanged;
 	
 	bool HasAuthority() const;
 

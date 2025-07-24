@@ -7,6 +7,7 @@
 #include "Animation/AnimInstance.h"
 #include "FPAnimInstance.generated.h"
 
+class AWeapon_Base;
 class UCharacterMovementComponent;
 class UAbilitySystemComponent;
 
@@ -76,6 +77,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	uint8 bIsJumping : 1;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	uint8 bHasEquippedWeapon : 1;
+
+	void UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon);
+
+	// 무기를 발사하고 난 뒤, 지난 시간
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float TimeSinceLastFire;
+
+	// 무기를 발사하고 난 뒤, 무기를 들지 않고 다시 원래 동작을 수행할 때까지 기다릴 시간
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimHoldDuration;
+
 	// 점프 이후의 체공 시간
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float TimeFalling;
@@ -114,6 +128,7 @@ protected:
 
 	// Upper Body에 Hip Fire를 적용할지 여부를 결정하는 Blend Weight
 	// 1이면 Upper Body가 총을 치켜드는 Hip Fire Pose 재생, 0이면 Base Pose 재생
+	// 추가로, 1이면 Idle Aim Offset, 0이면 Relaxed Aim Offset 재생
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float HipFireUpperBodyBlendWeight;
 

@@ -10,6 +10,7 @@
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Weapon/WeaponManageComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAnimInstance)
 
@@ -19,11 +20,21 @@ const FVector2D UFPAnimInstance::LandRecoveryAlphaOutRange = { 0.f, 1.f };
 UFPAnimInstance::UFPAnimInstance()
 {
 	CardinalDirectionDeadZone = 10.f;
+	AimHoldDuration = 1.5f;
 }
 
 void UFPAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
+
+	// 0으로 시작해 Blend Weight를 업데이트 하지 않도록 방지
+	TimeSinceLastFire = AimHoldDuration;
+
+	if (UWeaponManageComponent* WeaponManageComp = GetOwningActor() ? GetOwningActor()->FindComponentByClass<UWeaponManageComponent>() : nullptr)
+	{
+		// bHasEquippedWeapon 업데이트를 위한 델레게이트 등록
+		WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateHasEquippedWeapon);		
+	}
 
 	// GameplayTag Property
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState_IsSprinting, &GameplayTag_IsSprinting);
@@ -73,12 +84,26 @@ void UFPAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bIsOnGround = MoveComponent->IsMovingOnGround();
 			bIsCrouching = Character->bIsCrouched;
 
+			if (GameplayTag_IsFiring)
+			{
+				TimeSinceLastFire = 0.f;
+			}
+			else if (TimeSinceLastFire < AimHoldDuration)
+			{
+				TimeSinceLastFire += DeltaSeconds;
+			}
+
 			UpdateJumpData(DeltaSeconds, MoveComponent);
 			UpdateAimingData(Character);
 			UpdateCurrentDirection();
 			UpdateBlendWeight(DeltaSeconds);
 		}	
 	}
+}
+
+void UFPAnimInstance::UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon)
+{
+	bHasEquippedWeapon = EquippedWeapon != nullptr;
 }
 
 void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UCharacterMovementComponent* MoveComponent)
@@ -150,13 +175,17 @@ void UFPAnimInstance::UpdateCurrentDirection()
 void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds)
 {
 	// Update UpperBodyAdditiveWeight
-	if (IsAnyMontagePlaying() && bIsOnGround)
+	const bool bAdditive = IsAnyMontagePlaying() && bIsOnGround;
+	UpperBodyAdditiveWeight = bAdditive ? 1.f : FMath::FInterpTo(UpperBodyAdditiveWeight, 0.f, DeltaSeconds, 6.f);
+	
+	// Update HipFireUpperBodyBlendWeight
+	if (bHasEquippedWeapon)
 	{
-		UpperBodyAdditiveWeight = 1.f;
+		const bool bHipFire = GameplayTag_IsFiring || TimeSinceLastFire < AimHoldDuration || (bIsOnGround && !GameplayTag_IsSprinting);
+		HipFireUpperBodyBlendWeight = FMath::FInterpTo(HipFireUpperBodyBlendWeight, bHipFire ? 1.f : 0.f, DeltaSeconds, bHipFire ? 20.f : 3.f);
 	}
 	else
 	{
-		UpperBodyAdditiveWeight = FMath::FInterpTo(UpperBodyAdditiveWeight, 0.f, DeltaSeconds, 6.f);
+		HipFireUpperBodyBlendWeight = 0.f;
 	}
-	// TODO
 }
