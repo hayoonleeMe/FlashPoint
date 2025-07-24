@@ -24,4 +24,7 @@ namespace FPGameplayTags
 	extern FNativeGameplayTag Weapon_Type_SniperRifle;
 	extern FNativeGameplayTag Weapon_Type_GrenadeLauncher;
 	extern FNativeGameplayTag Weapon_Type_RocketLauncher;
+
+	extern FNativeGameplayTag Weapon_Data_Ammo;
+	extern FNativeGameplayTag Weapon_Data_ReserveAmmo;
 }

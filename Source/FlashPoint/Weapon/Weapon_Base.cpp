@@ -3,12 +3,14 @@
 
 #include "Weapon_Base.h"
 
+#include "FPGameplayTags.h"
 #include "FPLogChannels.h"
 #include "NiagaraComponent.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "NiagaraFunctionLibrary.h"
 #include "Data/FPCosmeticData.h"
 #include "GameFramework/Character.h"
+#include "Net/UnrealNetwork.h"
 #include "System/FPAssetManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Weapon_Base) 
@@ -26,8 +28,12 @@ AWeapon_Base::AWeapon_Base()
 	BulletsPerCartridge = 1;
 }
 
+void AWeapon_Base::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(AWeapon_Base, TagStacks);
+}
 
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
 {
@@ -94,7 +100,8 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 void AWeapon_Base::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	InitializeTagStacks();
 }
 
 void AWeapon_Base::LinkWeaponAnimLayer(bool bUseDefault) const
@@ -117,5 +124,13 @@ void AWeapon_Base::PlayOwningCharacterMontage(UAnimMontage* MontageToPlay) const
 	if (ACharacter* OwningCharacter = GetOwner<ACharacter>())
 	{
 		OwningCharacter->PlayAnimMontage(MontageToPlay);
+	}
+}
+
+void AWeapon_Base::InitializeTagStacks()
+{
+	if (HasAuthority())
+	{
+		TagStacks.AddTagStack(FPGameplayTags::Weapon_Data_Ammo, MagCapacity);
 	}
 }

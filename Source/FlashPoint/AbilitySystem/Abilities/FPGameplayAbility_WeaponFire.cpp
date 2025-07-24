@@ -18,6 +18,7 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 {
 	AbilityTags.AddTag(FPGameplayTags::Ability_WeaponFire);
 	ActivationPolicy = EAbilityActivationPolicy::WhileInputActive;
+	AmmoCostTag = FPGameplayTags::Weapon_Data_Ammo;
 }
 
 bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -84,6 +85,48 @@ void UFPGameplayAbility_WeaponFire::EndAbility(const FGameplayAbilitySpecHandle 
 	ASC->ConsumeClientReplicatedTargetData(CurrentSpecHandle, CurrentActivationInfo.GetActivationPredictionKey());
 	
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+}
+
+bool UFPGameplayAbility_WeaponFire::CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	FGameplayTagContainer* OptionalRelevantTags) const
+{
+	if (!Super::CheckCost(Handle, ActorInfo, OptionalRelevantTags))
+	{
+		return false;
+	}
+
+	if (AmmoCostTag.IsValid())
+	{
+		// Check Ammo
+		AActor* AvatarActor = ActorInfo->AvatarActor.Get();
+		if (AWeapon_Base* Weapon = GetEquippedWeapon(AvatarActor))
+		{
+			FGameplayTagStackContainer& WeaponTagStacks = Weapon->GetTagStacks();
+			return WeaponTagStacks.GetStackCount(AmmoCostTag) > 0;
+		}	
+	}
+
+	return true;
+}
+
+void UFPGameplayAbility_WeaponFire::ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
+	const FGameplayAbilityActivationInfo ActivationInfo) const
+{
+	Super::ApplyCost(Handle, ActorInfo, ActivationInfo);
+
+	if (HasAuthority(&CurrentActivationInfo))
+	{
+		if (AmmoCostTag.IsValid())
+		{
+			if (AWeapon_Base* Weapon = GetEquippedWeapon())
+			{
+				// Consume Ammo
+				FGameplayTagStackContainer& WeaponTagStacks = Weapon->GetTagStacks();
+				const int32 NewAmmo = WeaponTagStacks.GetStackCount(AmmoCostTag) - 1;
+				WeaponTagStacks.AddTagStack(AmmoCostTag, NewAmmo);
+			}	
+		}
+	}
 }
 
 AWeapon_Base* UFPGameplayAbility_WeaponFire::GetEquippedWeapon() const
@@ -235,7 +278,7 @@ void UFPGameplayAbility_WeaponFire::OnTargetDataReady(const FGameplayAbilityTarg
 		ASC->CallServerSetReplicatedTargetData(CurrentSpecHandle, CurrentActivationInfo.GetActivationPredictionKey(), LocalTargetData, ApplicationTag, ASC->GetPredictionKeyForNewAction());
 	}
 
-	// TODO : Check ammo
+	// Check ammo
 	if (CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
 	{
 		// Server Only

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
+#include "System/GameplayTagStackContainer.h"
 #include "Weapon_Base.generated.h"
 
 class UNiagaraSystem;
@@ -46,6 +47,7 @@ class FLASHPOINT_API AWeapon_Base : public AActor
 
 public:
 	AWeapon_Base();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	const FWeaponEquipInfo& GetEquipInfo() const { return EquipInfo; }
 	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
@@ -53,6 +55,8 @@ public:
 	float GetMaxDamageRange() const { return MaxDamageRange; }
 	int32 GetBulletsPerCartridge() const { return BulletsPerCartridge; }
 	float GetHalfScatterAngle() const { return HalfScatterAngle; }
+
+	FGameplayTagStackContainer& GetTagStacks() { return TagStacks; }
 
 	// Targeting 할 때 Weapon에서의 Source Location을 반환한다. (보통 총구)
 	FVector GetWeaponTargetingSourceLocation() const;
@@ -123,4 +127,9 @@ protected:
 	// 최대 사거리
 	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
 	float MaxDamageRange;
+
+	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	FGameplayTagStackContainer TagStacks;
+
+	void InitializeTagStacks();
 };

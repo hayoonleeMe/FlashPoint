@@ -22,4 +22,7 @@ namespace FPGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_SniperRifle, "Weapon.Type.SniperRifle");
 	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_GrenadeLauncher, "Weapon.Type.GrenadeLauncher");
 	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_RocketLauncher, "Weapon.Type.RocketLauncher");
+	
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Data_Ammo, "Weapon.Data.Ammo");
+	UE_DEFINE_GAMEPLAY_TAG(Weapon_Data_ReserveAmmo, "Weapon.Data.ReserveAmmo");
 }
