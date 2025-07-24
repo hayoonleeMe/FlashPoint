@@ -15,6 +15,7 @@ namespace FPGameplayTags
 	extern FNativeGameplayTag Ability_WeaponFire;
 
 	extern FNativeGameplayTag CharacterState_IsSprinting;
+	extern FNativeGameplayTag CharacterState_IsFiring;
 
 	extern FNativeGameplayTag Weapon_Type_Unarmed;
 	extern FNativeGameplayTag Weapon_Type_Pistol;

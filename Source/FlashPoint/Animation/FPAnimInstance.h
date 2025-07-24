@@ -45,7 +45,12 @@ protected:
 	void GameplayTagEventCallback(const FGameplayTag Tag, int32 NewCount);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	uint8 GameplayTag_IsSprinting : 1;
+	bool GameplayTag_IsSprinting;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsFiring;
+
+	TMap<FGameplayTag, bool*> TagToPropertyMap;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector Velocity;

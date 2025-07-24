@@ -13,6 +13,7 @@ namespace FPGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Ability_WeaponFire, "Ability.WeaponFire");
 
 	UE_DEFINE_GAMEPLAY_TAG(CharacterState_IsSprinting, "CharacterState.IsSprinting");
+	UE_DEFINE_GAMEPLAY_TAG(CharacterState_IsFiring, "CharacterState.IsFiring");
 
 	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Unarmed, "Weapon.Type.Unarmed");
 	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Pistol, "Weapon.Type.Pistol");
