@@ -28,4 +28,6 @@ namespace FPGameplayTags
 
 	extern FNativeGameplayTag Weapon_Data_Ammo;
 	extern FNativeGameplayTag Weapon_Data_ReserveAmmo;
+	
+	extern FNativeGameplayTag Weapon_NoFire;
 }

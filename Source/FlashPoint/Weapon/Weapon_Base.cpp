@@ -3,6 +3,8 @@
 
 #include "Weapon_Base.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "AbilitySystemComponent.h"
 #include "FPGameplayTags.h"
 #include "FPLogChannels.h"
 #include "NiagaraComponent.h"
@@ -26,6 +28,12 @@ AWeapon_Base::AWeapon_Base()
 	WeaponMeshComponent->SetHiddenInGame(true);
 
 	BulletsPerCartridge = 1;
+
+	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
+	OnMontageEndedDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted)
+	{
+		UpdateFireBlockTag(false);
+	});
 }
 
 void AWeapon_Base::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -45,6 +53,10 @@ void AWeapon_Base::OnEquipped()
 	LinkWeaponAnimLayer(false);
 	PlayOwningCharacterMontage(EquipInfo.EquipMontage);
 
+	// 총기 발사 관리
+	BindMontageEndedDelegate(EquipInfo.EquipMontage);
+	UpdateFireBlockTag(true);
+
 	GetWorldTimerManager().SetTimer(ShowWeaponTimerHandle, FTimerDelegate::CreateLambda([this]()
 	{
 		WeaponMeshComponent->SetHiddenInGame(false);
@@ -55,6 +67,10 @@ void AWeapon_Base::OnUnEquipped()
 {
 	LinkWeaponAnimLayer(true);
 	PlayOwningCharacterMontage(EquipInfo.UnEquipMontage);
+
+	// 총기 발사 관리
+	BindMontageEndedDelegate(EquipInfo.UnEquipMontage);
+	UpdateFireBlockTag(true);
 
 	WeaponMeshComponent->SetHiddenInGame(true);
 }
@@ -104,6 +120,11 @@ void AWeapon_Base::BeginPlay()
 	InitializeTagStacks();
 }
 
+UAbilitySystemComponent* AWeapon_Base::GetOwnerASC() const
+{
+	return UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
+}
+
 void AWeapon_Base::LinkWeaponAnimLayer(bool bUseDefault) const
 {
 	const UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));
@@ -119,11 +140,39 @@ void AWeapon_Base::LinkWeaponAnimLayer(bool bUseDefault) const
 	}
 }
 
-void AWeapon_Base::PlayOwningCharacterMontage(UAnimMontage* MontageToPlay) const
+void AWeapon_Base::PlayOwningCharacterMontage(UAnimMontage* MontageToPlay)
 {
 	if (ACharacter* OwningCharacter = GetOwner<ACharacter>())
 	{
 		OwningCharacter->PlayAnimMontage(MontageToPlay);
+	}
+}
+
+void AWeapon_Base::BindMontageEndedDelegate(UAnimMontage* Montage)
+{
+	if (ACharacter* OwningCharacter = GetOwner<ACharacter>())
+	{
+		USkeletalMeshComponent* MeshComp = OwningCharacter->GetMesh();
+		if (UAnimInstance* AnimInstance = MeshComp ? MeshComp->GetAnimInstance() : nullptr)
+		{
+			// Weak Lambda to call UpdateFireBlockTag(false)
+			AnimInstance->Montage_SetEndDelegate(OnMontageEndedDelegate, Montage);			
+		}
+	}
+}
+
+void AWeapon_Base::UpdateFireBlockTag(bool bBlockFire) const
+{
+	if (UAbilitySystemComponent* ASC = GetOwnerASC())
+	{
+		if (bBlockFire)
+		{
+			ASC->AddLooseGameplayTag(FPGameplayTags::Weapon_NoFire);
+		}
+		else
+		{
+			ASC->RemoveLooseGameplayTag(FPGameplayTags::Weapon_NoFire);
+		}
 	}
 }
 
