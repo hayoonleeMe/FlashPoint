@@ -28,6 +28,7 @@ AWeapon_Base::AWeapon_Base()
 	WeaponMeshComponent->SetHiddenInGame(true);
 
 	BulletsPerCartridge = 1;
+	HeadShotMultiplier = 1.f;
 
 	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
 	OnMontageEndedDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted)
@@ -111,6 +112,15 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 	{
 		DrawDebugSphere(GetWorld(), ImpactPoint, 6.f, 6, FColor::Red, false, 5.f, 1);
 	}
+}
+
+float AWeapon_Base::GetDamageByDistance(float Distance) const
+{
+	if (DamageFallOffCurve)
+	{
+		return BaseDamage * DamageFallOffCurve->GetFloatValue(Distance);
+	}
+	return BaseDamage;
 }
 
 void AWeapon_Base::BeginPlay()
