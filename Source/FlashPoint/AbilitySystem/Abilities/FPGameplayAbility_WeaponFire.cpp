@@ -13,6 +13,7 @@
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
 #include "GameFramework/Character.h"
+#include "Kismet/GameplayStatics.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameplayAbility_WeaponFire)
 
@@ -181,47 +182,53 @@ void UFPGameplayAbility_WeaponFire::StartTargeting()
 
 void UFPGameplayAbility_WeaponFire::PerformLocalTrace(TArray<FHitResult>& OutHitResults)
 {
-	// 카메라 기준
-	const FTransform TargetingTransform = GetTargetingTransform();
-	
-	// TargetingTransform 좌표계의 전방 x축 방향
-	const FVector AimDir = TargetingTransform.GetUnitAxis(EAxis::X);
-	const FVector TraceStart = TargetingTransform.GetTranslation();
+	const FVector TraceStart = GetWeaponTargetingSourceLocation();
+	const FVector TargetLoc = GetTargetLocation();
 	
 	// Scatter가 적용된 Trace End
 	TArray<FVector> TraceEnds;
-	GenerateTraceEndsWithScatterInCartridge(TraceStart, AimDir, TraceEnds);
+	GenerateTraceEndsWithScatterInCartridge(TraceStart, TargetLoc, TraceEnds);
 	
 	// Trace 수행
 	WeaponTrace(TraceStart, TraceEnds, OutHitResults);
 }
 
-FTransform UFPGameplayAbility_WeaponFire::GetTargetingTransform() const
+FVector UFPGameplayAbility_WeaponFire::GetTargetLocation() const
 {
-	if (const APlayerController* PC = CurrentActorInfo->PlayerController.Get())
-	{
-		// 카메라
-		FVector CamLoc;
-		FRotator CamRot;
-		PC->GetPlayerViewPoint(CamLoc, CamRot);
-		
-		// 카메라로부터 화면 정중앙을 향하는 방향
-		FVector AimDir = CamRot.Vector().GetSafeNormal();
-		FVector FocalLoc = CamLoc + AimDir * 1000.f;
-		FVector WeaponSourceLoc = GetWeaponTargetingSourceLocation();
-		
-		// WeaponSourceLoc에서 AimDir 벡터에 수직으로 투영
-		// CamLoc을 AimDir 위에 있으면서 WeaponSourceLoc에 가장 가까운 지점으로 업데이트
-		CamLoc = FocalLoc + ((WeaponSourceLoc - FocalLoc) | AimDir) * AimDir;
-
-		return FTransform(CamRot, CamLoc);
-	}
-
-	// 카메라가 없으면 AvatarActor 기준 사용
 	AActor* AvatarActor = GetAvatarActorFromActorInfo();
 	check(AvatarActor);
+	
+	APlayerController* OwnerController = GetActorInfo().PlayerController.Get();
+	check(OwnerController);
 
-	return FTransform(AvatarActor->GetActorForwardVector().Rotation(), AvatarActor->GetActorLocation());
+	AWeapon_Base* Weapon = GetEquippedWeapon();
+	check(Weapon);
+
+	const float MaxDamageRange = Weapon->GetMaxDamageRange();
+	
+	// Viewport Size
+	FVector2D ViewportSize;
+	GEngine->GameViewport->GetViewportSize(ViewportSize);
+
+	// Viewport 정중앙의 크로스헤어 위치 계산 (Viewport space = screen space)
+	const FVector2D CrosshairLocation(ViewportSize.X * 0.5f, ViewportSize.Y * 0.5f);
+
+	// Crosshair를 World Space로 변환
+	FVector CrosshairWorldPos;
+	FVector CrosshairWorldDir;
+	UGameplayStatics::DeprojectScreenToWorld(OwnerController, CrosshairLocation, CrosshairWorldPos, CrosshairWorldDir);
+
+	// 총구에서 가장 가까운 CrosshairWorldDirection 벡터 상의 위치에서 Trace 수행
+	const FVector TraceStart = CrosshairWorldPos + ((GetWeaponTargetingSourceLocation() - CrosshairWorldPos) | CrosshairWorldDir) * CrosshairWorldDir;
+	const FVector TraceEnd = TraceStart + CrosshairWorldDir * MaxDamageRange;
+	
+	FCollisionQueryParams QueryParams;
+	QueryParams.AddIgnoredActor(AvatarActor);
+	
+	FHitResult HitResult;
+	GetWorld()->LineTraceSingleByChannel(HitResult, TraceStart, TraceEnd, ECC_Projectile, QueryParams);
+
+	return HitResult.bBlockingHit ? HitResult.ImpactPoint : HitResult.TraceEnd;
 }
 
 FVector UFPGameplayAbility_WeaponFire::GetWeaponTargetingSourceLocation() const
@@ -235,21 +242,22 @@ FVector UFPGameplayAbility_WeaponFire::GetWeaponTargetingSourceLocation() const
 	return Weapon->GetWeaponTargetingSourceLocation();
 }
 
-void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithScatterInCartridge(const FVector& TraceStart, const FVector& AimDir, TArray<FVector>& OutTraceEnds) const
+void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithScatterInCartridge(const FVector& TraceStart, const FVector& TargetLoc, TArray<FVector>& OutTraceEnds) const
 {
 	AWeapon_Base* Weapon = GetEquippedWeapon();
 	check(Weapon);
 
 	const float MaxDamageRange = Weapon->GetMaxDamageRange();
 	const int32 BulletsPerCartridge = Weapon->GetBulletsPerCartridge();
+	const FVector WeaponAimDir = (TargetLoc - TraceStart).GetSafeNormal();
 
 	const float HalfScatterAngle = Weapon->GetHalfScatterAngle();
 	const float HalfScatterAngleRad = FMath::DegreesToRadians(HalfScatterAngle);
 
 	for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
 	{
-		FVector FinalAimDir = FMath::VRandCone(AimDir, HalfScatterAngleRad);
-		FVector TraceEnd = TraceStart + FinalAimDir * MaxDamageRange;
+		const FVector WeaponAimDirWithScatter = FMath::VRandCone(WeaponAimDir, HalfScatterAngleRad);
+		const FVector TraceEnd = TraceStart + WeaponAimDirWithScatter * MaxDamageRange;
 		OutTraceEnds.Add(TraceEnd);
 	}
 }
@@ -370,6 +378,9 @@ void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(FGameplayAbilityTargetDa
 					BaseDamage *= Weapon->GetHeadShotMultiplier();
 					NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("HeadShot"));
 				}
+
+				// 소수점 둘째 자리까지 반올림
+				BaseDamage = FMath::RoundToFloat(BaseDamage * 100.f) / 100.f;
 
 				// TODO : Indicates Damage and Update HUD
 

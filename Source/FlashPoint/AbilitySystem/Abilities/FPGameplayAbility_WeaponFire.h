@@ -63,14 +63,14 @@ private:
 	// 플레이어 로컬에서 Trace를 수행해 Target을 구한다.
 	void PerformLocalTrace(TArray<FHitResult>& OutHitResults);
 
-	// Trace를 수행할 때 필요한 Transform을 계산해 반환한다.
-	FTransform GetTargetingTransform() const;
+	// 총구에서 총알이 향할 위치를 계산해 반환한다.
+	FVector GetTargetLocation() const;
 	
 	// Weapon의 Targeting Source Location을 반환한다. (보통 총구)
 	FVector GetWeaponTargetingSourceLocation() const;
 
 	// 하나의 탄약에 포함된 총알 수만큼, Scatter를 적용한 Trace End 배열을 생성한다.
-	void GenerateTraceEndsWithScatterInCartridge(const FVector& TraceStart, const FVector& AimDir, TArray<FVector>& OutTraceEnds) const;
+	void GenerateTraceEndsWithScatterInCartridge(const FVector& TraceStart, const FVector& TargetLoc, TArray<FVector>& OutTraceEnds) const;
 
 	// 모든 TraceEnds를 향하는 LineTrace를 수행한 결과를 OutHitResults에 저장한다.
 	void WeaponTrace(const FVector& TraceStart, const TArray<FVector>& TraceEnds, TArray<FHitResult>& OutHitResults) const;
