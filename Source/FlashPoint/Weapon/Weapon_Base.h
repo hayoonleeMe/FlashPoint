@@ -55,7 +55,6 @@ public:
 
 	float GetMaxDamageRange() const { return MaxDamageRange; }
 	int32 GetBulletsPerCartridge() const { return BulletsPerCartridge; }
-	float GetHalfScatterAngle() const { return HalfScatterAngle; }
 	float GetHeadShotMultiplier() const { return HeadShotMultiplier; }
 	
 	// Distance에 따른 감소를 적용한 데미지를 반환한다.
@@ -137,10 +136,6 @@ protected:
 	// 한 탄창 당 총알 수
 	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
 	float MagCapacity;
-
-	// 총알이 퍼지는 절반 각도
-	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
-	float HalfScatterAngle;
 
 	// 최대 사거리
 	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")

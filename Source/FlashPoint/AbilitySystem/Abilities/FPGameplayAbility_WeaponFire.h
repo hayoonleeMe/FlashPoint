@@ -41,6 +41,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float BulletTraceRadius;
 
+	// 총알이 최대로 퍼질 수 있는 정도
+	UPROPERTY(EditDefaultsOnly)
+	float MaxScatterAmount;
+
 	// Character의 Weapon Fire Anim Montage
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAnimMontage> CharacterFireMontage;
