@@ -9,8 +9,10 @@
 #include "FPGameplayTags.h"
 #include "FPLogChannels.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "AbilitySystem/FPGameplayAbilityTargetData_SingleTargetHit.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
+#include "GameFramework/Character.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameplayAbility_WeaponFire)
 
@@ -145,6 +147,16 @@ AWeapon_Base* UFPGameplayAbility_WeaponFire::GetEquippedWeapon(const AActor* Ava
 	return nullptr;
 }
 
+bool UFPGameplayAbility_WeaponFire::CanApplyDamage(const AActor* TargetActor)
+{
+	if (IsValid(TargetActor))
+	{
+		// TODO : 적인지 체크
+		return TargetActor->IsA<ACharacter>();
+	}
+	return false;
+}
+
 void UFPGameplayAbility_WeaponFire::StartTargeting()
 {
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo_Checked();
@@ -159,7 +171,8 @@ void UFPGameplayAbility_WeaponFire::StartTargeting()
 	
 	for (const FHitResult& HitResult : HitResults)
 	{
-		FGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FGameplayAbilityTargetData_SingleTargetHit(HitResult);
+		FFPGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FFPGameplayAbilityTargetData_SingleTargetHit(HitResult);
+		NewTargetData->bCanApplyDamage = CanApplyDamage(HitResult.GetActor()); 
 		TargetDataHandle.Add(NewTargetData);
 	}
 
@@ -284,7 +297,7 @@ void UFPGameplayAbility_WeaponFire::OnTargetDataReady(const FGameplayAbilityTarg
 	if (CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
 	{
 		// Server Only
-		ApplyDamageToTarget(InData);
+		ApplyDamageToTarget(LocalTargetData);
 
 		// Target에 적중한 위치의 배열
 		TArray<FVector_NetQuantize> ImpactPoints;
@@ -326,16 +339,12 @@ void UFPGameplayAbility_WeaponFire::OnTargetDataReady(const FGameplayAbilityTarg
 	ASC->ConsumeClientReplicatedTargetData(CurrentSpecHandle, CurrentActivationInfo.GetActivationPredictionKey());
 }
 
-void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(const FGameplayAbilityTargetDataHandle& InData) const
+void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(FGameplayAbilityTargetDataHandle& InData) const
 {
 	if (InData.Num() <= 0 || !HasAuthority(&CurrentActivationInfo))
 	{
 		return;
 	}
-
-	// TODO
-	// Damage Effect 구현 및 필요한 데이터 설정
-	// 데미지를 입히기에 적절한 Target인지 체크
 
 	if (!DamageEffectClass)
 	{
@@ -343,6 +352,32 @@ void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(const FGameplayAbilityTa
 		return;
 	}
 
-	FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass);
-	ApplyGameplayEffectSpecToTarget(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo, EffectSpecHandle, InData);
+	const AWeapon_Base* Weapon = GetEquippedWeapon();
+	check(Weapon);
+
+	for (int32 Index = 0; Index < InData.Num(); ++Index)
+	{
+		if (FFPGameplayAbilityTargetData_SingleTargetHit* HitData = static_cast<FFPGameplayAbilityTargetData_SingleTargetHit*>(InData.Get(Index)))
+		{
+			// 데미지를 입힐 대상인지가 bHitReplaced에 저장됨
+			if (HitData->bCanApplyDamage)
+			{
+				float BaseDamage = Weapon->GetDamageByDistance(HitData->HitResult.Distance);
+
+				const bool bHeadShot = HitData->HitResult.BoneName == TEXT("head");
+				if (bHeadShot)
+				{
+					BaseDamage *= Weapon->GetHeadShotMultiplier();
+					NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("HeadShot"));
+				}
+
+				// TODO : Indicates Damage and Update HUD
+
+				FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass);
+				EffectSpecHandle.Data->SetSetByCallerMagnitude(FPGameplayTags::Attributes_IncomingDamage, BaseDamage);
+				
+				HitData->ApplyGameplayEffectSpec(*EffectSpecHandle.Data);
+			}
+		}
+	}
 }

@@ -28,4 +28,6 @@ namespace FPGameplayTags
 	UE_DEFINE_GAMEPLAY_TAG(Weapon_Data_ReserveAmmo, "Weapon.Data.ReserveAmmo");
 	
 	UE_DEFINE_GAMEPLAY_TAG(Weapon_NoFire, "Weapon.NoFire");
+	
+	UE_DEFINE_GAMEPLAY_TAG(Attributes_IncomingDamage, "Attributes.IncomingDamage");
 }

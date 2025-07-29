@@ -49,6 +49,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
+	// 플레이어 캐릭터가 TargetActor를 공격해 데미지를 입힐 수 있는지 체크
+	static bool CanApplyDamage(const AActor* TargetActor);
+
 	// Cost로 소모할 Ammo를 나타내는 GameplayTag
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag AmmoCostTag;
@@ -78,5 +81,5 @@ private:
 	void OnTargetDataReady(const FGameplayAbilityTargetDataHandle& InData, FGameplayTag ApplicationTag);
 
 	// TargetActors들에게 Damage Effect를 적용한다.
-	void ApplyDamageToTarget(const FGameplayAbilityTargetDataHandle& InData) const;
+	void ApplyDamageToTarget(FGameplayAbilityTargetDataHandle& InData) const;
 };

@@ -56,6 +56,10 @@ public:
 	float GetMaxDamageRange() const { return MaxDamageRange; }
 	int32 GetBulletsPerCartridge() const { return BulletsPerCartridge; }
 	float GetHalfScatterAngle() const { return HalfScatterAngle; }
+	float GetHeadShotMultiplier() const { return HeadShotMultiplier; }
+	
+	// Distance에 따른 감소를 적용한 데미지를 반환한다.
+	float GetDamageByDistance(float Distance) const;
 
 	FGameplayTagStackContainer& GetTagStacks() { return TagStacks; }
 
@@ -142,7 +146,16 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
 	float MaxDamageRange;
 
-	UPROPERTY(Replicated, VisibleAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	float BaseDamage;
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	TObjectPtr<UCurveFloat> DamageFallOffCurve;
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	float HeadShotMultiplier;
+
+	UPROPERTY(Replicated)
 	FGameplayTagStackContainer TagStacks;
 
 	void InitializeTagStacks();
