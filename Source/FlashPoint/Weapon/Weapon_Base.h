@@ -84,10 +84,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent;
 
-	// 무기 타입을 나타내는 태그
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag WeaponTypeTag;
-
 	UAbilitySystemComponent* GetOwnerASC() const;
 
 	// ============================================================================
@@ -95,7 +91,7 @@ protected:
 	// ============================================================================
 	
 	// 장착에 필요한 정보 
-	UPROPERTY(EditDefaultsOnly, Category="Equip")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Equip")
 	FWeaponEquipInfo EquipInfo;
 
 	void LinkWeaponAnimLayer(bool bUseDefault) const;
@@ -118,7 +114,7 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UNiagaraComponent> TracerComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category="Fire Effects")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Fire Effects")
 	TObjectPtr<UNiagaraSystem> TracerSystem;
 
 	// Tracer를 표시하는 Trigger 변수
@@ -129,25 +125,29 @@ protected:
 	// Weapon Config
 	// ============================================================================
 
+	// 무기 타입을 나타내는 태그
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FGameplayTag WeaponTypeTag;
+
 	// 한 번에 발사되는 총알 수 
-	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	int32 BulletsPerCartridge;
 
 	// 한 탄창 당 총알 수
-	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	float MagCapacity;
 
 	// 최대 사거리
-	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	float MaxDamageRange;
 
-	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	float BaseDamage;
 
-	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	TObjectPtr<UCurveFloat> DamageFallOffCurve;
 
-	UPROPERTY(EditDefaultsOnly, Category="Weapon Config")
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	float HeadShotMultiplier;
 
 	UPROPERTY(Replicated)
