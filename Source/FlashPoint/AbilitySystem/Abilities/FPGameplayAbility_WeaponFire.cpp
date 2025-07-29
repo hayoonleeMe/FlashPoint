@@ -14,6 +14,7 @@
 #include "Weapon/Weapon_Base.h"
 #include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameplayAbility_WeaponFire)
 
@@ -249,15 +250,13 @@ void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithScatterInCartridge(cons
 
 	const float MaxDamageRange = Weapon->GetMaxDamageRange();
 	const int32 BulletsPerCartridge = Weapon->GetBulletsPerCartridge();
-	const FVector WeaponAimDir = (TargetLoc - TraceStart).GetSafeNormal();
-
-	const float HalfScatterAngle = Weapon->GetHalfScatterAngle();
-	const float HalfScatterAngleRad = FMath::DegreesToRadians(HalfScatterAngle);
 
 	for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
 	{
-		const FVector WeaponAimDirWithScatter = FMath::VRandCone(WeaponAimDir, HalfScatterAngleRad);
-		const FVector TraceEnd = TraceStart + WeaponAimDirWithScatter * MaxDamageRange;
+		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, MaxScatterAmount);
+		const FVector TargetLocWithScatter = TargetLoc + RandVec;
+		const FVector WeaponAimDir = (TargetLocWithScatter - TraceStart).GetSafeNormal();
+		const FVector TraceEnd = TraceStart + WeaponAimDir * MaxDamageRange;
 		OutTraceEnds.Add(TraceEnd);
 	}
 }
