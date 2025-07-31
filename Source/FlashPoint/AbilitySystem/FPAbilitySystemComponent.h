@@ -18,6 +18,13 @@ public:
 	// Tags에 해당하는 Input Tag를 가지는 모든 Ability Spec의 Handle을 반환한다. 
 	void FindAllAbilitiesWithInputTags(TArray<FGameplayAbilitySpecHandle>& OutAbilityHandles, const FGameplayTagContainer& Tags) const;
 
+	// InputTag에 해당하는 어빌리티에 연동된 입력을 Flush한다.
+	// 입력이 존재하는 로컬 플레이어에 대해서만 수행한다.
+	void FlushPressedInput(const FGameplayTag& InputTag);
+
+	// AvatarActor가 Locally Controlled 인지 반환한다.
+	bool IsAvatarLocallyControlled() const;
+
 protected:
 	virtual void BeginPlay() override;
 

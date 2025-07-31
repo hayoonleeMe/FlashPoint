@@ -34,6 +34,10 @@ public:
 	// NativeInputConfigs에서 InputTag에 해당하는 InputAction을 찾아 반환한다.
 	// 찾지 못하면 nullptr를 반환한다.
 	const UInputAction* FindNativeInputActionForInputTag(const FGameplayTag& InputTag) const;
+
+	// AbilityInputConfigs에서 InputTag에 해당하는 InputAction을 찾아 반환한다.
+	// 찾지 못하면 nullptr를 반환한다.
+	const UInputAction* FindAbilityInputActionForInputTag(const FGameplayTag& InputTag) const;
 	
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;

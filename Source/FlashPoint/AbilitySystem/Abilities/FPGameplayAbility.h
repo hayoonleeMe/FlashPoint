@@ -17,5 +17,14 @@ class FLASHPOINT_API UFPGameplayAbility : public UGameplayAbility
 public:
 	UFPGameplayAbility();
 
+	// 해당 어빌리티의 Input Tag를 반환한다.
+	FGameplayTag GetInputTag() const;
 
+	// 해당 어빌리티의 InputTag에 연동된 입력을 Flush한다.
+	void FlushPressedInput() const;
+
+	// InputTag에 연동된 입력을 Flush한다.
+	void FlushPressedInput(const FGameplayTag& InputTag) const;
+
+	APlayerController* GetPlayerController() const;
 };

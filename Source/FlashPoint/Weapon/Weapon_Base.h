@@ -86,6 +86,12 @@ protected:
 
 	UAbilitySystemComponent* GetOwnerASC() const;
 
+	template<class T>
+	T* GetOwnerASC() const
+	{
+		return Cast<T>(GetOwnerASC());
+	}
+
 	// ============================================================================
 	// Equip
 	// ============================================================================

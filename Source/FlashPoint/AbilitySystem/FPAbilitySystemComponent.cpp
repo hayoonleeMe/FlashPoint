@@ -41,6 +41,34 @@ void UFPAbilitySystemComponent::FindAllAbilitiesWithInputTags(TArray<FGameplayAb
 	}
 }
 
+void UFPAbilitySystemComponent::FlushPressedInput(const FGameplayTag& InputTag)
+{
+	if (!IsAvatarLocallyControlled())
+	{
+		return;
+	}
+	
+	for (const FGameplayAbilitySpec& CurrentSpec : ActivatableAbilities.Items)
+	{
+		if (CurrentSpec.DynamicAbilityTags.HasTagExact(InputTag))
+		{
+			if (UFPGameplayAbility* AbilityInstance = Cast<UFPGameplayAbility>(CurrentSpec.GetPrimaryInstance()))
+			{
+				AbilityInstance->FlushPressedInput(InputTag);
+			}
+		}
+	}
+}
+
+bool UFPAbilitySystemComponent::IsAvatarLocallyControlled() const
+{
+	if (APawn* AvatarPawn = Cast<APawn>(GetAvatarActor()))
+	{
+		return AvatarPawn->IsLocallyControlled();
+	}
+	return false;
+}
+
 void UFPAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();

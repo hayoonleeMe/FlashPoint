@@ -10,6 +10,7 @@
 #include "NiagaraComponent.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "NiagaraFunctionLibrary.h"
+#include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Data/FPCosmeticData.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
@@ -66,6 +67,12 @@ void AWeapon_Base::OnEquipped()
 
 void AWeapon_Base::OnUnEquipped()
 {
+	if (UFPAbilitySystemComponent* ASC = GetOwnerASC<UFPAbilitySystemComponent>())
+	{
+		// 무기 발사 입력 Flush
+		ASC->FlushPressedInput(FPGameplayTags::Input_Action_WeaponFire);
+	}
+	
 	LinkWeaponAnimLayer(true);
 	PlayOwningCharacterMontage(EquipInfo.UnEquipMontage);
 
