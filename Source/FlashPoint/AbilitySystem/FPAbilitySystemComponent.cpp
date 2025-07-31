@@ -74,12 +74,17 @@ void UFPAbilitySystemComponent::AbilityInputTagPressed(const FGameplayTag& Input
 {
 	if (InputTag.IsValid())
 	{
-		for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+		ABILITYLIST_SCOPE_LOCK();
+		
+		for (FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 		{
 			if (Spec.DynamicAbilityTags.HasTagExact(InputTag))
 			{
-				InputPressedSpecHandles.AddUnique(Spec.Handle);
-				InputHeldSpecHandles.AddUnique(Spec.Handle);
+				if (!Spec.IsActive())
+				{
+					TryActivateAbility(Spec.Handle);
+				}
+				AbilitySpecInputPressed(Spec);
 			}
 		}
 	}
@@ -89,84 +94,17 @@ void UFPAbilitySystemComponent::AbilityInputTagReleased(const FGameplayTag& Inpu
 {
 	if (InputTag.IsValid())
 	{
-		for (const FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
+		ABILITYLIST_SCOPE_LOCK();
+		
+		for (FGameplayAbilitySpec& Spec : ActivatableAbilities.Items)
 		{
 			if (Spec.DynamicAbilityTags.HasTagExact(InputTag))
 			{
-				// 해당 어빌리티
-				InputReleasedSpecHandles.AddUnique(Spec.Handle);
-				InputHeldSpecHandles.Remove(Spec.Handle);
-			}
-		}
-	}
-}
-
-void UFPAbilitySystemComponent::ProcessAbilityInput()
-{
-	// TODO : Block Process Input?
-
-	// 배열의 capacity를 유지해 메모리 할당을 줄임
-	static TArray<FGameplayAbilitySpecHandle> AbilitiesToActivate;
-	AbilitiesToActivate.Reset();
-
-	// 입력이 유지될 때 활성화되는 어빌리티 처리
-	for (const FGameplayAbilitySpecHandle& SpecHandle : InputHeldSpecHandles)
-	{
-		if (const FGameplayAbilitySpec* Spec = FindAbilitySpecFromHandle(SpecHandle))
-		{
-			if (!Spec->IsActive())
-			{
-				const UFPGameplayAbility* AbilityCDO = CastChecked<UFPGameplayAbility>(Spec->Ability);
-				if (AbilityCDO->GetActivationPolicy() == EAbilityActivationPolicy::WhileInputActive)
+				if (Spec.IsActive())
 				{
-					AbilitiesToActivate.AddUnique(SpecHandle);
+					AbilitySpecInputReleased(Spec);
 				}
 			}
 		}
 	}
-
-	// 이번 프레임에 input press된 어빌리티 처리
-	for (const FGameplayAbilitySpecHandle& SpecHandle : InputPressedSpecHandles)
-	{
-		if (FGameplayAbilitySpec* Spec = FindAbilitySpecFromHandle(SpecHandle))
-		{
-			Spec->InputPressed = true;
-			
-			if (Spec->IsActive())
-			{
-				AbilitySpecInputPressed(*Spec);
-			}
-			else
-			{
-				const UFPGameplayAbility* AbilityCDO = CastChecked<UFPGameplayAbility>(Spec->Ability);
-				if (AbilityCDO->GetActivationPolicy() == EAbilityActivationPolicy::OnInputTriggered)
-				{
-					AbilitiesToActivate.AddUnique(SpecHandle);
-				}
-			}
-		}
-	}
-
-	// 어빌리티 활성화
-	for (const FGameplayAbilitySpecHandle& SpecHandle : AbilitiesToActivate)
-	{
-		TryActivateAbility(SpecHandle);
-	}
-
-	// 이번 프레임에 input release된 어빌리티 처리
-	for (const FGameplayAbilitySpecHandle& SpecHandle : InputReleasedSpecHandles)
-	{
-		if (FGameplayAbilitySpec* Spec = FindAbilitySpecFromHandle(SpecHandle))
-		{
-			Spec->InputPressed = false;
-			
-			if (Spec->IsActive())
-			{
-				AbilitySpecInputReleased(*Spec);
-			}
-		}
-	}
-
-	InputPressedSpecHandles.Reset();
-	InputReleasedSpecHandles.Reset();
 }

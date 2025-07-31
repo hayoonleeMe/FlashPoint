@@ -11,6 +11,4 @@ UFPGameplayAbility::UFPGameplayAbility()
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalPredicted;
 	NetSecurityPolicy = EGameplayAbilityNetSecurityPolicy::ClientOrServer;
-	
-	ActivationPolicy = EAbilityActivationPolicy::Manual;
 }
