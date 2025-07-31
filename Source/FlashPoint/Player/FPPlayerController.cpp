@@ -20,16 +20,6 @@ AFPPlayerController::AFPPlayerController()
 	bReplicates = true;
 }
 
-void AFPPlayerController::PostProcessInput(const float DeltaTime, const bool bGamePaused)
-{
-	Super::PostProcessInput(DeltaTime, bGamePaused);
-
-	if (UFPAbilitySystemComponent* ASC = GetFPAbilitySystemComponent())
-	{
-		ASC->ProcessAbilityInput();
-	}
-}
-
 void AFPPlayerController::BeginPlay()
 {
 	Super::BeginPlay();

@@ -23,7 +23,6 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 	AbilityTags.AddTag(FPGameplayTags::Ability_WeaponFire);
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState_IsFiring);
 	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon_NoFire);
-	ActivationPolicy = EAbilityActivationPolicy::WhileInputActive;
 	AmmoCostTag = FPGameplayTags::Weapon_Data_Ammo;
 }
 
