@@ -10,6 +10,7 @@ class AWeapon_Base;
 
 /**
  * 현재 장착 중인 총기 무기를 발사하는 Gameplay Ability
+ * 발사를 시작하면 어빌리티가 실행되고, 실제 발사가 끝나면 어빌리티가 종료된다.
  */
 UCLASS()
 class FLASHPOINT_API UFPGameplayAbility_WeaponFire : public UFPGameplayAbility
@@ -26,12 +27,31 @@ protected:
 	virtual bool CheckCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, FGameplayTagContainer* OptionalRelevantTags = nullptr) const override;
 	virtual void ApplyCost(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo) const override;
 
+	// 실제 발사를 수행한다.
+	virtual void Fire();
+
+	void AutoFire();
+	void SemiAutoFire();
+	void OnSemiAutoFireDelayEnded();
+
+	// true라면, 입력 키가 떼어졌을 때 어빌리티를 종료한다.
+	bool bEndWhenInputReleased = false;
+	// 입력 키가 떼어졌는지 여부를 나타낸다.
+	bool bInputReleased = false;
+
+	// Wait Input Released에 등록된 콜백 함수
+	UFUNCTION()
+	void OnInputReleased(float TimeHeld);
+
 	// 현재 플레이어 캐릭터가 장착 중인 Weapon을 반환한다.
 	AWeapon_Base* GetEquippedWeapon() const;
 	AWeapon_Base* GetEquippedWeapon(const AActor* AvatarActor) const;
 
+	// true라면 연사를 수행하고, false라면 단발 사격을 수행한다.
+	UPROPERTY(EditDefaultsOnly)
+	uint8 bAutoFire : 1;
+
 	// 발사 간 딜레이
-	// 이 딜레이 이후 Ability 종료
 	UPROPERTY(EditDefaultsOnly)
 	float FireDelay;
 
@@ -44,6 +64,11 @@ protected:
 	// 총알이 최대로 퍼질 수 있는 정도
 	UPROPERTY(EditDefaultsOnly)
 	float MaxScatterAmount;
+
+	// 총알이 퍼지는 정도를 제어하는 값
+	// 값이 클수록 총알이 중앙으로 집중된다.
+	UPROPERTY(EditDefaultsOnly)
+	float ScatterDistribution;
 
 	// Character의 Weapon Fire Anim Montage
 	UPROPERTY(EditDefaultsOnly)

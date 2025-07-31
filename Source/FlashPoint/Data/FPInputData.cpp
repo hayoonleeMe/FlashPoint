@@ -16,3 +16,15 @@ const UInputAction* UFPInputData::FindNativeInputActionForInputTag(const FGamepl
 	}
 	return nullptr;
 }
+
+const UInputAction* UFPInputData::FindAbilityInputActionForInputTag(const FGameplayTag& InputTag) const
+{
+	for (const FInputConfig& InputConfig : AbilityInputConfigs)
+	{
+		if (InputConfig.InputTag.MatchesTag(InputTag))
+		{
+			return InputConfig.InputAction;
+		}
+	}
+	return nullptr;
+}

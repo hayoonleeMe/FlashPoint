@@ -9,6 +9,7 @@
 #include "FPGameplayTags.h"
 #include "FPLogChannels.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
+#include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
 #include "AbilitySystem/FPGameplayAbilityTargetData_SingleTargetHit.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
@@ -24,6 +25,8 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState_IsFiring);
 	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon_NoFire);
 	AmmoCostTag = FPGameplayTags::Weapon_Data_Ammo;
+
+	ScatterDistribution = 1.f;
 }
 
 bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -49,38 +52,43 @@ bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpe
 void UFPGameplayAbility_WeaponFire::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                                     const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
+	bEndWhenInputReleased = false;
+	bInputReleased = false;
+	
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo_Checked();
 
 	// 델레게이트 등록
 	TargetDataSetDelegateHandle = ASC->AbilityTargetDataSetDelegate(CurrentSpecHandle, CurrentActivationInfo.GetActivationPredictionKey()).AddUObject(this, &ThisClass::OnTargetDataReady);
+
+	// Input Release Event 등록
+	if (UAbilityTask_WaitInputRelease* Task = UAbilityTask_WaitInputRelease::WaitInputRelease(this))
+	{
+		Task->OnRelease.AddDynamic(this, &ThisClass::OnInputReleased);
+		Task->ReadyForActivation();
+	}
+
+	UWorld* World = GetWorld();
+	check(World);
 	
-	if (IsLocallyControlled())
+	if (bAutoFire)
 	{
-		StartTargeting();
+		World->GetTimerManager().SetTimer(FireDelayTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::AutoFire), FireDelay, true, 0.f);
 	}
-
-	if (CharacterFireMontage)
+	else
 	{
-		// Play Character Fire Anim Montage
-		if (UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, TEXT("Play Character Fire Montage"), CharacterFireMontage))
-		{
-			MontageTask->OnCompleted.AddDynamic(this, &ThisClass::K2_EndAbility);
-			MontageTask->OnCancelled.AddDynamic(this, &ThisClass::K2_EndAbility);
-			MontageTask->OnInterrupted.AddDynamic(this, &ThisClass::K2_EndAbility);
-			MontageTask->ReadyForActivation();
-		}
-	}
-
-	// Start Fire Delay Timer
-	if (GetWorld())
-	{
-		GetWorld()->GetTimerManager().SetTimer(FireDelayTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::K2_EndAbility), FireDelay, false);
+		SemiAutoFire();
 	}
 }
 
 void UFPGameplayAbility_WeaponFire::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	if (GetWorld())
+	{
+		// Fire Delay Timer 해제
+		GetWorld()->GetTimerManager().ClearTimer(FireDelayTimerHandle);
+	}
+	
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo_Checked();
 
 	// 델레게이트 등록 해제
@@ -131,6 +139,73 @@ void UFPGameplayAbility_WeaponFire::ApplyCost(const FGameplayAbilitySpecHandle H
 				WeaponTagStacks.AddTagStack(AmmoCostTag, NewAmmo);
 			}	
 		}
+	}
+}
+
+void UFPGameplayAbility_WeaponFire::Fire()
+{
+	// Check ammo
+	if (CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
+	{
+		if (IsLocallyControlled())
+		{
+			StartTargeting();
+		}
+
+		if (CharacterFireMontage)
+		{
+			// Play Character Fire Anim Montage
+			if (UAbilityTask_PlayMontageAndWait* MontageTask = UAbilityTask_PlayMontageAndWait::CreatePlayMontageAndWaitProxy(this, TEXT("Play Character Fire Montage"), CharacterFireMontage))
+			{
+				MontageTask->ReadyForActivation();
+			}
+		}
+	}
+	else
+	{
+		// TODO : Reload, Dry fire
+		NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("Can't Commit Ability"));
+	}
+}
+
+void UFPGameplayAbility_WeaponFire::AutoFire()
+{
+	if (bInputReleased)
+	{
+		K2_EndAbility();
+		return;
+	}
+	
+	Fire();
+}
+
+void UFPGameplayAbility_WeaponFire::SemiAutoFire()
+{
+	Fire();
+
+	// FireDelay가 지나면 종료
+	GetWorld()->GetTimerManager().SetTimer(FireDelayTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::OnSemiAutoFireDelayEnded), FireDelay, false);
+}
+
+void UFPGameplayAbility_WeaponFire::OnSemiAutoFireDelayEnded()
+{
+	if (bInputReleased)	
+	{
+		K2_EndAbility();
+	}
+	else
+	{
+		// 입력이 떼어지면 종료시킴
+		bEndWhenInputReleased = true;
+	}
+}
+
+void UFPGameplayAbility_WeaponFire::OnInputReleased(float TimeHeld)
+{
+	bInputReleased = true;
+	if (bEndWhenInputReleased)
+	{
+		K2_EndAbility();
 	}
 }
 
@@ -252,7 +327,7 @@ void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithScatterInCartridge(cons
 
 	for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
 	{
-		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, MaxScatterAmount);
+		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::Pow(FMath::FRand(), ScatterDistribution) * MaxScatterAmount;
 		const FVector TargetLocWithScatter = TargetLoc + RandVec;
 		const FVector WeaponAimDir = (TargetLocWithScatter - TraceStart).GetSafeNormal();
 		const FVector TraceEnd = TraceStart + WeaponAimDir * MaxDamageRange;
@@ -299,47 +374,38 @@ void UFPGameplayAbility_WeaponFire::OnTargetDataReady(const FGameplayAbilityTarg
 		ASC->CallServerSetReplicatedTargetData(CurrentSpecHandle, CurrentActivationInfo.GetActivationPredictionKey(), LocalTargetData, ApplicationTag, ASC->GetPredictionKeyForNewAction());
 	}
 
-	// Check ammo
-	if (CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
+	// Server Only
+	ApplyDamageToTarget(LocalTargetData);
+
+	// Target에 적중한 위치의 배열
+	TArray<FVector_NetQuantize> ImpactPoints;
+	// Target에 적중하지 않은 끝 위치의 배열
+	TArray<FVector_NetQuantize> EndPoints;
+
+	for (int32 Index = 0; Index < LocalTargetData.Num(); ++Index)
 	{
-		// Server Only
-		ApplyDamageToTarget(LocalTargetData);
-
-		// Target에 적중한 위치의 배열
-		TArray<FVector_NetQuantize> ImpactPoints;
-		// Target에 적중하지 않은 끝 위치의 배열
-		TArray<FVector_NetQuantize> EndPoints;
-
-		for (int32 Index = 0; Index < LocalTargetData.Num(); ++Index)
+		if (FGameplayAbilityTargetData_SingleTargetHit* TargetHit = static_cast<FGameplayAbilityTargetData_SingleTargetHit*>(LocalTargetData.Get(Index)))
 		{
-			if (FGameplayAbilityTargetData_SingleTargetHit* TargetHit = static_cast<FGameplayAbilityTargetData_SingleTargetHit*>(LocalTargetData.Get(Index)))
+			if (TargetHit->HitResult.bBlockingHit)
 			{
-				if (TargetHit->HitResult.bBlockingHit)
-				{
-					ImpactPoints.Add(TargetHit->GetEndPoint());
-				}
-				else
-				{
-					EndPoints.Add(TargetHit->HitResult.TraceEnd);
-				}
+				ImpactPoints.Add(TargetHit->GetEndPoint());
+			}
+			else
+			{
+				EndPoints.Add(TargetHit->HitResult.TraceEnd);
 			}
 		}
+	}
 
-		if (IsLocallyControlled())
-		{
-			// 클라이언트 로컬에서 Weapon Fire Effects를 바로 표시
-			Weapon->TriggerWeaponFireEffects(ImpactPoints, EndPoints);
-		}
-		else
-		{
-			// 클라이언트의 다른 플레이어의 Weapon Fire Effects를 Replicate해 표시
-			Weapon->BroadcastWeaponFireEffects(ImpactPoints, EndPoints);
-		}
+	if (IsLocallyControlled())
+	{
+		// 클라이언트 로컬에서 Weapon Fire Effects를 바로 표시
+		Weapon->TriggerWeaponFireEffects(ImpactPoints, EndPoints);
 	}
 	else
 	{
-		// TODO : Reload, Dry fire
-		NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("Can't Commit Ability"));
+		// 클라이언트의 다른 플레이어의 Weapon Fire Effects를 Replicate해 표시
+		Weapon->BroadcastWeaponFireEffects(ImpactPoints, EndPoints);
 	}
 
 	ASC->ConsumeClientReplicatedTargetData(CurrentSpecHandle, CurrentActivationInfo.GetActivationPredictionKey());
