@@ -25,6 +25,8 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState_IsFiring);
 	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon_NoFire);
 	AmmoCostTag = FPGameplayTags::Weapon_Data_Ammo;
+
+	ScatterDistribution = 1.f;
 }
 
 bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -325,7 +327,7 @@ void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithScatterInCartridge(cons
 
 	for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
 	{
-		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::FRandRange(0.f, MaxScatterAmount);
+		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::Pow(FMath::FRand(), ScatterDistribution) * MaxScatterAmount;
 		const FVector TargetLocWithScatter = TargetLoc + RandVec;
 		const FVector WeaponAimDir = (TargetLocWithScatter - TraceStart).GetSafeNormal();
 		const FVector TraceEnd = TraceStart + WeaponAimDir * MaxDamageRange;

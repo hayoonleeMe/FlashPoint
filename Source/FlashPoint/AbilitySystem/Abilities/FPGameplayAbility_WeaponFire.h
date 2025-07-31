@@ -65,6 +65,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float MaxScatterAmount;
 
+	// 총알이 퍼지는 정도를 제어하는 값
+	// 값이 클수록 총알이 중앙으로 집중된다.
+	UPROPERTY(EditDefaultsOnly)
+	float ScatterDistribution;
+
 	// Character의 Weapon Fire Anim Montage
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAnimMontage> CharacterFireMontage;
