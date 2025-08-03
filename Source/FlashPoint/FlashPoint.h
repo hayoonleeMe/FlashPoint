@@ -5,3 +5,4 @@
 #include "CoreMinimal.h"
 
 #define ECC_Projectile ECC_GameTraceChannel1
+#define ECC_Spawner ECC_GameTraceChannel2
