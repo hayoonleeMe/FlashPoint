@@ -321,15 +321,28 @@ void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithScatterInCartridge(cons
 {
 	AWeapon_Base* Weapon = GetEquippedWeapon();
 	check(Weapon);
-
-	const float MaxDamageRange = Weapon->GetMaxDamageRange();
+	
 	const int32 BulletsPerCartridge = Weapon->GetBulletsPerCartridge();
+
+	// Scatter 적용 X
+	if (!bUseScatter)
+	{
+		for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
+		{
+			OutTraceEnds.Add(TargetLoc);
+		}
+		return;
+	}
+	
+	const float MaxDamageRange = Weapon->GetMaxDamageRange();
+	const FVector TargetDir = (TargetLoc - TraceStart).GetSafeNormal();
+	const FVector BaseScatteredLoc = TraceStart + TargetDir * ScatterOffset;
 
 	for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
 	{
 		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::Pow(FMath::FRand(), ScatterDistribution) * MaxScatterAmount;
-		const FVector TargetLocWithScatter = TargetLoc + RandVec;
-		const FVector WeaponAimDir = (TargetLocWithScatter - TraceStart).GetSafeNormal();
+		const FVector ScatteredLoc = BaseScatteredLoc + RandVec;
+		const FVector WeaponAimDir = (ScatteredLoc - TraceStart).GetSafeNormal();
 		const FVector TraceEnd = TraceStart + WeaponAimDir * MaxDamageRange;
 		OutTraceEnds.Add(TraceEnd);
 	}
