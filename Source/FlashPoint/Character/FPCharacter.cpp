@@ -7,6 +7,7 @@
 #include "FPCharacterMovementComponent.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Data/FPCosmeticData.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -45,6 +46,8 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
 	GetCharacterMovement()->SetCrouchedHalfHeight(65.f);
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Spawner, ECR_Overlap);
 
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 270.f, 0.f));
