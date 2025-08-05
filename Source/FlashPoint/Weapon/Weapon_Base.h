@@ -141,7 +141,7 @@ protected:
 
 	// 한 탄창 당 총알 수
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	float MagCapacity;
+	int32 MagCapacity;
 
 	// 최대 사거리
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")

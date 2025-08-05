@@ -61,13 +61,20 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float BulletTraceRadius;
 
-	// 총알이 최대로 퍼질 수 있는 정도
 	UPROPERTY(EditDefaultsOnly)
+	uint8 bUseScatter : 1;	
+
+	// 총알이 최대로 퍼질 수 있는 정도
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition="bUseScatter"))
 	float MaxScatterAmount;
+
+	// Scatter를 적용할 위치까지의 거리
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition="bUseScatter"))
+	float ScatterOffset;
 
 	// 총알이 퍼지는 정도를 제어하는 값
 	// 값이 클수록 총알이 중앙으로 집중된다.
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, meta=(EditCondition="bUseScatter"))
 	float ScatterDistribution;
 
 	// Character의 Weapon Fire Anim Montage
