@@ -99,9 +99,16 @@ void UFPAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			UpdateCurrentDirection();
 			UpdateBlendWeight(DeltaSeconds);
 		}
-
-		UpdateLeftHandModifyTransform(Character);
 	}
+}
+
+void UFPAnimInstance::NativePostEvaluateAnimation()
+{
+	Super::NativePostEvaluateAnimation();
+
+	// NativeUpdateAnimation()에서 CurveValue를 가져오면 처음 약간의 프레임 동안 제대로 가져오지 못함
+	// 따라서 평가가 끝난 후 CurveValue를 제대로 가져올 수 있을 때 업데이트
+	UpdateLeftHandModifyTransform();
 }
 
 void UFPAnimInstance::UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon)
@@ -194,20 +201,31 @@ void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds)
 	}
 }
 
-void UFPAnimInstance::UpdateLeftHandModifyTransform(const ACharacter* Character)
+void UFPAnimInstance::UpdateLeftHandModifyTransform()
 {
 	if (EquippedWeaponWeakPtr.IsValid())
 	{
-		if (Character && Character->GetMesh())
+		if (ACharacter* Character = Cast<ACharacter>(GetOwningActor()))
 		{
-			LeftHandModifyAlpha = 1.f;
+			if (Character && Character->GetMesh())
+			{
+				float DisableLeftHandIK = GetCurveValue(TEXT("DisableLeftHandIK"));
+				if (DisableLeftHandIK > 0.f)
+				{
+					LeftHandModifyAlpha = 0.f;
+				}
+				else
+				{
+					LeftHandModifyAlpha = FMath::FInterpTo(LeftHandModifyAlpha, 1.f, GetDeltaSeconds(), 8.f);
+				}
 			
-			const FTransform WeaponAttachTransform = EquippedWeaponWeakPtr->GetLeftHandAttachTransform();
-			FVector MeshAttachLocation;
-			FRotator Temp;
-			Character->GetMesh()->TransformToBoneSpace(TEXT("hand_r"), WeaponAttachTransform.GetLocation(), WeaponAttachTransform.Rotator(), MeshAttachLocation, Temp);
+				const FTransform WeaponAttachTransform = EquippedWeaponWeakPtr->GetLeftHandAttachTransform();
+				FVector MeshAttachLocation;
+				FRotator Temp;
+				Character->GetMesh()->TransformToBoneSpace(TEXT("hand_r"), WeaponAttachTransform.GetLocation(), WeaponAttachTransform.Rotator(), MeshAttachLocation, Temp);
 
-			LeftHandModifyTransform = FTransform(MeshAttachLocation);
+				LeftHandModifyTransform = FTransform(MeshAttachLocation);
+			}	
 		}
 	}
 	else

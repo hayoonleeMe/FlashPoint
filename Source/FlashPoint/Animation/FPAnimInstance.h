@@ -35,6 +35,7 @@ public:
 	UFPAnimInstance();
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+	virtual void NativePostEvaluateAnimation() override;
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
 	
@@ -146,5 +147,5 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float LeftHandModifyAlpha;
 
-	void UpdateLeftHandModifyTransform(const ACharacter* Character);
+	void UpdateLeftHandModifyTransform();
 };
