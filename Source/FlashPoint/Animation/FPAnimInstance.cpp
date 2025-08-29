@@ -11,6 +11,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon/WeaponManageComponent.h"
+#include "Weapon/Weapon_Base.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAnimInstance)
 
@@ -97,12 +98,15 @@ void UFPAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			UpdateAimingData(Character);
 			UpdateCurrentDirection();
 			UpdateBlendWeight(DeltaSeconds);
-		}	
+		}
+
+		UpdateLeftHandModifyTransform(Character);
 	}
 }
 
 void UFPAnimInstance::UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon)
 {
+	EquippedWeaponWeakPtr = EquippedWeapon;
 	bHasEquippedWeapon = EquippedWeapon != nullptr;
 }
 
@@ -187,5 +191,27 @@ void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds)
 	else
 	{
 		HipFireUpperBodyBlendWeight = 0.f;
+	}
+}
+
+void UFPAnimInstance::UpdateLeftHandModifyTransform(const ACharacter* Character)
+{
+	if (EquippedWeaponWeakPtr.IsValid())
+	{
+		if (Character && Character->GetMesh())
+		{
+			LeftHandModifyAlpha = 1.f;
+			
+			const FTransform WeaponAttachTransform = EquippedWeaponWeakPtr->GetLeftHandAttachTransform();
+			FVector MeshAttachLocation;
+			FRotator Temp;
+			Character->GetMesh()->TransformToBoneSpace(TEXT("hand_r"), WeaponAttachTransform.GetLocation(), WeaponAttachTransform.Rotator(), MeshAttachLocation, Temp);
+
+			LeftHandModifyTransform = FTransform(MeshAttachLocation);
+		}
+	}
+	else
+	{
+		LeftHandModifyAlpha = 0.f;
 	}
 }

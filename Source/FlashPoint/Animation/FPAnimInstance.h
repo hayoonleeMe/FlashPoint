@@ -80,6 +80,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	uint8 bHasEquippedWeapon : 1;
 
+	UPROPERTY()
+	TWeakObjectPtr<AWeapon_Base> EquippedWeaponWeakPtr;
+
 	void UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon);
 
 	// 무기를 발사하고 난 뒤, 지난 시간
@@ -133,4 +136,15 @@ protected:
 	float HipFireUpperBodyBlendWeight;
 
 	void UpdateBlendWeight(float DeltaSeconds);
+
+	// 왼손을 무기에 부착할 Transform (Only Translation)
+	// Character Mesh의 hand_r 기준
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FTransform LeftHandModifyTransform;
+
+	// 왼손을 무기에 부착할지를 결정하는 Alpha
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float LeftHandModifyAlpha;
+
+	void UpdateLeftHandModifyTransform(const ACharacter* Character);
 };

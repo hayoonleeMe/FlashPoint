@@ -65,6 +65,9 @@ public:
 	// Targeting 할 때 Weapon에서의 Source Location을 반환한다. (보통 총구)
 	FVector GetWeaponTargetingSourceLocation() const;
 
+	// LeftHandAttachSocketName에 해당하는 소켓의 Transform을 반환한다.
+	FTransform GetLeftHandAttachTransform() const;
+
 	// 무기가 장착된 후 호출된다.
 	virtual void OnEquipped();
 
@@ -160,4 +163,7 @@ protected:
 	FGameplayTagStackContainer TagStacks;
 
 	void InitializeTagStacks();
+
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FName LeftHandAttachSocketName;
 };

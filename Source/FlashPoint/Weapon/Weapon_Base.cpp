@@ -36,6 +36,8 @@ AWeapon_Base::AWeapon_Base()
 	{
 		UpdateFireBlockTag(false);
 	});
+
+	LeftHandAttachSocketName = TEXT("LeftHandSocket");
 }
 
 void AWeapon_Base::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -48,6 +50,11 @@ void AWeapon_Base::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& O
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
 {
 	return WeaponMeshComponent->GetSocketLocation(TEXT("MuzzleFlash"));
+}
+
+FTransform AWeapon_Base::GetLeftHandAttachTransform() const
+{
+	return WeaponMeshComponent->GetSocketTransform(LeftHandAttachSocketName);
 }
 
 void AWeapon_Base::OnEquipped()
