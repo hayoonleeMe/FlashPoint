@@ -11,5 +11,6 @@ public class FlashPointEditorTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.V5;
 		IncludeOrderVersion = EngineIncludeOrderVersion.Unreal5_4;
 		ExtraModuleNames.AddRange( new string[] { "FlashPoint" } );
+		ExtraModuleNames.AddRange(new string[] { "OnlineService" });
 	}
 }
