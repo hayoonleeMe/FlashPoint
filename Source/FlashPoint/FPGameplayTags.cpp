@@ -3,6 +3,15 @@
 
 namespace FPGameplayTags
 {
+	namespace Asset
+	{
+		namespace Level
+		{
+			UE_DEFINE_GAMEPLAY_TAG(SignScreen, "Asset.Level.SignScreen");
+			UE_DEFINE_GAMEPLAY_TAG(MainMenu, "Asset.Level.MainMenu");
+		}
+	}
+	
 	namespace Input
 	{
 		namespace Action

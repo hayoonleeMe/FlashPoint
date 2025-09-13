@@ -119,7 +119,8 @@ void USignScreen::OnConfirmButtonClicked()
 
 void USignScreen::OnSignInSucceeded()
 {
-	//TODO	
+	const FName MainMenuLevelPath = UFPAssetManager::GetAssetPathByTag(FPGameplayTags::Asset::Level::MainMenu).GetAssetFName();
+	UGameplayStatics::OpenLevel(this, MainMenuLevelPath);
 }
 
 void USignScreen::OnSignUpSucceeded(const FString& CodeDeliveryDestination)
