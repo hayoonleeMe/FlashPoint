@@ -27,6 +27,12 @@ public:
 
 	static void Initialize();
 
+	// AssetId에 해당하는 애셋의 FSoftObjectPath를 반환한다.
+	static FSoftObjectPath GetAssetPathById(const FName& AssetId);
+
+	// AssetTag에 해당하는 애셋의 FSoftObjectPath를 반환한다.
+	static FSoftObjectPath GetAssetPathByTag(const FGameplayTag& AssetTag);
+
 	// AssetPath에 해당하는 애셋을 동기적으로 로드하고 반환한다.
 	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
 	static UObject* LoadSyncByPath(const FSoftObjectPath& AssetPath, bool bKeepInMemory = true);

@@ -26,6 +26,20 @@ void UFPAssetManager::Initialize()
 	Get().LoadPreloadAssets();
 }
 
+FSoftObjectPath UFPAssetManager::GetAssetPathById(const FName& AssetId)
+{
+	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	check(AssetData);
+	return AssetData->GetAssetPathById(AssetId);
+}
+
+FSoftObjectPath UFPAssetManager::GetAssetPathByTag(const FGameplayTag& AssetTag)
+{
+	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	check(AssetData);
+	return AssetData->GetAssetPathByTag(AssetTag);
+}
+
 UObject* UFPAssetManager::LoadSyncByPath(const FSoftObjectPath& AssetPath, bool bKeepInMemory)
 {
 	if (AssetPath.IsValid())

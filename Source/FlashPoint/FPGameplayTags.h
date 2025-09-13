@@ -5,6 +5,15 @@
 
 namespace FPGameplayTags
 {
+	namespace Asset
+	{
+		namespace Level
+		{
+			extern FNativeGameplayTag SignScreen;
+			extern FNativeGameplayTag MainMenu;
+		}
+	}
+	
 	namespace Input
 	{
 		namespace Action
