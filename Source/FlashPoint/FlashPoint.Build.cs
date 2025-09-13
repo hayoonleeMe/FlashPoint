@@ -26,6 +26,7 @@ public class FlashPoint : ModuleRules
 			"AnimGraphRuntime",
 			"NetCore",
 			"Niagara",
+			"OnlineService",
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });

@@ -15,6 +15,8 @@ public class OnlineService : ModuleRules
             new string[]
             {
                 "Core",
+                "HTTP",
+                "GameplayTags",
             }
         );
 
@@ -23,7 +25,12 @@ public class OnlineService : ModuleRules
             {
                 "CoreUObject",
                 "Engine",
+                "Json",
+                "JsonUtilities",
+                "GameLiftServerSDK",
             }
         );
+        
+		bEnableExceptions =  true;
     }
 }
