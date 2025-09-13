@@ -26,6 +26,8 @@ public class FlashPoint : ModuleRules
 			"AnimGraphRuntime",
 			"NetCore",
 			"Niagara",
+			"UMG",
+			"SlateCore",
 			"OnlineService",
 		});
 
