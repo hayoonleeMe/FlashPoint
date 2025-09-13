@@ -11,7 +11,7 @@
 
 UFPGameplayAbility_Jump::UFPGameplayAbility_Jump()
 {
-	AbilityTags.AddTag(FPGameplayTags::Ability_Jump);
+	AbilityTags.AddTag(FPGameplayTags::Ability::Jump);
 }
 
 bool UFPGameplayAbility_Jump::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
