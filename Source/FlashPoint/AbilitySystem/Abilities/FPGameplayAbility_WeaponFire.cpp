@@ -21,10 +21,10 @@
 
 UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 {
-	AbilityTags.AddTag(FPGameplayTags::Ability_WeaponFire);
-	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState_IsFiring);
-	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon_NoFire);
-	AmmoCostTag = FPGameplayTags::Weapon_Data_Ammo;
+	AbilityTags.AddTag(FPGameplayTags::Ability::WeaponFire);
+	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState::IsFiring);
+	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon::NoFire);
+	AmmoCostTag = FPGameplayTags::Weapon::Data::Ammo;
 
 	ScatterDistribution = 1.f;
 }
@@ -462,7 +462,7 @@ void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(FGameplayAbilityTargetDa
 				// TODO : Indicates Damage and Update HUD
 
 				FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass);
-				EffectSpecHandle.Data->SetSetByCallerMagnitude(FPGameplayTags::Attributes_IncomingDamage, BaseDamage);
+				EffectSpecHandle.Data->SetSetByCallerMagnitude(FPGameplayTags::Attributes::IncomingDamage, BaseDamage);
 				
 				HitData->ApplyGameplayEffectSpec(*EffectSpecHandle.Data);
 			}

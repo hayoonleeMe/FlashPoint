@@ -43,9 +43,9 @@ void AFPPlayerController::SetupInputComponent()
 	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
 
 	// Bind Native Inputs
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input_Action_Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input_Action_Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input_Action_Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Action::Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Action::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Action::Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
 
 	// Bind Ability Inputs
 	FPInputComponent->BindAbilityActions(InputData, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);

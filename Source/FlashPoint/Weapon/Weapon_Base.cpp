@@ -77,7 +77,7 @@ void AWeapon_Base::OnUnEquipped()
 	if (UFPAbilitySystemComponent* ASC = GetOwnerASC<UFPAbilitySystemComponent>())
 	{
 		// 무기 발사 입력 Flush
-		ASC->FlushPressedInput(FPGameplayTags::Input_Action_WeaponFire);
+		ASC->FlushPressedInput(FPGameplayTags::Input::Action::WeaponFire);
 	}
 	
 	LinkWeaponAnimLayer(true);
@@ -191,11 +191,11 @@ void AWeapon_Base::UpdateFireBlockTag(bool bBlockFire) const
 	{
 		if (bBlockFire)
 		{
-			ASC->AddLooseGameplayTag(FPGameplayTags::Weapon_NoFire);
+			ASC->AddLooseGameplayTag(FPGameplayTags::Weapon::NoFire);
 		}
 		else
 		{
-			ASC->RemoveLooseGameplayTag(FPGameplayTags::Weapon_NoFire);
+			ASC->RemoveLooseGameplayTag(FPGameplayTags::Weapon::NoFire);
 		}
 	}
 }
@@ -204,6 +204,6 @@ void AWeapon_Base::InitializeTagStacks()
 {
 	if (HasAuthority())
 	{
-		TagStacks.AddTagStack(FPGameplayTags::Weapon_Data_Ammo, MagCapacity);
+		TagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, MagCapacity);
 	}
 }
