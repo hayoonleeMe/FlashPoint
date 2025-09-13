@@ -5,31 +5,55 @@
 
 namespace FPGameplayTags
 {
-	extern FNativeGameplayTag Input_Action_Move;
-	extern FNativeGameplayTag Input_Action_Look;
-	extern FNativeGameplayTag Input_Action_Crouch;
-	extern FNativeGameplayTag Input_Action_Jump;
-	extern FNativeGameplayTag Input_Action_WeaponFire;
+	namespace Input
+	{
+		namespace Action
+		{
+			extern FNativeGameplayTag Move;
+			extern FNativeGameplayTag Look;
+			extern FNativeGameplayTag Crouch;
+			extern FNativeGameplayTag Jump;
+			extern FNativeGameplayTag WeaponFire;
+		}
+	}
 
-	extern FNativeGameplayTag Ability_Jump;
-	extern FNativeGameplayTag Ability_WeaponFire;
+	namespace Ability
+	{
+		extern FNativeGameplayTag Jump;
+		extern FNativeGameplayTag WeaponFire;
+	}
 
-	extern FNativeGameplayTag CharacterState_IsSprinting;
-	extern FNativeGameplayTag CharacterState_IsFiring;
+	namespace CharacterState
+	{
+		extern FNativeGameplayTag IsSprinting;
+		extern FNativeGameplayTag IsFiring;
+	}
 
-	extern FNativeGameplayTag Weapon_Type_Unarmed;
-	extern FNativeGameplayTag Weapon_Type_Pistol;
-	extern FNativeGameplayTag Weapon_Type_Rifle;
-	extern FNativeGameplayTag Weapon_Type_Shotgun;
-	extern FNativeGameplayTag Weapon_Type_SMG;
-	extern FNativeGameplayTag Weapon_Type_SniperRifle;
-	extern FNativeGameplayTag Weapon_Type_GrenadeLauncher;
-	extern FNativeGameplayTag Weapon_Type_RocketLauncher;
+	namespace Weapon
+	{
+		extern FNativeGameplayTag NoFire;
+		
+		namespace Type
+		{
+			extern FNativeGameplayTag Unarmed;
+			extern FNativeGameplayTag Pistol;
+			extern FNativeGameplayTag Rifle;
+			extern FNativeGameplayTag Shotgun;
+			extern FNativeGameplayTag SMG;
+			extern FNativeGameplayTag SniperRifle;
+			extern FNativeGameplayTag GrenadeLauncher;
+			extern FNativeGameplayTag RocketLauncher;
+		}
 
-	extern FNativeGameplayTag Weapon_Data_Ammo;
-	extern FNativeGameplayTag Weapon_Data_ReserveAmmo;
-	
-	extern FNativeGameplayTag Weapon_NoFire;
+		namespace Data
+		{
+			extern FNativeGameplayTag Ammo;
+			extern FNativeGameplayTag ReserveAmmo;
+		}
+	}
 
-	extern FNativeGameplayTag Attributes_IncomingDamage;
+	namespace Attributes
+	{
+		extern FNativeGameplayTag IncomingDamage;
+	}
 }

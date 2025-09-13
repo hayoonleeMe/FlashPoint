@@ -3,31 +3,55 @@
 
 namespace FPGameplayTags
 {
-	UE_DEFINE_GAMEPLAY_TAG(Input_Action_Move, "Input.Action.Move");
-	UE_DEFINE_GAMEPLAY_TAG(Input_Action_Look, "Input.Action.Look");
-	UE_DEFINE_GAMEPLAY_TAG(Input_Action_Crouch, "Input.Action.Crouch");
-	UE_DEFINE_GAMEPLAY_TAG(Input_Action_Jump, "Input.Action.Jump");
-	UE_DEFINE_GAMEPLAY_TAG(Input_Action_WeaponFire, "Input.Action.WeaponFire");
-	
-	UE_DEFINE_GAMEPLAY_TAG(Ability_Jump, "Ability.Jump");
-	UE_DEFINE_GAMEPLAY_TAG(Ability_WeaponFire, "Ability.WeaponFire");
+	namespace Input
+	{
+		namespace Action
+		{
+			UE_DEFINE_GAMEPLAY_TAG(Move, "Input.Action.Move");
+			UE_DEFINE_GAMEPLAY_TAG(Look, "Input.Action.Look");
+			UE_DEFINE_GAMEPLAY_TAG(Crouch, "Input.Action.Crouch");
+			UE_DEFINE_GAMEPLAY_TAG(Jump, "Input.Action.Jump");
+			UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Input.Action.WeaponFire");
+		}
+	}
 
-	UE_DEFINE_GAMEPLAY_TAG(CharacterState_IsSprinting, "CharacterState.IsSprinting");
-	UE_DEFINE_GAMEPLAY_TAG(CharacterState_IsFiring, "CharacterState.IsFiring");
+	namespace Ability
+	{
+		UE_DEFINE_GAMEPLAY_TAG(Jump, "Ability.Jump");
+		UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Ability.WeaponFire");
+	}
 
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Unarmed, "Weapon.Type.Unarmed");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Pistol, "Weapon.Type.Pistol");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Rifle, "Weapon.Type.Rifle");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_Shotgun, "Weapon.Type.Shotgun");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_SMG, "Weapon.Type.SMG");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_SniperRifle, "Weapon.Type.SniperRifle");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_GrenadeLauncher, "Weapon.Type.GrenadeLauncher");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Type_RocketLauncher, "Weapon.Type.RocketLauncher");
-	
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Data_Ammo, "Weapon.Data.Ammo");
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_Data_ReserveAmmo, "Weapon.Data.ReserveAmmo");
-	
-	UE_DEFINE_GAMEPLAY_TAG(Weapon_NoFire, "Weapon.NoFire");
-	
-	UE_DEFINE_GAMEPLAY_TAG(Attributes_IncomingDamage, "Attributes.IncomingDamage");
+	namespace CharacterState
+	{
+		UE_DEFINE_GAMEPLAY_TAG(IsSprinting, "CharacterState.IsSprinting");
+		UE_DEFINE_GAMEPLAY_TAG(IsFiring, "CharacterState.IsFiring");
+	}
+
+	namespace Weapon
+	{
+		UE_DEFINE_GAMEPLAY_TAG(NoFire, "Weapon.NoFire");
+		
+		namespace Type
+		{
+			UE_DEFINE_GAMEPLAY_TAG(Unarmed, "Weapon.Type.Unarmed");
+			UE_DEFINE_GAMEPLAY_TAG(Pistol, "Weapon.Type.Pistol");
+			UE_DEFINE_GAMEPLAY_TAG(Rifle, "Weapon.Type.Rifle");
+			UE_DEFINE_GAMEPLAY_TAG(Shotgun, "Weapon.Type.Shotgun");
+			UE_DEFINE_GAMEPLAY_TAG(SMG, "Weapon.Type.SMG");
+			UE_DEFINE_GAMEPLAY_TAG(SniperRifle, "Weapon.Type.SniperRifle");
+			UE_DEFINE_GAMEPLAY_TAG(GrenadeLauncher, "Weapon.Type.GrenadeLauncher");
+			UE_DEFINE_GAMEPLAY_TAG(RocketLauncher, "Weapon.Type.RocketLauncher");
+		}
+
+		namespace Data
+		{
+			UE_DEFINE_GAMEPLAY_TAG(Ammo, "Weapon.Data.Ammo");
+			UE_DEFINE_GAMEPLAY_TAG(ReserveAmmo, "Weapon.Data.ReserveAmmo");
+		}
+	}
+
+	namespace Attributes
+	{
+		UE_DEFINE_GAMEPLAY_TAG(IncomingDamage, "Attributes.IncomingDamage");
+	}
 }
