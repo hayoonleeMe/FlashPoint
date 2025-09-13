@@ -64,6 +64,5 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> Text_StatusMessage;
 
-	UFUNCTION()
 	void UpdateStatusMessage(const FString& Message, bool bShouldResetWidget);
 };

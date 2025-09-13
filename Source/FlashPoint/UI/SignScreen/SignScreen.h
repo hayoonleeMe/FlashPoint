@@ -62,12 +62,9 @@ private:
 	UFUNCTION()
 	void OnConfirmButtonClicked();
 
-	UFUNCTION()
 	void OnSignInSucceeded();
 
-	UFUNCTION()
 	void OnSignUpSucceeded(const FString& CodeDeliveryDestination);
 
-	UFUNCTION()
 	void OnConfirmSignUpSucceeded();
 };
