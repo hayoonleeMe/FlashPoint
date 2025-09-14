@@ -11,4 +11,6 @@ class FLASHPOINT_API AMainMenuGameMode : public AGameModeBase
 {
 	GENERATED_BODY()
 
+public:
+	FString GetParsedKickReasonOption() const;
 };
