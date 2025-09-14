@@ -23,6 +23,13 @@ void ABasePlayerController::BeginPlay()
 	SetInitialInputMode();
 }
 
+void ABasePlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	OnInputComponentSetupDelegate.Broadcast(InputComponent);
+}
+
 void ABasePlayerController::SetInitialInputMode()
 {
 	if (UUserWidget* MainWidget = UIManageComponent->GetMainWidget())

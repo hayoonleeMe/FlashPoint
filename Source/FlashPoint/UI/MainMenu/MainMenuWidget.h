@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WidgetInputInteraction.h"
 #include "Blueprint/UserWidget.h"
 #include "MainMenuWidget.generated.h"
 
@@ -16,11 +17,14 @@ class UButton;
  * Main Menu를 표시하는 위젯
  */
 UCLASS()
-class FLASHPOINT_API UMainMenuWidget : public UUserWidget
+class FLASHPOINT_API UMainMenuWidget : public UUserWidget, public IWidgetInputInteraction
 {
 	GENERATED_BODY()
 
 public:
+	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Back() override;
+	// End IWidgetInputInteraction
 
 protected:
 	virtual void NativeOnInitialized() override;

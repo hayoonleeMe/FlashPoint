@@ -8,6 +8,9 @@
 
 class UUIManageComponent;
 
+// SetupInputComponent()가 호출될 때 브로드캐스트하는 델레게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnInputComponentSetupDelegate, UInputComponent*/*InputComponent*/);
+
 /**
  * Main Widget을 표시하고, Initial Input Mode를 설정하는 Base Player Controller
  */
@@ -19,8 +22,11 @@ class FLASHPOINT_API ABasePlayerController : public APlayerController
 public:
 	ABasePlayerController();
 
+	FOnInputComponentSetupDelegate OnInputComponentSetupDelegate;
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void SetupInputComponent() override;
 
 	// 플레이어의 초기 Input Mode를 설정하는 가상함수
 	virtual void SetInitialInputMode();

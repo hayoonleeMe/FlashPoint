@@ -13,6 +13,20 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MainMenuWidget)
 
+void UMainMenuWidget::Input_UI_Back()
+{
+	if (MessagePopup->GetVisibility() == ESlateVisibility::Visible)
+	{
+		// MessagePopup 표시중이면 닫기
+		OnMessagePopupCloseButtonClicked();
+	}
+	else
+	{
+		// 열려있는 CreateMatchPopup 또는 MatchListPage 닫기
+		HideWidgetSwitcher();
+	}
+}
+
 void UMainMenuWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();

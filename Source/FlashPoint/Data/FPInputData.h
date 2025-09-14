@@ -42,6 +42,9 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> DefaultMappingContext;
 
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputMappingContext> UIMappingContext;
+
 	// 일반적인 입력
 	UPROPERTY(EditDefaultsOnly)
 	TArray<FInputConfig> NativeInputConfigs;
