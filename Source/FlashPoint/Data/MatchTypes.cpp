@@ -9,7 +9,7 @@ FMatchInfo::FMatchInfo(const FGameSessionInfo& GameSessionInfo)
 {
 	GameSessionId = GameSessionInfo.GameSessionId;
 	HostId = GameSessionInfo.CreatorId;
-	CurrentPlayers = FString::FromInt(GameSessionInfo.CurrentPlayerSessionCount);
+	CurrentPlayers = GameSessionInfo.CurrentPlayerSessionCount;
 	RetrieveGameProperties(GameSessionInfo.GameProperties);
 }
 
@@ -39,5 +39,5 @@ void FMatchInfo::Dump() const
 	UE_LOG(LogFP, Log, TEXT("  RoomName %s"), *RoomName);
 	UE_LOG(LogFP, Log, TEXT("  MatchMode %s"), *LexToString(MatchMode));
 	UE_LOG(LogFP, Log, TEXT("  MaxPlayers %s"), *MaxPlayers);
-	UE_LOG(LogFP, Log, TEXT("  CurrentPlayers %s"), *CurrentPlayers);
+	UE_LOG(LogFP, Log, TEXT("  CurrentPlayers %d"), CurrentPlayers);
 }

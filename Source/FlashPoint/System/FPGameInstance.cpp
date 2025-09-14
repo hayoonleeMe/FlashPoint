@@ -13,3 +13,15 @@ void UFPGameInstance::Init()
 
 	UFPAssetManager::Initialize();
 }
+
+void UFPGameInstance::CacheMatchInfo(const FMatchInfo& InMatchInfo)
+{
+	CachedMatchInfo = InMatchInfo;
+}
+
+FMatchInfo UFPGameInstance::ConsumeCachedMatchInfo()
+{
+	FMatchInfo RetData = CachedMatchInfo.Get(FMatchInfo());
+	CachedMatchInfo.Reset();
+	return RetData;
+}

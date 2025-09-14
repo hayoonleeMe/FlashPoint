@@ -27,7 +27,7 @@ void UMatchListEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
 	{
 		Text_RoomName->SetText(FText::FromString(Object->RoomName));
 		Text_MatchMode->SetText(FText::FromString(Object->MatchModeStr));
-		FString PlayerCount = FString::Printf(TEXT("%s / %s"), *Object->CurrentPlayers, *Object->MaxPlayers);
+		FString PlayerCount = FString::Printf(TEXT("%s / %s"), *Object->CurrentPlayersStr, *Object->MaxPlayers);
 		Text_PlayerCount->SetText(FText::FromString(PlayerCount));
 	}
 }
