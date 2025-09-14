@@ -8,16 +8,10 @@
 #include "CreateMatchPopup.h"
 #include "MatchListPage.h"
 #include "Components/WidgetSwitcher.h"
+#include "Game/MainMenuGameMode.h"
 #include "UI/Shared/MessagePopup.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MainMenuWidget)
-
-void UMainMenuWidget::ShowKickReason(const FString& KickReason) const
-{
-	MessagePopup->SetTitleText(DisconnectedText);
-	MessagePopup->SetMessageText(KickReason);
-	ShowMessagePopup(true);
-}
 
 void UMainMenuWidget::NativeOnInitialized()
 {
@@ -40,6 +34,30 @@ void UMainMenuWidget::NativePreConstruct()
 
 	HideWidgetSwitcher();
 	ShowMessagePopup(false);
+}
+
+void UMainMenuWidget::NativeConstruct()
+{
+	Super::NativeConstruct();
+
+	TryShowKickReason();
+}
+
+void UMainMenuWidget::TryShowKickReason() const
+{
+	if (GetWorld())
+	{
+		if (AMainMenuGameMode* MainMenuGameMode = GetWorld()->GetAuthGameMode<AMainMenuGameMode>())
+		{
+			const FString KickReason = MainMenuGameMode->GetParsedKickReasonOption();
+			if (!KickReason.IsEmpty())
+			{
+				MessagePopup->SetTitleText(DisconnectedText);
+				MessagePopup->SetMessageText(KickReason);
+				ShowMessagePopup(true);
+			}
+		}
+	}
 }
 
 void UMainMenuWidget::HideWidgetSwitcher()

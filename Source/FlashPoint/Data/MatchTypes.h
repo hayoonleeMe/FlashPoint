@@ -5,6 +5,10 @@
 
 #include "MatchTypes.generated.h"
 
+constexpr const TCHAR* KickReasonOption = TEXT("KickReason");
+constexpr const TCHAR* HostLogoutKickReason = TEXT("The host has left the match.");
+constexpr const TCHAR* SessionTerminatedKickReason = TEXT("The game session has terminated.");
+
 /**
  * 현재 매치의 모드를 나타내는 enum class
  */
@@ -75,9 +79,35 @@ struct FMatchInfo
 	FString MaxPlayers;
 
 	UPROPERTY()
-	FString CurrentPlayers;
+	int32 CurrentPlayers{};
 
 	// TArray<FKeyValueStruct> 타입의 데이터를 변환해 내부 데이터를 설정한다.
 	void RetrieveGameProperties(const TArray<FKeyValueStruct>& GameProperties);
 	void Dump() const;
 };
+
+/**
+ * Team Death Match의 팀을 나타내는 enum class
+ */
+UENUM()
+enum class ETeam
+{
+	RedTeam,
+	BlueTeam,
+	None
+};
+
+static FString LexToString(ETeam Team)
+{
+	switch (Team)
+	{
+	case ETeam::RedTeam:
+		return TEXT("Red Team");
+
+	case ETeam::BlueTeam:
+		return TEXT("Blue Team");
+
+	default:
+		return TEXT("None");
+	}
+}

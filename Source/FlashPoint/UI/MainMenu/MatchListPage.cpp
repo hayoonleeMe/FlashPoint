@@ -68,7 +68,7 @@ void UMatchListPage::OnDescribeGameSessionsSucceeded(const TArray<FGameSessionIn
 		Object->RoomName = MatchInfo.RoomName;
 		Object->MatchModeStr = LexToString(MatchInfo.MatchMode);
 		Object->MaxPlayers = MatchInfo.MaxPlayers;
-		Object->CurrentPlayers = MatchInfo.CurrentPlayers;
+		Object->CurrentPlayersStr = FString::FromInt(MatchInfo.CurrentPlayers);
 		ListView->AddItem(Object);
 	}
 }

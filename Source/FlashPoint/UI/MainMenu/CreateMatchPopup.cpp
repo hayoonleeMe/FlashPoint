@@ -128,7 +128,7 @@ void UCreateMatchPopup::UpdateStatusMessage(const FString& Message, bool bShould
 	Text_StatusMessage->SetText(FText::FromString(Message));
 	if (bShouldResetWidget)
 	{
-		UpdateCreateButtonState();
+		Button_Create->SetIsEnabled(true);
 		Button_Cancel->SetIsEnabled(true);
 	}
 }

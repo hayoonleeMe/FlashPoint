@@ -19,5 +19,5 @@ public:
 	FString RoomName;
 	FString MatchModeStr;
 	FString MaxPlayers;
-	FString CurrentPlayers;
+	FString CurrentPlayersStr;
 };

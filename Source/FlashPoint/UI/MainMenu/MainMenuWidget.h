@@ -21,13 +21,16 @@ class FLASHPOINT_API UMainMenuWidget : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void ShowKickReason(const FString& KickReason) const;
 
 protected:
 	virtual void NativeOnInitialized() override;
 	virtual void NativePreConstruct() override;
+	virtual void NativeConstruct() override;
 
 private:
+	// 로비 또는 매치에서 퇴장당해 메인메뉴로 이동한 경우, 그 이유를 띄운다.
+	void TryShowKickReason() const;
+	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UWidgetSwitcher> WidgetSwitcher;
 
