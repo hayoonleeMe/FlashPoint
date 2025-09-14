@@ -24,7 +24,7 @@ void FCodeDeliveryDetails::Dump() const
 
 void FSignUpResponse::Dump() const
 {
-	UE_LOG(LogOnlineService, Log, TEXT("FDSSignUpResponse Details:"));
+	UE_LOG(LogOnlineService, Log, TEXT("FSignUpResponse Details:"));
 	CodeDeliveryDetails.Dump();
 	UE_LOG(LogOnlineService, Log, TEXT("UserConfirmed: %s"), UserConfirmed ? TEXT("true") : TEXT("false"));
 	UE_LOG(LogOnlineService, Log, TEXT("UserSub: %s"), *UserSub);
@@ -114,7 +114,7 @@ void FChallengeParameters::Dump() const
 
 void FInitiateAuthResponse::Dump() const
 {
-	UE_LOG(LogOnlineService, Log, TEXT("FDSSignUpResponse Details:"));
+	UE_LOG(LogOnlineService, Log, TEXT("FInitiateAuthResponse Details:"));
 	AuthenticationResult.Dump();
 	UE_LOG(LogOnlineService, Log, TEXT("ChallengeName: %s"), *ChallengeName);
 	ChallengeParameters.Dump();
