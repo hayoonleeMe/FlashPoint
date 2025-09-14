@@ -17,6 +17,7 @@ class FLASHPOINT_API UFPGameInstance : public UGameInstance
 
 public:
 	virtual void Init() override;
+	virtual void Shutdown() override;
 
 	// Seamless Travel 중 데이터를 유지하기 위해 캐싱
 	void CacheMatchInfo(const FMatchInfo& InMatchInfo);
