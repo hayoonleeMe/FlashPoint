@@ -3,6 +3,8 @@
 
 #include "LobbyGameMode.h"
 
+#include "FPGameplayTags.h"
+#include "System/FPAssetManager.h"
 #include "System/FPGameInstance.h"
 
 void ALobbyGameMode::StartMatch(EMatchMode MatchMode)
@@ -11,5 +13,20 @@ void ALobbyGameMode::StartMatch(EMatchMode MatchMode)
 	if (UFPGameInstance* FPGameInstance = GetGameInstance<UFPGameInstance>())
 	{
 		FPGameInstance->CacheMatchInfo(MatchInfo);
+	}
+	
+	FString URL;	
+	if (MatchMode == EMatchMode::TeamDeathMatch)
+	{
+		URL = UFPAssetManager::GetAssetPathByTag(FPGameplayTags::Asset::Level::Warehouse_TDM).GetAssetName();
+	}
+	else if (MatchMode == EMatchMode::FreeForAll)
+	{
+		URL = UFPAssetManager::GetAssetPathByTag(FPGameplayTags::Asset::Level::Warehouse_FFA).GetAssetName();
+	}
+
+	if (!URL.IsEmpty() && GetWorld())
+	{
+		GetWorld()->ServerTravel(URL);
 	}
 }

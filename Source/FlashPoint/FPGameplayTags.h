@@ -11,6 +11,8 @@ namespace FPGameplayTags
 		{
 			extern FNativeGameplayTag SignScreen;
 			extern FNativeGameplayTag MainMenu;
+			extern FNativeGameplayTag Warehouse_TDM;
+			extern FNativeGameplayTag Warehouse_FFA;
 		}
 	}
 	
