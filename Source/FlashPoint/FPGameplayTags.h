@@ -30,6 +30,7 @@ namespace FPGameplayTags
 		namespace UI
 		{
 			extern FNativeGameplayTag Back;
+			extern FNativeGameplayTag Confirm;
 		}
 	}
 

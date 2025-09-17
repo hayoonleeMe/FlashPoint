@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "Components/TextBlock.h"
+#include "Player/BasePlayerController.h"
 #include "System/OnlineServiceSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(ConfirmSignUpPage)
@@ -17,6 +18,15 @@ void UConfirmSignUpPage::InitializeWidget()
 	Text_Destination->SetText(FText::GetEmpty());
 
 	UpdateConfirmButtonState();
+}
+
+void UConfirmSignUpPage::Input_UI_Confirm()
+{
+	// Confirm 수행
+	if (Button_Confirm->GetIsEnabled())
+	{
+		Button_Confirm->OnClicked.Broadcast();
+	}
 }
 
 void UConfirmSignUpPage::NativeOnInitialized()
@@ -32,6 +42,7 @@ void UConfirmSignUpPage::NativeOnInitialized()
 	}
 	
 	TextBox_ConfirmationCode->OnTextChanged.AddDynamic(this, &ThisClass::UpdateConfirmButtonState);
+	TextBox_ConfirmationCode->OnTextCommitted.AddDynamic(this, &ThisClass::OnTextBoxCommitted);
 }
 
 void UConfirmSignUpPage::UpdateConfirmButtonState(const FText& Text)
@@ -41,6 +52,19 @@ void UConfirmSignUpPage::UpdateConfirmButtonState(const FText& Text)
 		const bool bValidConfirmationCode = OnlineServiceSubsystem->ValidateConfirmationCode(Text.ToString());
 		
 		Button_Confirm->SetIsEnabled(bValidConfirmationCode);
+	}
+}
+
+void UConfirmSignUpPage::OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
+		{
+			// 제대로 입력이 들어갈 수 있도록 다시 설정
+			BasePC->SetInitialInputMode();
+			Input_UI_Confirm();
+		}
 	}
 }
 

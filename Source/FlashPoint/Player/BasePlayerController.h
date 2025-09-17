@@ -24,12 +24,12 @@ public:
 
 	FOnInputComponentSetupDelegate OnInputComponentSetupDelegate;
 
+	// 플레이어의 초기 Input Mode를 설정하는 가상함수
+	virtual void SetInitialInputMode();
+	
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
-
-	// 플레이어의 초기 Input Mode를 설정하는 가상함수
-	virtual void SetInitialInputMode();
 	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UUIManageComponent> UIManageComponent;

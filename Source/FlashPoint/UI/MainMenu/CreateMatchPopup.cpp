@@ -52,6 +52,15 @@ void UCreateMatchPopup::InitializeWidget()
 	}
 }
 
+void UCreateMatchPopup::Input_UI_Confirm()
+{
+	// Create 수행
+	if (Button_Create->GetIsEnabled())
+	{
+		Button_Create->OnClicked.Broadcast();
+	}
+}
+
 void UCreateMatchPopup::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();

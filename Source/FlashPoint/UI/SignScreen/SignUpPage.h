@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WidgetInputInteraction.h"
 #include "Blueprint/UserWidget.h"
 #include "SignUpPage.generated.h"
 
@@ -14,7 +15,7 @@ class UEditableTextBox;
  * Sign Up 입력을 받고 수행하는 위젯
  */
 UCLASS()
-class FLASHPOINT_API USignUpPage : public UUserWidget
+class FLASHPOINT_API USignUpPage : public UUserWidget, public IWidgetInputInteraction
 {
 	GENERATED_BODY()
 
@@ -22,6 +23,10 @@ class FLASHPOINT_API USignUpPage : public UUserWidget
 
 public:
 	void InitializeWidget();
+
+	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Confirm() override;
+	// End IWidgetInputInteraction
 
 protected:
 	virtual void NativeOnInitialized() override;
@@ -54,6 +59,9 @@ private:
 
 	UFUNCTION()
 	void OnEmailChanged(const FText& Text);
+
+	UFUNCTION()
+	void OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_SignUp;

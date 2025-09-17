@@ -28,6 +28,7 @@ namespace FPGameplayTags
 		namespace UI
 		{
 			UE_DEFINE_GAMEPLAY_TAG(Back, "Input.UI.Back");
+			UE_DEFINE_GAMEPLAY_TAG(Confirm, "Input.UI.Confirm");
 		}
 	}
 

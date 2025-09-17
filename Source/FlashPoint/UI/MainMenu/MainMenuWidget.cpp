@@ -7,8 +7,11 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "CreateMatchPopup.h"
 #include "MatchListPage.h"
+#include "Components/EditableTextBox.h"
+#include "Components/SizeBox.h"
 #include "Components/WidgetSwitcher.h"
 #include "Game/MainMenuGameMode.h"
+#include "Player/BasePlayerController.h"
 #include "UI/Shared/MessagePopup.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MainMenuWidget)
@@ -27,11 +30,20 @@ void UMainMenuWidget::Input_UI_Back()
 	}
 }
 
+void UMainMenuWidget::Input_UI_Confirm()
+{
+	if (IWidgetInputInteraction* WidgetInputInteraction = Cast<IWidgetInputInteraction>(WidgetSwitcher->GetActiveWidget()))
+	{
+		WidgetInputInteraction->Input_UI_Confirm();
+	}
+}
+
 void UMainMenuWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
 	CreateMatchPopup->Button_Cancel->OnClicked.AddDynamic(this, &ThisClass::HideWidgetSwitcher);
+	CreateMatchPopup->TextBox_RoomName->OnTextCommitted.AddDynamic(this, &ThisClass::OnCreateMatchPopupRoomNameTextCommitted);
 	MatchListPage->Button_Back->OnClicked.AddDynamic(this, &ThisClass::HideWidgetSwitcher);
 	
 	Button_CreateMatch->OnClicked.AddDynamic(this, &ThisClass::OnCreateMatchButtonClicked);
@@ -76,21 +88,41 @@ void UMainMenuWidget::TryShowKickReason() const
 
 void UMainMenuWidget::HideWidgetSwitcher()
 {
-	WidgetSwitcher->SetVisibility(ESlateVisibility::Collapsed);
+	WidgetSwitcher->SetActiveWidget(EmptyWidget);
+}
+
+void UMainMenuWidget::OnCreateMatchPopupRoomNameTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
+		{
+			// 제대로 입력이 들어갈 수 있도록 다시 설정
+			BasePC->SetInitialInputMode();
+			Input_UI_Confirm();
+		}
+	}
+	else if (CommitMethod == ETextCommit::OnCleared)
+	{
+		if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
+		{
+			// 제대로 입력이 들어갈 수 있도록 다시 설정
+			BasePC->SetInitialInputMode();
+			Input_UI_Back();			
+		}
+	}
 }
 
 void UMainMenuWidget::OnCreateMatchButtonClicked()
 {
 	WidgetSwitcher->SetActiveWidget(CreateMatchPopup);
 	CreateMatchPopup->InitializeWidget();
-	WidgetSwitcher->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UMainMenuWidget::OnFindMatchButtonClicked()
 {
 	WidgetSwitcher->SetActiveWidget(MatchListPage);
 	MatchListPage->InitializeWidget();
-	WidgetSwitcher->SetVisibility(ESlateVisibility::Visible);
 }
 
 void UMainMenuWidget::OnSettingsButtonClicked()

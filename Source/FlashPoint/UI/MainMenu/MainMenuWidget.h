@@ -7,6 +7,7 @@
 #include "Blueprint/UserWidget.h"
 #include "MainMenuWidget.generated.h"
 
+class USizeBox;
 class UMessagePopup;
 class UWidgetSwitcher;
 class UMatchListPage;
@@ -24,6 +25,7 @@ class FLASHPOINT_API UMainMenuWidget : public UUserWidget, public IWidgetInputIn
 public:
 	// Begin IWidgetInputInteraction
 	virtual void Input_UI_Back() override;
+	virtual void Input_UI_Confirm() override;
 	// End IWidgetInputInteraction
 
 protected:
@@ -38,11 +40,17 @@ private:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UWidgetSwitcher> WidgetSwitcher;
 
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<USizeBox> EmptyWidget;
+
 	UFUNCTION()
 	void HideWidgetSwitcher();
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UCreateMatchPopup> CreateMatchPopup;
+
+	UFUNCTION()
+	void OnCreateMatchPopupRoomNameTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UMatchListPage> MatchListPage;

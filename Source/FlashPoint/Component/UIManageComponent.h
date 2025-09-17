@@ -37,4 +37,5 @@ protected:
 
 private:
 	void Input_UI_Back();
+	void Input_UI_Confirm();
 };

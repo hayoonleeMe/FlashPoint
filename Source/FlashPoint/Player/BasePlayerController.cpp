@@ -16,6 +16,19 @@ ABasePlayerController::ABasePlayerController()
 	UIManageComponent = CreateDefaultSubobject<UUIManageComponent>(TEXT("UI Manage Component"));
 }
 
+void ABasePlayerController::SetInitialInputMode()
+{
+	if (UUserWidget* MainWidget = UIManageComponent->GetMainWidget())
+	{
+		// for Menu
+		FInputModeGameAndUI InputMode;
+		InputMode.SetWidgetToFocus(MainWidget->TakeWidget());
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		InputMode.SetHideCursorDuringCapture(false);
+		SetInputMode(InputMode);
+	}
+}
+
 void ABasePlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -28,17 +41,4 @@ void ABasePlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	OnInputComponentSetupDelegate.Broadcast(InputComponent);
-}
-
-void ABasePlayerController::SetInitialInputMode()
-{
-	if (UUserWidget* MainWidget = UIManageComponent->GetMainWidget())
-	{
-		// for Menu
-		FInputModeGameAndUI InputMode;
-		InputMode.SetWidgetToFocus(MainWidget->TakeWidget());
-		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
-		InputMode.SetHideCursorDuringCapture(false);
-		SetInputMode(InputMode);
-	}
 }

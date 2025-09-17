@@ -22,4 +22,5 @@ class FLASHPOINT_API IWidgetInputInteraction
 
 public:
 	virtual void Input_UI_Back() {}
+	virtual void Input_UI_Confirm() {}
 };

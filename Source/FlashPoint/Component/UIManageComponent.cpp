@@ -69,6 +69,7 @@ void UUIManageComponent::OnSetupInputComponent(UInputComponent* InputComponent)
 
 	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Back, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Back);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Confirm, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Confirm);
 }
 
 void UUIManageComponent::Input_UI_Back()
@@ -76,5 +77,13 @@ void UUIManageComponent::Input_UI_Back()
 	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(MainWidget))
 	{
 		WidgetInteraction->Input_UI_Back();
+	}
+}
+
+void UUIManageComponent::Input_UI_Confirm()
+{
+	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(MainWidget))
+	{
+		WidgetInteraction->Input_UI_Confirm();
 	}
 }

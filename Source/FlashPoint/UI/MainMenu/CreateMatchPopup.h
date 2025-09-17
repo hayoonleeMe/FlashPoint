@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WidgetInputInteraction.h"
 #include "Blueprint/UserWidget.h"
 #include "CreateMatchPopup.generated.h"
 
@@ -15,7 +16,7 @@ class UEditableTextBox;
  * Match를 생성하기 위한 입력을 받고 생성하는 팝업 위젯
  */
 UCLASS()
-class FLASHPOINT_API UCreateMatchPopup : public UUserWidget
+class FLASHPOINT_API UCreateMatchPopup : public UUserWidget, public IWidgetInputInteraction
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,10 @@ public:
 	UCreateMatchPopup(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	void InitializeWidget();
+
+	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Confirm() override;
+	// End IWidgetInputInteraction
 
 protected:
 	virtual void NativeOnInitialized() override;

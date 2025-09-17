@@ -18,6 +18,14 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SignScreen)
 
+void USignScreen::Input_UI_Confirm()
+{
+	if (IWidgetInputInteraction* WidgetInputInteraction = Cast<IWidgetInputInteraction>(WidgetSwitcher->GetActiveWidget()))
+	{
+		WidgetInputInteraction->Input_UI_Confirm();
+	}
+}
+
 void USignScreen::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
