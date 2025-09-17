@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WidgetInputInteraction.h"
 #include "Blueprint/UserWidget.h"
 #include "ConfirmSignUpPage.generated.h"
 
@@ -14,7 +15,7 @@ class UEditableTextBox;
  * Sign Up을 위한 Confirmation Code를 입력받고 수행하는 위젯
  */
 UCLASS()
-class FLASHPOINT_API UConfirmSignUpPage : public UUserWidget
+class FLASHPOINT_API UConfirmSignUpPage : public UUserWidget, public IWidgetInputInteraction
 {
 	GENERATED_BODY()
 
@@ -22,6 +23,10 @@ class FLASHPOINT_API UConfirmSignUpPage : public UUserWidget
 	
 public:
 	void InitializeWidget();
+
+	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Confirm() override;
+	// End IWidgetInputInteraction
 	
 protected:
 	virtual void NativeOnInitialized() override;
@@ -32,6 +37,9 @@ private:
 	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UEditableTextBox> TextBox_ConfirmationCode;
+
+	UFUNCTION()
+	void OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_Confirm;

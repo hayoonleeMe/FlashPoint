@@ -2,3 +2,11 @@
 
 
 #include "SuccessConfirmedPage.h"
+
+#include "Components/Button.h"
+
+void USuccessConfirmedPage::Input_UI_Confirm()
+{
+	// OK
+	Button_Ok->OnClicked.Broadcast();
+}

@@ -6,6 +6,7 @@
 #include "Components/Button.h"
 #include "Components/EditableTextBox.h"
 #include "Components/TextBlock.h"
+#include "Player/BasePlayerController.h"
 #include "System/OnlineServiceSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(SignUpPage)
@@ -21,6 +22,15 @@ void USignUpPage::InitializeWidget()
 	UpdateSignUpButtonState();
 }
 
+void USignUpPage::Input_UI_Confirm()
+{
+	// Sign Up 수행
+	if (Button_SignUp->GetIsEnabled())
+	{
+		Button_SignUp->OnClicked.Broadcast();
+	}
+}
+
 void USignUpPage::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -33,10 +43,17 @@ void USignUpPage::NativeOnInitialized()
 		}
 	}
 	
-	TextBox_Username->OnTextChanged.AddDynamic(this, &USignUpPage::OnUsernameChanged);
-	TextBox_Password->OnTextChanged.AddDynamic(this, &USignUpPage::OnPasswordChanged);
-	TextBox_ConfirmPassword->OnTextChanged.AddDynamic(this, &USignUpPage::OnConfirmPasswordChanged);
-	TextBox_Email->OnTextChanged.AddDynamic(this, &USignUpPage::OnEmailChanged);
+	TextBox_Username->OnTextChanged.AddDynamic(this, &ThisClass::OnUsernameChanged);
+	TextBox_Username->OnTextCommitted.AddDynamic(this, &ThisClass::OnTextBoxCommitted);
+	
+	TextBox_Password->OnTextChanged.AddDynamic(this, &ThisClass::OnPasswordChanged);
+	TextBox_Password->OnTextCommitted.AddDynamic(this, &ThisClass::OnTextBoxCommitted);
+	
+	TextBox_ConfirmPassword->OnTextChanged.AddDynamic(this, &ThisClass::OnConfirmPasswordChanged);
+	TextBox_ConfirmPassword->OnTextCommitted.AddDynamic(this, &ThisClass::OnTextBoxCommitted);
+	
+	TextBox_Email->OnTextChanged.AddDynamic(this, &ThisClass::OnEmailChanged);
+	TextBox_Email->OnTextCommitted.AddDynamic(this, &ThisClass::OnTextBoxCommitted);
 }
 
 void USignUpPage::UpdateSignUpButtonState()
@@ -76,6 +93,19 @@ void USignUpPage::OnConfirmPasswordChanged(const FText& Text)
 void USignUpPage::OnEmailChanged(const FText& Text)
 {
 	UpdateTextBox(Text, TextBox_Email);
+}
+
+void USignUpPage::OnTextBoxCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
+		{
+			// 제대로 입력이 들어갈 수 있도록 다시 설정
+			BasePC->SetInitialInputMode();
+			Input_UI_Confirm();
+		}
+	}
 }
 
 void USignUpPage::UpdateStatusMessage(const FString& Message, bool bShouldResetWidget)

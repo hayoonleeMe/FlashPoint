@@ -16,13 +16,6 @@ ABasePlayerController::ABasePlayerController()
 	UIManageComponent = CreateDefaultSubobject<UUIManageComponent>(TEXT("UI Manage Component"));
 }
 
-void ABasePlayerController::BeginPlay()
-{
-	Super::BeginPlay();
-
-	SetInitialInputMode();
-}
-
 void ABasePlayerController::SetInitialInputMode()
 {
 	if (UUserWidget* MainWidget = UIManageComponent->GetMainWidget())
@@ -34,4 +27,18 @@ void ABasePlayerController::SetInitialInputMode()
 		InputMode.SetHideCursorDuringCapture(false);
 		SetInputMode(InputMode);
 	}
+}
+
+void ABasePlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	SetInitialInputMode();
+}
+
+void ABasePlayerController::SetupInputComponent()
+{
+	Super::SetupInputComponent();
+
+	OnInputComponentSetupDelegate.Broadcast(InputComponent);
 }

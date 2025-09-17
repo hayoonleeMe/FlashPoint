@@ -26,6 +26,12 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag Jump;
 			extern FNativeGameplayTag WeaponFire;
 		}
+
+		namespace UI
+		{
+			extern FNativeGameplayTag Back;
+			extern FNativeGameplayTag Confirm;
+		}
 	}
 
 	namespace Ability

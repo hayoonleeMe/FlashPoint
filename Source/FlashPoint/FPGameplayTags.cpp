@@ -24,6 +24,12 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Jump, "Input.Action.Jump");
 			UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Input.Action.WeaponFire");
 		}
+
+		namespace UI
+		{
+			UE_DEFINE_GAMEPLAY_TAG(Back, "Input.UI.Back");
+			UE_DEFINE_GAMEPLAY_TAG(Confirm, "Input.UI.Confirm");
+		}
 	}
 
 	namespace Ability

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "WidgetInputInteraction.h"
 #include "Blueprint/UserWidget.h"
 #include "SignScreen.generated.h"
 
@@ -16,9 +17,14 @@ class UWidgetSwitcher;
  * Sign In, Sign Up을 수행할 게임 초기 화면
  */
 UCLASS()
-class FLASHPOINT_API USignScreen : public UUserWidget
+class FLASHPOINT_API USignScreen : public UUserWidget, public IWidgetInputInteraction
 {
 	GENERATED_BODY()
+
+public:
+	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Confirm() override;
+	// End IWidgetInputInteraction
 
 protected:
 	virtual void NativeOnInitialized() override;

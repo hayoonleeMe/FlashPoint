@@ -18,6 +18,7 @@ class FLASHPOINT_API UUIManageComponent : public UActorComponent
 
 public:
 	UUIManageComponent();
+	virtual void InitializeComponent() override;
 
 	UUserWidget* GetMainWidget() const { return MainWidget; }
 
@@ -26,10 +27,15 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void OnSetupInputComponent(UInputComponent* InputComponent);
 
 	UPROPERTY(EditDefaultsOnly, Category="UI")
 	TSubclassOf<UUserWidget> MainWidgetClass;
 
 	UPROPERTY()
 	TObjectPtr<UUserWidget> MainWidget;
+
+private:
+	void Input_UI_Back();
+	void Input_UI_Confirm();
 };

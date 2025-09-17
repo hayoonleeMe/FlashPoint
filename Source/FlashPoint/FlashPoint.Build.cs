@@ -27,6 +27,7 @@ public class FlashPoint : ModuleRules
 			"NetCore",
 			"Niagara",
 			"UMG",
+			"Slate",
 			"SlateCore",
 			"OnlineService",
 		});
