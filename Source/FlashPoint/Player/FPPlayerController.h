@@ -3,23 +3,25 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "BasePlayerController.h"
 #include "GameplayTagContainer.h"
-#include "GameFramework/PlayerController.h"
 #include "FPPlayerController.generated.h"
 
 class UFPAbilitySystemComponent;
 struct FInputActionValue;
 
 /**
- * 
+ * 게임플레이에서 사용할 PlayerController
  */
 UCLASS()
-class FLASHPOINT_API AFPPlayerController : public APlayerController
+class FLASHPOINT_API AFPPlayerController : public ABasePlayerController
 {
 	GENERATED_BODY()
 
 public:
 	AFPPlayerController();
+
+	virtual void SetInitialInputMode() override;
 	
 protected:
 	virtual void BeginPlay() override;

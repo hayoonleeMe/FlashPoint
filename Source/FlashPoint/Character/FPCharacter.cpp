@@ -30,16 +30,12 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	bUseControllerRotationYaw = true;
 	bUseControllerRotationRoll = false;
 	
-	GetCharacterMovement()->bOrientRotationToMovement = false;
-	GetCharacterMovement()->bUseControllerDesiredRotation = false;
-	GetCharacterMovement()->bAllowPhysicsRotationDuringAnimRootMotion = false;
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
+	GetCharacterMovement()->MaxWalkSpeed = 360.f;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 250.f;
 	GetCharacterMovement()->GravityScale = 1.2f;
 	GetCharacterMovement()->MaxAcceleration = 2400.f;
 	GetCharacterMovement()->BrakingFrictionFactor = 1.f;
 	GetCharacterMovement()->BrakingFriction = 6.f;
-	GetCharacterMovement()->GroundFriction = 8.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 1400.f;
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->RotationRate.Yaw = 720.f;
