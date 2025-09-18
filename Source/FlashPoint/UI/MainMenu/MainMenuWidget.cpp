@@ -23,9 +23,16 @@ void UMainMenuWidget::Input_UI_Back()
 		// MessagePopup 표시중이면 닫기
 		OnMessagePopupCloseButtonClicked();
 	}
+	else if (WidgetSwitcher->GetActiveWidget() == CreateMatchPopup)
+	{
+		// CreateMatchPopup에서 Cancel 할 수 있을 때 닫기
+		if (CreateMatchPopup->Button_Cancel->GetIsEnabled())
+		{
+			HideWidgetSwitcher();
+		}
+	}
 	else
 	{
-		// 열려있는 CreateMatchPopup 또는 MatchListPage 닫기
 		HideWidgetSwitcher();
 	}
 }
