@@ -5,12 +5,12 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "FPGameplayTags.h"
-#include "WidgetInputInteraction.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/FPInputData.h"
 #include "Input/FPInputComponent.h"
 #include "Player/BasePlayerController.h"
 #include "System/FPAssetManager.h"
+#include "UI/WidgetInputInteraction.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(UIManageComponent)
 

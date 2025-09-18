@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "WidgetInputInteraction.h"
 #include "Blueprint/UserWidget.h"
+#include "UI/WidgetInputInteraction.h"
 #include "ConfirmSignUpPage.generated.h"
 
 class UTextBlock;
