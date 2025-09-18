@@ -14,7 +14,7 @@ void UFPAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActo
 	check(ActorInfo);
 	check(InOwnerActor);
 
-	bool bHasNewAvatarPawn = InAvatarActor->IsA<APawn>() && InAvatarActor != ActorInfo->AvatarActor;
+	bool bHasNewAvatarPawn = IsValid(InAvatarActor) && InAvatarActor->IsA<APawn>() && InAvatarActor != ActorInfo->AvatarActor;
 	
 	Super::InitAbilityActorInfo(InOwnerActor, InAvatarActor);
 
