@@ -36,75 +36,77 @@ void ABaseGameMode::PreLogin(const FString& Options, const FString& Address, con
 FString ABaseGameMode::InitNewPlayer(APlayerController* NewPlayerController, const FUniqueNetIdRepl& UniqueId, const FString& Options, const FString& Portal)
 {
 	// PreLogin()이 성공적으로 수행되어 Player Session이 Accept 된 후, 플레이어의 NewPlayerController가 생성된 후에 호출된다.
-	FString RetValue = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
-
-	// 로그인에 성공했으므로 접속한 플레이어 수를 설정
-	++MatchInfo.CurrentPlayers;
+	// 플레이어가 해당 서버로 클라이언트로 들어오는 경우에만 호출된다.
+	// 이 시점에서 PlayerController와 PlayerState는 모두 유효
+	check(NewPlayerController);
 
 	// 해당 서버로 접속할 때 사용한 URL의 옵션 데이터를 가져온다.
 	const FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("PlayerSessionId"));
 	const FString Username = UGameplayStatics::ParseOption(Options, TEXT("Username"));
-
-	if (NewPlayerController)
+	
+	if (ABasePlayerState* BasePS = NewPlayerController->GetPlayerState<ABasePlayerState>())
 	{
-		if (ABasePlayerState* BasePS = NewPlayerController->GetPlayerState<ABasePlayerState>())
-		{
-			// 추후 PlayerSession을 제거하기 위해 저장
-			BasePS->SetServerPlayerSessionId(PlayerSessionId);
-			BasePS->SetServerUsername(Username);
+		// 추후 PlayerSession을 제거하기 위해 저장
+		BasePS->SetServerPlayerSessionId(PlayerSessionId);
+		BasePS->SetServerUsername(Username);
 
-			// 플레이어의 팀이 변경될 때 PlayerInfoArray와 위젯을 업데이트하도록 등록
-			BasePS->OnServerPlayerTeamChangedDelegate.AddUObject(this, &ThisClass::OnPlayerTeamChanged);
-			
-			if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
-			{
-				// TDM이라면 플레이어의 팀을 선택하고, 배열에 추가해 관리
-				ChoosePlayerTeam(BasePS);
-				BaseGS->AddPlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
-			}
+		// 플레이어의 팀이 변경될 때 PlayerInfoArray와 위젯을 업데이트하도록 등록
+		BasePS->OnServerPlayerTeamChangedDelegate.AddUObject(this, &ThisClass::OnPlayerTeamChanged);
+		
+		if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
+		{
+			// TDM이라면 플레이어의 팀을 선택하고, 배열에 추가해 관리
+			ChoosePlayerTeam(BasePS);
+			BaseGS->AddPlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
 		}
 	}
+	
+	// 부모 클래스에서 검사
+	FString ErrorMessage = Super::InitNewPlayer(NewPlayerController, UniqueId, Options, Portal);
+	if (ErrorMessage.IsEmpty())
+	{
+		// 로그인에 성공했을 때 접속한 플레이어 수를 업데이트
+		++MatchInfo.CurrentPlayers;
+	}
 		
-	return RetValue;
+	return ErrorMessage;
 }
 
 void ABaseGameMode::Logout(AController* Exiting)
 {
-	Super::Logout(Exiting);
-
-	if (!Exiting)
+	if (Exiting)
 	{
-		return;
-	}
-	
-	if (ABasePlayerState* BasePS = Exiting->GetPlayerState<ABasePlayerState>())
-	{
-		if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
+		if (ABasePlayerState* BasePS = Exiting->GetPlayerState<ABasePlayerState>())
 		{
-			// GameLift GameSession에 등록한 PlayerSession을 제거
-			OnlineServiceSubsystem->RemovePlayerSession(BasePS->GetServerPlayerSessionId());
-
-			if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
+			if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
 			{
-				if (MatchInfo.MatchMode == EMatchMode::TeamDeathMatch)
+				// GameLift GameSession에 등록한 PlayerSession을 제거
+				OnlineServiceSubsystem->RemovePlayerSession(BasePS->GetServerPlayerSessionId());
+
+				if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
 				{
-					RedTeamPlayers.Remove(BasePS);
-					BlueTeamPlayers.Remove(BasePS);
+					if (MatchInfo.MatchMode == EMatchMode::TeamDeathMatch)
+					{
+						RedTeamPlayers.Remove(BasePS);
+						BlueTeamPlayers.Remove(BasePS);
+					}
+
+					// 배열에서 제거
+					BaseGS->RemovePlayerInfo(BasePS->GetServerUsername());
 				}
 
-				// 배열에서 제거
-				BaseGS->RemovePlayerInfo(BasePS->GetServerUsername());
+				const bool bIsHost = MatchInfo.HostId == BasePS->GetServerUsername();
+				if (bIsHost)
+				{
+					// 방장이 나가면 GameSession 제거
+					// 이후 모든 플레이어 추방
+					OnlineServiceSubsystem->TerminateGameSession(MatchInfo.GameSessionId);
+				}
 			}
+		}	
+	}
 
-			const bool bIsHost = MatchInfo.HostId == BasePS->GetServerUsername();
-			if (bIsHost)
-			{
-				// 방장이 나가면 GameSession 제거
-				// 이후 모든 플레이어 추방
-				OnlineServiceSubsystem->TerminateGameSession(MatchInfo.GameSessionId);
-			}
-		}
-	}	
+	Super::Logout(Exiting);
 }
 
 void ABaseGameMode::PostSeamlessTravel()
@@ -132,6 +134,16 @@ void ABaseGameMode::PostSeamlessTravel()
 			if (ABasePlayerState* BasePS = Cast<ABasePlayerState>(PS))
 			{
 				BaseGS->AddPlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
+
+				// 팀 정보 유지
+				if (BasePS->GetTeam() == ETeam::RedTeam)
+				{
+					RedTeamPlayers.Add(BasePS);
+				}
+				else if (BasePS->GetTeam() == ETeam::BlueTeam)
+				{
+					BlueTeamPlayers.Add(BasePS);
+				}
 			}
 		}
 	}
