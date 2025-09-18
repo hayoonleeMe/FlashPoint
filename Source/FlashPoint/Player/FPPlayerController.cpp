@@ -17,7 +17,12 @@
 
 AFPPlayerController::AFPPlayerController()
 {
-	bReplicates = true;
+	bShowMouseCursor = false;
+}
+
+void AFPPlayerController::SetInitialInputMode()
+{
+	SetInputMode(FInputModeGameOnly());
 }
 
 void AFPPlayerController::BeginPlay()

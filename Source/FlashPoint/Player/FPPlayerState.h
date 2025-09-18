@@ -4,17 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
-#include "GameFramework/PlayerState.h"
+#include "BasePlayerState.h"
 #include "FPPlayerState.generated.h"
 
 class UFPAttributeSet;
 class UFPAbilitySystemComponent;
 
 /**
- * 
+ * 게임플레이에서 사용할 PlayerState
  */
 UCLASS()
-class FLASHPOINT_API AFPPlayerState : public APlayerState, public IAbilitySystemInterface
+class FLASHPOINT_API AFPPlayerState : public ABasePlayerState, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
