@@ -72,7 +72,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void OnSetupInputComponent(UInputComponent* InputComponent);
 
 private:
 	// HUD Layer의 메인 위젯 클래스
@@ -86,7 +85,12 @@ private:
 
 	// 우선순위가 가장 높은 최상단 위젯을 반환한다.
 	UUserWidget* GetTopWidget() const;
+
+	// ============================================================================
+	// Input 
+	// ============================================================================
 	
+	void OnSetupInputComponent(UInputComponent* InputComponent);
 	void Input_UI_Back();
 	void Input_UI_Confirm();
 };

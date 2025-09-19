@@ -76,10 +76,22 @@ void UUIManageComponent::RemoveWidgets(EWidgetLayer WidgetLayer, const TSubclass
 	{
 		if (FActiveWidgetArray* ActiveWidgetArray = ActiveWidgetMap.Find(WidgetLayer))
 		{
+			// WidgetClass 타입인지 체크
 			auto Predicate = [&WidgetClass](const UUserWidget* Target) -> bool
 			{
 				return Target && Target->IsA(WidgetClass);
 			};
+
+			// 우선 화면에서 제거
+			for (UUserWidget* Widget : ActiveWidgetArray->Widgets)
+			{
+				if (Predicate(Widget))
+				{
+					Widget->RemoveFromParent();
+				}
+			}
+
+			// 배열에서 제거
 			ActiveWidgetArray->Widgets.RemoveAll(Predicate);
 		}
 	}
@@ -97,6 +109,7 @@ void UUIManageComponent::RemoveWidget(EWidgetLayer WidgetLayer, UUserWidget* Wid
 		{
 			if (!ActiveWidgetArray->Widgets.IsEmpty())
 			{
+				WidgetToRemove->RemoveFromParent();
 				if (WidgetToRemove == ActiveWidgetArray->Widgets.Last())
 				{
 					ActiveWidgetArray->Widgets.Pop();
@@ -137,16 +150,6 @@ void UUIManageComponent::BeginPlay()
 	}
 }
 
-void UUIManageComponent::OnSetupInputComponent(UInputComponent* InputComponent)
-{
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
-	check(InputData);
-
-	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Back, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Back);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Confirm, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Confirm);
-}
-
 UUserWidget* UUIManageComponent::GetTopWidget() const
 {
 	for (int32 Index = static_cast<int32>(EWidgetLayer::MAX) - 1; Index >= 0; --Index)
@@ -161,6 +164,16 @@ UUserWidget* UUIManageComponent::GetTopWidget() const
 		}
 	}
 	return nullptr;
+}
+
+void UUIManageComponent::OnSetupInputComponent(UInputComponent* InputComponent)
+{
+	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	check(InputData);
+
+	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Back, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Back);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Confirm, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Confirm);
 }
 
 void UUIManageComponent::Input_UI_Back()

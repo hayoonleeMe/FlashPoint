@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/OnlineServiceTypes.h"
+#include "UI/WidgetInputInteraction.h"
 #include "MatchListPage.generated.h"
 
 class UTextBlock;
@@ -18,17 +19,21 @@ class UListView;
  * 매치를 선택해 Join 할 수 있다.
  */
 UCLASS()
-class FLASHPOINT_API UMatchListPage : public UUserWidget
+class FLASHPOINT_API UMatchListPage : public UUserWidget, public IWidgetInputInteraction
 {
 	GENERATED_BODY()
 
-	friend class UMainMenuWidget;
-
 public:
-	void InitializeWidget();
+	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Back() override;
+	virtual void Input_UI_Confirm() override;
+	// End IWidgetInputInteraction
 	
 protected:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
+	
+	void InitializeWidget();
 
 private:
 	void OnDescribeGameSessionsSucceeded(const TArray<FGameSessionInfo>& GameSessionInfos);

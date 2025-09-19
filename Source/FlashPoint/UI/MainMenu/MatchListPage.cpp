@@ -5,6 +5,7 @@
 
 #include "MatchListEntry.h"
 #include "MatchListObject.h"
+#include "Component/UIManageComponent.h"
 #include "Components/Button.h"
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
@@ -14,18 +15,18 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MatchListPage)
 
-void UMatchListPage::InitializeWidget()
+void UMatchListPage::Input_UI_Back()
 {
-	ListView->ClearListItems();
-	UnselectMatchList();
-	
-	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
+	// Back 수행
+	Button_Back->OnClicked.Broadcast();
+}
+
+void UMatchListPage::Input_UI_Confirm()
+{
+	// Join 수행
+	if (Button_Join->GetIsEnabled())
 	{
-		if (!OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.IsBoundToObject(this))
-		{
-			OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.AddUObject(this, &ThisClass::OnJoinSucceeded);
-		}
-		OnlineServiceSubsystem->DescribeGameSessions();
+		Button_Join->OnClicked.Broadcast();
 	}
 }
 
@@ -33,26 +34,44 @@ void UMatchListPage::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
-	{
-		if (!OnlineServiceSubsystem->DescribeGameSessionsStatusMessageDelegate.IsBoundToObject(this))
-		{
-			OnlineServiceSubsystem->DescribeGameSessionsStatusMessageDelegate.AddUObject(this, &ThisClass::UpdateRefreshStatusMessage);
-		}
-		if (!OnlineServiceSubsystem->CreatePlayerSessionStatusMessageDelegate.IsBoundToObject(this))
-		{
-			OnlineServiceSubsystem->CreatePlayerSessionStatusMessageDelegate.AddUObject(this, &ThisClass::UpdateJoinStatusMessage);
-		}
-		if (!OnlineServiceSubsystem->OnDescribeGameSessionsSucceededDelegate.IsBoundToObject(this))
-		{
-			OnlineServiceSubsystem->OnDescribeGameSessionsSucceededDelegate.AddUObject(this, &ThisClass::OnDescribeGameSessionsSucceeded);
-		}
-	}
-
 	ListView->OnItemClicked().AddUObject(this, &ThisClass::OnMatchListItemClicked);
 	Button_Join->OnClicked.AddDynamic(this, &ThisClass::OnJoinButtonClicked);
 	Button_Back->OnClicked.AddDynamic(this, &ThisClass::OnBackButtonClicked);
 	Button_Refresh->OnClicked.AddDynamic(this, &ThisClass::OnRefreshButtonClicked);
+
+	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
+	{
+		OnlineServiceSubsystem->DescribeGameSessionsStatusMessageDelegate.AddUObject(this, &ThisClass::UpdateRefreshStatusMessage);
+		OnlineServiceSubsystem->CreatePlayerSessionStatusMessageDelegate.AddUObject(this, &ThisClass::UpdateJoinStatusMessage);
+		OnlineServiceSubsystem->OnDescribeGameSessionsSucceededDelegate.AddUObject(this, &ThisClass::OnDescribeGameSessionsSucceeded);
+		OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.AddUObject(this, &ThisClass::OnJoinSucceeded);
+	}
+
+	InitializeWidget();
+}
+
+void UMatchListPage::NativeDestruct()
+{
+	Super::NativeDestruct();
+
+	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
+	{
+		OnlineServiceSubsystem->DescribeGameSessionsStatusMessageDelegate.RemoveAll(this);
+		OnlineServiceSubsystem->CreatePlayerSessionStatusMessageDelegate.RemoveAll(this);
+		OnlineServiceSubsystem->OnDescribeGameSessionsSucceededDelegate.RemoveAll(this);
+		OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.RemoveAll(this);
+	}
+}
+
+void UMatchListPage::InitializeWidget()
+{
+	ListView->ClearListItems();
+	UnselectMatchList();
+	
+	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
+	{
+		OnlineServiceSubsystem->DescribeGameSessions();
+	}
 }
 
 void UMatchListPage::OnDescribeGameSessionsSucceeded(const TArray<FGameSessionInfo>& GameSessionInfos)
@@ -129,9 +148,9 @@ void UMatchListPage::OnJoinSucceeded(const FString& URL)
 
 void UMatchListPage::OnBackButtonClicked()
 {
-	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
+	if (UUIManageComponent* UIManageComponent = UUIManageComponent::Get(GetOwningPlayer()))
 	{
-		OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.RemoveAll(this);
+		UIManageComponent->RemoveWidget(EWidgetLayer::Menu, this);
 	}
 }
 

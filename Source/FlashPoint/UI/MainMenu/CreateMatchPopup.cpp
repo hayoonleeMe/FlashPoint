@@ -3,11 +3,13 @@
 
 #include "CreateMatchPopup.h"
 
+#include "Component/UIManageComponent.h"
 #include "Components/Button.h"
 #include "Components/ComboBoxString.h"
 #include "Components/EditableTextBox.h"
 #include "Components/TextBlock.h"
 #include "Data/MatchTypes.h"
+#include "Player/BasePlayerController.h"
 #include "System/OnlineServiceSubsystem.h"
 #include "System/PlayerAuthSubsystem.h"
 
@@ -22,8 +24,34 @@ UCreateMatchPopup::UCreateMatchPopup(const FObjectInitializer& ObjectInitializer
 	FFAPlayerCountOptions = { 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 }
 
-void UCreateMatchPopup::InitializeWidget()
+void UCreateMatchPopup::Input_UI_Back()
 {
+	// Cancel 수행
+	if (Button_Cancel->GetIsEnabled())
+	{
+		Button_Cancel->OnClicked.Broadcast();
+	}
+}
+
+void UCreateMatchPopup::Input_UI_Confirm()
+{
+	// Create 수행
+	if (Button_Create->GetIsEnabled())
+	{
+		Button_Create->OnClicked.Broadcast();
+	}
+}
+
+void UCreateMatchPopup::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	ComboBox_MatchMode->OnSelectionChanged.AddDynamic(this, &ThisClass::OnMatchModeOptionChanged);
+	TextBox_RoomName->OnTextChanged.AddDynamic(this, &ThisClass::UpdateCreateButtonState);
+	TextBox_RoomName->OnTextCommitted.AddDynamic(this, &ThisClass::OnRoomNameTextCommitted);
+	Button_Create->OnClicked.AddDynamic(this, &ThisClass::OnCreateButtonClicked);
+	Button_Cancel->OnClicked.AddDynamic(this, &ThisClass::OnCancelButtonClicked);
+
 	TextBox_RoomName->SetText(FText::GetEmpty());
 	Text_StatusMessage->SetText(FText::GetEmpty());
 
@@ -45,29 +73,20 @@ void UCreateMatchPopup::InitializeWidget()
 
 	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
 	{
-		if (!OnlineServiceSubsystem->CreateGameSessionStatusMessageDelegate.IsBoundToObject(this))
-		{
-			OnlineServiceSubsystem->CreateGameSessionStatusMessageDelegate.AddUObject(this, &ThisClass::UpdateStatusMessage);	
-		}
+		OnlineServiceSubsystem->CreateGameSessionStatusMessageDelegate.AddUObject(this, &ThisClass::UpdateStatusMessage);	
+		OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.AddUObject(this, &ThisClass::OnCreateMatchSucceeded);
 	}
 }
 
-void UCreateMatchPopup::Input_UI_Confirm()
+void UCreateMatchPopup::NativeDestruct()
 {
-	// Create 수행
-	if (Button_Create->GetIsEnabled())
+	Super::NativeDestruct();
+
+	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
 	{
-		Button_Create->OnClicked.Broadcast();
+		OnlineServiceSubsystem->CreateGameSessionStatusMessageDelegate.RemoveAll(this);
+		OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.RemoveAll(this);
 	}
-}
-
-void UCreateMatchPopup::NativeOnInitialized()
-{
-	Super::NativeOnInitialized();
-
-	ComboBox_MatchMode->OnSelectionChanged.AddDynamic(this, &ThisClass::OnMatchModeOptionChanged);
-	TextBox_RoomName->OnTextChanged.AddDynamic(this, &ThisClass::UpdateCreateButtonState);
-	Button_Create->OnClicked.AddDynamic(this, &ThisClass::OnCreateButtonClicked);
 }
 
 void UCreateMatchPopup::UpdateCreateButtonState(const FText& Text)
@@ -76,6 +95,28 @@ void UCreateMatchPopup::UpdateCreateButtonState(const FText& Text)
 	Button_Create->SetIsEnabled(bCanEnableCreateButton);
 
 	Text_StatusMessage->SetText(FText::FromString(bCanEnableCreateButton ? TEXT("") : OnlineServiceStatusMessage::CreateGameSession::InvalidRoomName));
+}
+
+void UCreateMatchPopup::OnRoomNameTextCommitted(const FText& Text, ETextCommit::Type CommitMethod)
+{
+	if (CommitMethod == ETextCommit::OnEnter)
+	{
+		if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
+		{
+			// 제대로 입력이 들어갈 수 있도록 다시 설정
+			BasePC->SetInitialInputMode();
+			Input_UI_Confirm();
+		}
+	}
+	else if (CommitMethod == ETextCommit::OnCleared)
+	{
+		if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
+		{
+			// 제대로 입력이 들어갈 수 있도록 다시 설정
+			BasePC->SetInitialInputMode();
+			Input_UI_Back();			
+		}
+	}
 }
 
 void UCreateMatchPopup::OnMatchModeOptionChanged(FString SelectedItem, ESelectInfo::Type SelectionType)
@@ -106,11 +147,6 @@ void UCreateMatchPopup::OnCreateButtonClicked()
 	{
 		if (UPlayerAuthSubsystem* PlayerAuthSubsystem = UPlayerAuthSubsystem::Get(this))
 		{
-			if (!OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.IsBoundToObject(this))
-			{
-				OnlineServiceSubsystem->OnCreatePlayerSessionSucceededDelegate.AddUObject(this, &ThisClass::OnCreateMatchSucceeded);
-			}
-			
 			const FString RoomName = TextBox_RoomName->GetText().ToString();
 			const FString MatchMode = ComboBox_MatchMode->GetSelectedOption();
 			const FString MaxPlayers = ComboBox_MaxPlayers->GetSelectedOption();
@@ -129,6 +165,14 @@ void UCreateMatchPopup::OnCreateMatchSucceeded(const FString& URL)
 	if (APlayerController* PC = GetOwningPlayer())
 	{
 		PC->ClientTravel(URL, TRAVEL_Absolute);
+	}
+}
+
+void UCreateMatchPopup::OnCancelButtonClicked()
+{
+	if (UUIManageComponent* UIManageComponent = UUIManageComponent::Get(GetOwningPlayer()))
+	{
+		UIManageComponent->RemoveWidget(EWidgetLayer::Popup, this);
 	}
 }
 

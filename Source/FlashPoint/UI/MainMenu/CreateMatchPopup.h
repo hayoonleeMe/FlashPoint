@@ -20,19 +20,17 @@ class FLASHPOINT_API UCreateMatchPopup : public UUserWidget, public IWidgetInput
 {
 	GENERATED_BODY()
 
-	friend class UMainMenuWidget;
-
 public:
 	UCreateMatchPopup(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
-	void InitializeWidget();
-
 	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Back() override;
 	virtual void Input_UI_Confirm() override;
 	// End IWidgetInputInteraction
 
 protected:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 private:
 	UFUNCTION()
@@ -40,6 +38,9 @@ private:
 	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UEditableTextBox> TextBox_RoomName;
+
+	UFUNCTION()
+	void OnRoomNameTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UComboBoxString> ComboBox_MatchMode;
@@ -69,6 +70,9 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_Cancel;
+
+	UFUNCTION()
+	void OnCancelButtonClicked();
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> Text_StatusMessage;
