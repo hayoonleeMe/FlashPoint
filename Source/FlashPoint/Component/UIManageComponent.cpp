@@ -5,6 +5,7 @@
 
 #include "EnhancedInputSubsystems.h"
 #include "FPGameplayTags.h"
+#include "FPLogChannels.h"
 #include "Blueprint/UserWidget.h"
 #include "Data/FPInputData.h"
 #include "Input/FPInputComponent.h"
@@ -13,6 +14,11 @@
 #include "UI/WidgetInputInteraction.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(UIManageComponent)
+
+UUIManageComponent* UUIManageComponent::Get(const APlayerController* OwningPC)
+{
+	return OwningPC ? OwningPC->FindComponentByClass<UUIManageComponent>() : nullptr;
+}
 
 UUIManageComponent::UUIManageComponent()
 {
@@ -29,22 +35,91 @@ void UUIManageComponent::InitializeComponent()
 	}
 }
 
+UUserWidget* UUIManageComponent::GetMainHUDWidget() const
+{
+	if (const FActiveWidgetArray* Array = ActiveWidgetMap.Find(EWidgetLayer::HUD))
+	{
+		for (UUserWidget* Widget : Array->Widgets)
+		{
+			if (Widget->IsA(MainHUDWidgetClass))
+			{
+				return Widget;
+			}
+		}
+	}
+	return nullptr;
+}
+
+UUserWidget* UUIManageComponent::AddWidget(EWidgetLayer WidgetLayer, const TSubclassOf<UUserWidget>& WidgetClass)
+{
+	if (WidgetLayer != EWidgetLayer::MAX && WidgetClass)
+	{
+		if (APlayerController* PC = GetOwner<APlayerController>())
+		{
+			UUserWidget* Widget = CreateWidget<UUserWidget>(PC, WidgetClass);
+			Widget->AddToViewport(static_cast<int32>(WidgetLayer));
+
+			FActiveWidgetArray& ActiveWidgetStack = ActiveWidgetMap.FindOrAdd(WidgetLayer);
+			ActiveWidgetStack.Widgets.Add(Widget);
+					
+			return Widget;
+		}
+	}
+			
+	UE_LOG(LogFP, Error, TEXT("[%hs] Invalid WidgetLayer or WidgetClass."), __FUNCTION__);
+	return nullptr;
+}
+
+void UUIManageComponent::RemoveWidgets(EWidgetLayer WidgetLayer, const TSubclassOf<UUserWidget>& WidgetClass)
+{
+	if (WidgetLayer != EWidgetLayer::MAX && WidgetClass)
+	{
+		if (FActiveWidgetArray* ActiveWidgetArray = ActiveWidgetMap.Find(WidgetLayer))
+		{
+			auto Predicate = [&WidgetClass](const UUserWidget* Target) -> bool
+			{
+				return Target && Target->IsA(WidgetClass);
+			};
+			ActiveWidgetArray->Widgets.RemoveAll(Predicate);
+		}
+	}
+	else
+	{
+		UE_LOG(LogFP, Error, TEXT("[%hs] Invalid WidgetLayer or WidgetClass."), __FUNCTION__);
+	}
+}
+
+void UUIManageComponent::RemoveWidget(EWidgetLayer WidgetLayer, UUserWidget* WidgetToRemove)
+{
+	if (WidgetLayer != EWidgetLayer::MAX && WidgetToRemove)
+	{
+		if (FActiveWidgetArray* ActiveWidgetArray = ActiveWidgetMap.Find(WidgetLayer))
+		{
+			if (!ActiveWidgetArray->Widgets.IsEmpty())
+			{
+				if (WidgetToRemove == ActiveWidgetArray->Widgets.Last())
+				{
+					ActiveWidgetArray->Widgets.Pop();
+				}
+				else
+				{
+					ActiveWidgetArray->Widgets.Remove(WidgetToRemove);
+				}
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogFP, Error, TEXT("[%hs] Invalid WidgetLayer or WidgetToRemove."), __FUNCTION__);
+	}
+}
+
 void UUIManageComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
 	// UI
-	if (MainWidgetClass)
-	{
-		if (APlayerController* PC = Cast<APlayerController>(GetOwner()))
-		{
-			if (PC->IsLocalController())
-			{
-				MainWidget = CreateWidget(PC, MainWidgetClass);
-				MainWidget->AddToViewport();
-			}
-		}
-	}
+	AddWidget(EWidgetLayer::HUD, MainHUDWidgetClass);
 
 	// UI Input
 	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
@@ -72,9 +147,25 @@ void UUIManageComponent::OnSetupInputComponent(UInputComponent* InputComponent)
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Confirm, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Confirm);
 }
 
+UUserWidget* UUIManageComponent::GetTopWidget() const
+{
+	for (int32 Index = static_cast<int32>(EWidgetLayer::MAX) - 1; Index >= 0; --Index)
+	{
+		EWidgetLayer WidgetLayer = static_cast<EWidgetLayer>(Index);
+		if (const FActiveWidgetArray* ActiveWidgetArray = ActiveWidgetMap.Find(WidgetLayer))
+		{
+			if (!ActiveWidgetArray->Widgets.IsEmpty())
+			{
+				return ActiveWidgetArray->Widgets.Last();
+			}
+		}
+	}
+	return nullptr;
+}
+
 void UUIManageComponent::Input_UI_Back()
 {
-	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(MainWidget))
+	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(GetTopWidget()))
 	{
 		WidgetInteraction->Input_UI_Back();
 	}
@@ -82,7 +173,7 @@ void UUIManageComponent::Input_UI_Back()
 
 void UUIManageComponent::Input_UI_Confirm()
 {
-	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(MainWidget))
+	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(GetTopWidget()))
 	{
 		WidgetInteraction->Input_UI_Confirm();
 	}

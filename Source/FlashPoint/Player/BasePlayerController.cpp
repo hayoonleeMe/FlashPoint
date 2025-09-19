@@ -18,11 +18,11 @@ ABasePlayerController::ABasePlayerController()
 
 void ABasePlayerController::SetInitialInputMode()
 {
-	if (UUserWidget* MainWidget = UIManageComponent->GetMainWidget())
+	if (UUserWidget* MainHUDWidget = UIManageComponent->GetMainHUDWidget())
 	{
 		// for Menu
 		FInputModeGameAndUI InputMode;
-		InputMode.SetWidgetToFocus(MainWidget->TakeWidget());
+		InputMode.SetWidgetToFocus(MainHUDWidget->TakeWidget());
 		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 		InputMode.SetHideCursorDuringCapture(false);
 		SetInputMode(InputMode);
