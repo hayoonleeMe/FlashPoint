@@ -4,12 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
-#include "UI/WidgetInputInteraction.h"
 #include "MainMenuWidget.generated.h"
 
-class USizeBox;
 class UMessagePopup;
-class UWidgetSwitcher;
 class UMatchListPage;
 class UCreateMatchPopup;
 class UButton;
@@ -18,19 +15,12 @@ class UButton;
  * Main Menu를 표시하는 위젯
  */
 UCLASS()
-class FLASHPOINT_API UMainMenuWidget : public UUserWidget, public IWidgetInputInteraction
+class FLASHPOINT_API UMainMenuWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-public:
-	// Begin IWidgetInputInteraction
-	virtual void Input_UI_Back() override;
-	virtual void Input_UI_Confirm() override;
-	// End IWidgetInputInteraction
-
 protected:
 	virtual void NativeOnInitialized() override;
-	virtual void NativePreConstruct() override;
 	virtual void NativeConstruct() override;
 
 private:
@@ -38,34 +28,22 @@ private:
 	void TryShowKickReason() const;
 	
 	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UWidgetSwitcher> WidgetSwitcher;
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<USizeBox> EmptyWidget;
-
-	UFUNCTION()
-	void HideWidgetSwitcher();
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UCreateMatchPopup> CreateMatchPopup;
-
-	UFUNCTION()
-	void OnCreateMatchPopupRoomNameTextCommitted(const FText& Text, ETextCommit::Type CommitMethod);
-
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UMatchListPage> MatchListPage;
-	
-	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_CreateMatch;
 
 	UFUNCTION()
 	void OnCreateMatchButtonClicked();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UCreateMatchPopup> CreateMatchPopupClass;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_FindMatch;
 
 	UFUNCTION()
 	void OnFindMatchButtonClicked();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UMatchListPage> MatchListPageClass;
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_Settings;
@@ -79,14 +57,9 @@ private:
 	UFUNCTION()
 	void OnQuitButtonClicked();
 
-	UPROPERTY(meta=(BindWidget))
-	TObjectPtr<UMessagePopup> MessagePopup;
-
-	UFUNCTION()
-	void OnMessagePopupCloseButtonClicked();
-
-	void ShowMessagePopup(bool bShow) const;
-
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UMessagePopup> MessagePopupClass;
+	
 	// 로비에서 퇴장당했을 때 MessagePopup Title에 표시할 문자열
 	static constexpr const TCHAR* DisconnectedText = TEXT("Disconnected");
 };

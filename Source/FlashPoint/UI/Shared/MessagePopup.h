@@ -5,10 +5,9 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/Button.h"
+#include "UI/WidgetInputInteraction.h"
 #include "MessagePopup.generated.h"
 
-class USizeBox;
-class FOnButtonClickedEvent;
 class UButton;
 class UTextBlock;
 
@@ -16,16 +15,21 @@ class UTextBlock;
  * Text와 Close Button으로 구성되는 간단한 팝업 위젯
  */
 UCLASS()
-class FLASHPOINT_API UMessagePopup : public UUserWidget
+class FLASHPOINT_API UMessagePopup : public UUserWidget, public IWidgetInputInteraction
 {
 	GENERATED_BODY()
 	
 public:
+	// Begin IWidgetInputInteraction
+	virtual void Input_UI_Back() override;
+	// End IWidgetInputInteraction
+	
 	void SetTitleText(const FString& Str);
 	void SetMessageText(const FString& Str);
 
-	FOnButtonClickedEvent& OnCloseButtonClicked() const { return Button_Close->OnClicked; }
-
+protected:
+	virtual void NativeOnInitialized() override;
+	
 private:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> Text_Title;
@@ -35,4 +39,7 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_Close;
+
+	UFUNCTION()
+	void OnCloseButtonClicked();
 };
