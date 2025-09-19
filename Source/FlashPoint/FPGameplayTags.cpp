@@ -16,13 +16,13 @@ namespace FPGameplayTags
 	
 	namespace Input
 	{
-		namespace Action
+		namespace Gameplay
 		{
-			UE_DEFINE_GAMEPLAY_TAG(Move, "Input.Action.Move");
-			UE_DEFINE_GAMEPLAY_TAG(Look, "Input.Action.Look");
-			UE_DEFINE_GAMEPLAY_TAG(Crouch, "Input.Action.Crouch");
-			UE_DEFINE_GAMEPLAY_TAG(Jump, "Input.Action.Jump");
-			UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Input.Action.WeaponFire");
+			UE_DEFINE_GAMEPLAY_TAG(Move, "Input.Gameplay.Move");
+			UE_DEFINE_GAMEPLAY_TAG(Look, "Input.Gameplay.Look");
+			UE_DEFINE_GAMEPLAY_TAG(Crouch, "Input.Gameplay.Crouch");
+			UE_DEFINE_GAMEPLAY_TAG(Jump, "Input.Gameplay.Jump");
+			UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Input.Gameplay.WeaponFire");
 		}
 
 		namespace UI

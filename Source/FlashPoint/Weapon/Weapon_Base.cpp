@@ -77,7 +77,7 @@ void AWeapon_Base::OnUnEquipped()
 	if (UFPAbilitySystemComponent* ASC = GetOwnerASC<UFPAbilitySystemComponent>())
 	{
 		// 무기 발사 입력 Flush
-		ASC->FlushPressedInput(FPGameplayTags::Input::Action::WeaponFire);
+		ASC->FlushPressedInput(FPGameplayTags::Input::Gameplay::WeaponFire);
 	}
 	
 	LinkWeaponAnimLayer(true);

@@ -18,7 +18,7 @@ namespace FPGameplayTags
 	
 	namespace Input
 	{
-		namespace Action
+		namespace Gameplay
 		{
 			extern FNativeGameplayTag Move;
 			extern FNativeGameplayTag Look;
