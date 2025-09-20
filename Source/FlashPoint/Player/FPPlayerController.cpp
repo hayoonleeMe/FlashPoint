@@ -7,6 +7,7 @@
 #include "FPGameplayTags.h"
 #include "FPPlayerState.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -15,27 +16,37 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
 
-AFPPlayerController::AFPPlayerController()
+void AFPPlayerController::SetUIInputMode()
 {
-	bShowMouseCursor = false;
-}
-
-void AFPPlayerController::SetInitialInputMode()
-{
-	SetInputMode(FInputModeGameOnly());
-}
-
-void AFPPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
+	Super::SetUIInputMode();
 
 	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
 	check(InputData);
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		Subsystem->AddMappingContext(InputData->DefaultMappingContext, 0);
+		// 추가로, 게임플레이 중 UI Input을 활성화하면 Gameplay IMC 제거
+		Subsystem->RemoveMappingContext(InputData->GameplayMappingContext);
 	}
+}
+
+void AFPPlayerController::SetGameplayInputMode()
+{
+	Super::SetGameplayInputMode();
+
+	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	check(InputData);
+	
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(InputData->GameplayMappingContext, 0);
+		Subsystem->RemoveMappingContext(InputData->UIMappingContext);
+	}
+}
+
+void AFPPlayerController::SetInitialInputMode()
+{
+	SetGameplayInputMode();
 }
 
 void AFPPlayerController::SetupInputComponent()

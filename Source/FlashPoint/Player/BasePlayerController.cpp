@@ -34,22 +34,17 @@ void ABasePlayerController::SetUIInputMode()
 	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
 	check(InputData);
 
-	if (APlayerController* PC = GetOwner<APlayerController>())
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		if (ULocalPlayer* LocalPlayer = PC->GetLocalPlayer())
-		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-			{
-				Subsystem->AddMappingContext(InputData->UIMappingContext, 0);
-			}
-		}
+		Subsystem->AddMappingContext(InputData->UIMappingContext, 0);
 	}
 }
 
-void ABasePlayerController::SetInitialInputMode()
+void ABasePlayerController::SetGameplayInputMode()
 {
-	// 기본은 UI
-	SetUIInputMode();
+	SetInputMode(FInputModeGameOnly());
+
+	SetShowMouseCursor(false);
 }
 
 void ABasePlayerController::BeginPlay()
@@ -57,6 +52,12 @@ void ABasePlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	SetInitialInputMode();
+}
+
+void ABasePlayerController::SetInitialInputMode()
+{
+	// 기본은 UI
+	SetUIInputMode();
 }
 
 void ABasePlayerController::SetupInputComponent()
