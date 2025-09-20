@@ -13,6 +13,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Input/FPInputComponent.h"
 #include "System/FPAssetManager.h"
+#include "UI/Gameplay/PauseMenu.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
 
@@ -105,7 +106,13 @@ void AFPPlayerController::Input_Crouch()
 
 void AFPPlayerController::Input_PauseMenu()
 {
-	UE_LOG(LogTemp, Warning, TEXT("%hs"), __FUNCTION__);
+	UUserWidget* PauseMenuWidget = UIManageComponent->AddWidget(EWidgetLayer::Menu, PauseMenuClass);
+	PauseMenuWidget->OnNativeDestruct.AddLambda([this](UUserWidget* InWidget)
+	{
+		SetGameplayInputMode();
+	});
+
+	SetUIInputMode();
 }
 
 void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)

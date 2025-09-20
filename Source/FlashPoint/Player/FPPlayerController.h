@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "FPPlayerController.generated.h"
 
+class UPauseMenu;
 class UFPAbilitySystemComponent;
 struct FInputActionValue;
 
@@ -36,4 +37,7 @@ private:
 	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
 
 	UFPAbilitySystemComponent* GetFPAbilitySystemComponent() const;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPauseMenu> PauseMenuClass;
 };
