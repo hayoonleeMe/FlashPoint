@@ -3,15 +3,8 @@
 
 #include "UIManageComponent.h"
 
-#include "EnhancedInputSubsystems.h"
-#include "FPGameplayTags.h"
 #include "FPLogChannels.h"
 #include "Blueprint/UserWidget.h"
-#include "Data/FPInputData.h"
-#include "Input/FPInputComponent.h"
-#include "Player/BasePlayerController.h"
-#include "System/FPAssetManager.h"
-#include "UI/WidgetInputInteraction.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(UIManageComponent)
 
@@ -20,19 +13,20 @@ UUIManageComponent* UUIManageComponent::Get(const APlayerController* OwningPC)
 	return OwningPC ? OwningPC->FindComponentByClass<UUIManageComponent>() : nullptr;
 }
 
-UUIManageComponent::UUIManageComponent()
+UUserWidget* UUIManageComponent::GetTopWidget() const
 {
-	bWantsInitializeComponent = true;
-}
-
-void UUIManageComponent::InitializeComponent()
-{
-	Super::InitializeComponent();
-
-	if (ABasePlayerController* BasePC = GetOwner<ABasePlayerController>())
+	for (int32 Index = static_cast<int32>(EWidgetLayer::MAX) - 1; Index >= 0; --Index)
 	{
-		BasePC->OnInputComponentSetupDelegate.AddUObject(this, &ThisClass::OnSetupInputComponent);
+		EWidgetLayer WidgetLayer = static_cast<EWidgetLayer>(Index);
+		if (const FActiveWidgetArray* ActiveWidgetArray = ActiveWidgetMap.Find(WidgetLayer))
+		{
+			if (!ActiveWidgetArray->Widgets.IsEmpty())
+			{
+				return ActiveWidgetArray->Widgets.Last();
+			}
+		}
 	}
+	return nullptr;
 }
 
 UUserWidget* UUIManageComponent::GetMainHUDWidget() const
@@ -133,61 +127,4 @@ void UUIManageComponent::BeginPlay()
 
 	// UI
 	AddWidget(EWidgetLayer::HUD, MainHUDWidgetClass);
-
-	// UI Input
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
-	check(InputData);
-
-	if (APlayerController* PC = GetOwner<APlayerController>())
-	{
-		if (ULocalPlayer* LocalPlayer = PC->GetLocalPlayer())
-		{
-			if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(LocalPlayer))
-			{
-				Subsystem->AddMappingContext(InputData->UIMappingContext, 0);
-			}
-		}
-	}
-}
-
-UUserWidget* UUIManageComponent::GetTopWidget() const
-{
-	for (int32 Index = static_cast<int32>(EWidgetLayer::MAX) - 1; Index >= 0; --Index)
-	{
-		EWidgetLayer WidgetLayer = static_cast<EWidgetLayer>(Index);
-		if (const FActiveWidgetArray* ActiveWidgetArray = ActiveWidgetMap.Find(WidgetLayer))
-		{
-			if (!ActiveWidgetArray->Widgets.IsEmpty())
-			{
-				return ActiveWidgetArray->Widgets.Last();
-			}
-		}
-	}
-	return nullptr;
-}
-
-void UUIManageComponent::OnSetupInputComponent(UInputComponent* InputComponent)
-{
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
-	check(InputData);
-
-	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Back, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Back);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::UI::Confirm, ETriggerEvent::Triggered, this, &ThisClass::Input_UI_Confirm);
-}
-
-void UUIManageComponent::Input_UI_Back()
-{
-	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(GetTopWidget()))
-	{
-		WidgetInteraction->Input_UI_Back();
-	}
-}
-
-void UUIManageComponent::Input_UI_Confirm()
-{
-	if (IWidgetInputInteraction* WidgetInteraction = Cast<IWidgetInputInteraction>(GetTopWidget()))
-	{
-		WidgetInteraction->Input_UI_Confirm();
-	}
 }
