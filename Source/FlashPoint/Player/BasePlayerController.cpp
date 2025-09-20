@@ -30,11 +30,6 @@ void ABasePlayerController::SetUIInputMode()
 
 	SetShowMouseCursor(true);
 
-	// 마우스 커서를 화면 중앙에 설정
-	int32 ViewportX, ViewportY;
-	GetViewportSize(ViewportX, ViewportY);
-	SetMouseLocation(ViewportX * 0.5f, ViewportY * 0.5f);
-
 	// UI Input
 	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
 	check(InputData);

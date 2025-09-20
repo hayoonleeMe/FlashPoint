@@ -29,6 +29,11 @@ void AFPPlayerController::SetUIInputMode()
 		// 추가로, 게임플레이 중 UI Input을 활성화하면 Gameplay IMC 제거
 		Subsystem->RemoveMappingContext(InputData->GameplayMappingContext);
 	}
+	
+	// 마우스 커서를 화면 중앙에 설정
+	int32 ViewportX, ViewportY;
+	GetViewportSize(ViewportX, ViewportY);
+	SetMouseLocation(ViewportX * 0.5f, ViewportY * 0.5f);
 }
 
 void AFPPlayerController::SetGameplayInputMode()
