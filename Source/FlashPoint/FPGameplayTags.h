@@ -20,6 +20,7 @@ namespace FPGameplayTags
 	{
 		namespace Gameplay
 		{
+			extern FNativeGameplayTag PauseMenu;
 			extern FNativeGameplayTag Move;
 			extern FNativeGameplayTag Look;
 			extern FNativeGameplayTag Crouch;

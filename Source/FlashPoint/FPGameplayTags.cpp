@@ -18,6 +18,7 @@ namespace FPGameplayTags
 	{
 		namespace Gameplay
 		{
+			UE_DEFINE_GAMEPLAY_TAG(PauseMenu, "Input.Gameplay.PauseMenu");
 			UE_DEFINE_GAMEPLAY_TAG(Move, "Input.Gameplay.Move");
 			UE_DEFINE_GAMEPLAY_TAG(Look, "Input.Gameplay.Look");
 			UE_DEFINE_GAMEPLAY_TAG(Crouch, "Input.Gameplay.Crouch");

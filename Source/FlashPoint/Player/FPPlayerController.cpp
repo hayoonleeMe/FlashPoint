@@ -51,6 +51,7 @@ void AFPPlayerController::SetupInputComponent()
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::PauseMenu, ETriggerEvent::Triggered, this, &ThisClass::Input_PauseMenu);
 
 	// Bind Ability Inputs
 	FPInputComponent->BindAbilityActions(InputData, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);
@@ -89,6 +90,11 @@ void AFPPlayerController::Input_Crouch()
 	{
 		GetCharacter()->bIsCrouched ? GetCharacter()->UnCrouch() : GetCharacter()->Crouch();  
 	}
+}
+
+void AFPPlayerController::Input_PauseMenu()
+{
+	UE_LOG(LogTemp, Warning, TEXT("%hs"), __FUNCTION__);
 }
 
 void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)
