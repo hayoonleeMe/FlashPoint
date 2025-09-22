@@ -46,21 +46,28 @@ UUserWidget* UUIManageComponent::GetMainHUDWidget() const
 
 UUserWidget* UUIManageComponent::AddWidget(EWidgetLayer WidgetLayer, const TSubclassOf<UUserWidget>& WidgetClass)
 {
-	if (WidgetLayer != EWidgetLayer::MAX && WidgetClass)
+	if (APlayerController* PC = GetOwner<APlayerController>())
 	{
-		if (APlayerController* PC = GetOwner<APlayerController>())
+		if (PC->IsLocalController())
 		{
-			UUserWidget* Widget = CreateWidget<UUserWidget>(PC, WidgetClass);
-			Widget->AddToViewport(static_cast<int32>(WidgetLayer));
+			if (WidgetLayer != EWidgetLayer::MAX && WidgetClass)
+			{
+				if (UUserWidget* Widget = CreateWidget<UUserWidget>(PC, WidgetClass))
+				{
+					Widget->AddToViewport(static_cast<int32>(WidgetLayer));
 
-			FActiveWidgetArray& ActiveWidgetStack = ActiveWidgetMap.FindOrAdd(WidgetLayer);
-			ActiveWidgetStack.Widgets.Add(Widget);
-					
-			return Widget;
+					FActiveWidgetArray& ActiveWidgetStack = ActiveWidgetMap.FindOrAdd(WidgetLayer);
+					ActiveWidgetStack.Widgets.Add(Widget);
+							
+					return Widget;
+				}
+			}
+			else
+			{
+				UE_LOG(LogFP, Error, TEXT("[%hs] Invalid WidgetLayer or WidgetClass."), __FUNCTION__);
+			}
 		}
 	}
-			
-	UE_LOG(LogFP, Error, TEXT("[%hs] Invalid WidgetLayer or WidgetClass."), __FUNCTION__);
 	return nullptr;
 }
 
