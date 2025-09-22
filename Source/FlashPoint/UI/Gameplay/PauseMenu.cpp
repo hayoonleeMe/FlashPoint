@@ -8,6 +8,8 @@
 #include "Components/Button.h"
 #include "System/FPAssetManager.h"
 
+#include UE_INLINE_GENERATED_CPP_BY_NAME(PauseMenu)
+
 void UPauseMenu::Input_UI_Back()
 {
 	// Resume 수행
