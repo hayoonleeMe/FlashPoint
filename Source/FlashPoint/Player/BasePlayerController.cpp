@@ -21,6 +21,13 @@ ABasePlayerController::ABasePlayerController()
 	UIManageComponent = CreateDefaultSubobject<UUIManageComponent>(TEXT("UI Manage Component"));
 }
 
+void ABasePlayerController::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	OnPlayerStateReplicatedDelegate.Broadcast(PlayerState);
+}
+
 void ABasePlayerController::SetUIInputMode()
 {
 	FInputModeGameAndUI InputMode;

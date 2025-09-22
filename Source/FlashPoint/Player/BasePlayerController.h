@@ -8,6 +8,9 @@
 
 class UUIManageComponent;
 
+// PlayerState가 Replicate 될 때 브로드캐스트하는 델레게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayerStateReplicatedDelegate, APlayerState*);
+
 /**
  * Main Widget을 표시하고, Initial Input Mode를 설정하는 Base Player Controller
  */
@@ -18,6 +21,9 @@ class FLASHPOINT_API ABasePlayerController : public APlayerController
 
 public:
 	ABasePlayerController();
+	virtual void OnRep_PlayerState() override;
+
+	FOnPlayerStateReplicatedDelegate OnPlayerStateReplicatedDelegate;
 
 	// UI Input Mode로 설정한다.
 	virtual void SetUIInputMode();
