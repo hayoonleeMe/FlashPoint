@@ -5,6 +5,9 @@
 #include "Net/Serialization/FastArraySerializer.h"
 #include "GameplayTagStackContainer.generated.h"
 
+// TagStack 변경을 브로드캐스트하는 델레게이트
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTagStackChangedDelegate, const FGameplayTag&/*Tag*/, int32/*StackCount*/);
+
 /**
  * Gameplay Tag와 해당 태그의 스택 수를 저장하는 구조체
  */
@@ -60,6 +63,8 @@ struct FGameplayTagStackContainer : public FFastArraySerializer
 	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);
 	void PostReplicatedChange(const TArrayView<int32> ChangedIndices, int32 FinalSize);
 	//~End of FFastArraySerializer contract
+
+	FOnTagStackChangedDelegate OnTagStackChangedDelegate;
 
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParms)
 	{

@@ -64,7 +64,6 @@ namespace FPGameplayTags
 		namespace Data
 		{
 			UE_DEFINE_GAMEPLAY_TAG(Ammo, "Weapon.Data.Ammo");
-			UE_DEFINE_GAMEPLAY_TAG(ReserveAmmo, "Weapon.Data.ReserveAmmo");
 		}
 	}
 

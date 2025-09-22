@@ -66,7 +66,6 @@ namespace FPGameplayTags
 		namespace Data
 		{
 			extern FNativeGameplayTag Ammo;
-			extern FNativeGameplayTag ReserveAmmo;
 		}
 	}
 
