@@ -14,6 +14,8 @@ class AWeapon_Base;
 // 서버와 클라 모두에서 호출된다.
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquippedWeaponChangedDelegate, AWeapon_Base*);
 
+// 무기 장착 상태 변경을 달리는 델레게이트
+DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeaponEquipStateChangedDelegate, int32/*ActiveSlotIndex*/, AWeapon_Base*/*EquippedWeapon*/);
 
 // AmmoTagStacks가 변경될 때 브로드캐스트하는 델레게이트
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAmmoTagStackChangedDelegate, const FGameplayTag&/*Tag*/, int32/*StackCount*/);
@@ -34,6 +36,8 @@ public:
 	AWeapon_Base* GetEquippedWeapon() const { return EquippedWeapon; }
 
 	FOnEquippedWeaponChangedDelegate OnEquippedWeaponChanged;
+
+	FOnWeaponEquipStateChangedDelegate OnWeaponEquipStateChangedDelegate;
 	
 	FGameplayTagStackContainer& GetAmmoTagStacks() { return AmmoTagStacks; }
 
@@ -92,6 +96,13 @@ private:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon);
+
+	// 슬롯 변경, 장착 무기 변경 등 Equip State 변경을 알리기 위한 트리거 프로퍼티 
+	UPROPERTY(ReplicatedUsing=OnRep_WeaponEquipStateUpdateCounter)
+	uint8 WeaponEquipStateUpdateCounter;
+
+	UFUNCTION()
+	void OnRep_WeaponEquipStateUpdateCounter();
 
 	// ============================================================================
 	// Tag Stacks

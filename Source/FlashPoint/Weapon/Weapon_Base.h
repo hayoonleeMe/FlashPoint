@@ -35,8 +35,6 @@ struct FWeaponEquipInfo
 	FGameplayTagContainer CosmeticTags;
 };
 
-// TODO : UI Info
-
 /**
  * 무기를 정의하는 기본 액터 클래스
  */
@@ -55,6 +53,8 @@ public:
 	int32 GetBulletsPerCartridge() const { return BulletsPerCartridge; }
 	float GetHeadShotMultiplier() const { return HeadShotMultiplier; }
 	float GetMagCapacity() const { return MagCapacity; }
+	FString GetDisplayName() const { return DisplayName; }
+	UTexture2D* GetDisplayIcon() const { return DisplayIcon; }
 
 	void SetServerRemainAmmo(int32 InServerRemainAmmo) { ServerRemainAmmo = InServerRemainAmmo; }
 	int32 GetServerRemainAmmo() const { return ServerRemainAmmo; }
@@ -164,4 +164,11 @@ protected:
 	// 서버에서만 유효하다.
 	int32 ServerRemainAmmo = 0;
 
+	// HUD에 표시할 무기 이름
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FString DisplayName;
+
+	// HUD에 표시할 Icon
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	TObjectPtr<UTexture2D> DisplayIcon;
 };

@@ -27,6 +27,7 @@ void UWeaponManageComponent::GetLifetimeReplicatedProps(TArray<class FLifetimePr
 
 	DOREPLIFETIME(UWeaponManageComponent, ActiveSlotIndex);
 	DOREPLIFETIME(UWeaponManageComponent, EquippedWeapon);
+	DOREPLIFETIME(UWeaponManageComponent, WeaponEquipStateUpdateCounter);
 	DOREPLIFETIME(UWeaponManageComponent, AmmoTagStacks);
 }
 
@@ -76,6 +77,10 @@ void UWeaponManageComponent::ServerEquipWeaponAtSlot_Implementation(int32 SlotNu
 
 	// 새 슬롯의 무기 장착
 	EquipWeaponInternal(WeaponSlots[ActiveSlotIndex]);
+
+	// Equip State 변경을 알림
+	++WeaponEquipStateUpdateCounter;
+	OnWeaponEquipStateChangedDelegate.Broadcast(ActiveSlotIndex, EquippedWeapon);
 }
 
 void UWeaponManageComponent::EquipNewWeapon(const TSubclassOf<AWeapon_Base>& WeaponToEquipClass)
@@ -90,11 +95,20 @@ void UWeaponManageComponent::EquipNewWeapon(const TSubclassOf<AWeapon_Base>& Wea
 
 	// 현재 슬롯의 무기 장착
 	EquipWeaponInternal(WeaponToEquipClass);
+
+	// Equip State 변경을 알림
+	++WeaponEquipStateUpdateCounter;
+	OnWeaponEquipStateChangedDelegate.Broadcast(ActiveSlotIndex, EquippedWeapon);
 }
 
 void UWeaponManageComponent::ServerUnEquipWeapon_Implementation()
 {
 	UnEquipWeapon(false);
+
+	// Equip State 변경을 알림
+	++WeaponEquipStateUpdateCounter;
+	OnWeaponEquipStateChangedDelegate.Broadcast(ActiveSlotIndex, EquippedWeapon);
+}
 
 void UWeaponManageComponent::BeginPlay()
 {
@@ -242,6 +256,11 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 	}
 
 	OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
+}
+
+void UWeaponManageComponent::OnRep_WeaponEquipStateUpdateCounter()
+{
+	OnWeaponEquipStateChangedDelegate.Broadcast(ActiveSlotIndex, EquippedWeapon);
 }
 
 void UWeaponManageComponent::OnAmmoTagStackChanged(const FGameplayTag& Tag, int32 StackCount)
