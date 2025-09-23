@@ -103,7 +103,7 @@ void UWeaponManageComponent::EquipNewWeapon(const TSubclassOf<AWeapon_Base>& Wea
 
 void UWeaponManageComponent::ServerUnEquipWeapon_Implementation()
 {
-	UnEquipWeapon(false);
+	UnEquipWeapon(true);
 
 	// Equip State 변경을 알림
 	++WeaponEquipStateUpdateCounter;
@@ -226,6 +226,9 @@ void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 		{
 			// 클라이언트에서 장착 해제한 무기 액터의 OnUnEquipped() 호출을 보장하기 위해 일정 시간 뒤에 Destroy
 			EquippedWeapon->SetLifeSpan(5.f);
+			
+			// 슬롯에서 제거
+			WeaponSlots[ActiveSlotIndex] = nullptr;
 		}
 
 		// 탄창에 남은 총알 수 저장
