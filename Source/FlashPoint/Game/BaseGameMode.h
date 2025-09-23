@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Data/MatchTypes.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "BaseGameMode.generated.h"
 
 class ABasePlayerState;
@@ -13,7 +13,7 @@ class ABasePlayerState;
  * 매치 정보와 서버에 접속한 플레이어 정보를 관리하는 GameMode
  */
 UCLASS()
-class FLASHPOINT_API ABaseGameMode : public AGameModeBase
+class FLASHPOINT_API ABaseGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
