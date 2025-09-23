@@ -18,8 +18,9 @@ namespace FPGameplayTags
 	
 	namespace Input
 	{
-		namespace Action
+		namespace Gameplay
 		{
+			extern FNativeGameplayTag PauseMenu;
 			extern FNativeGameplayTag Move;
 			extern FNativeGameplayTag Look;
 			extern FNativeGameplayTag Crouch;
@@ -65,7 +66,6 @@ namespace FPGameplayTags
 		namespace Data
 		{
 			extern FNativeGameplayTag Ammo;
-			extern FNativeGameplayTag ReserveAmmo;
 		}
 	}
 

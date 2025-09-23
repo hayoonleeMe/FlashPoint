@@ -62,7 +62,7 @@ void UConfirmSignUpPage::OnTextBoxCommitted(const FText& Text, ETextCommit::Type
 		if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
 		{
 			// 제대로 입력이 들어갈 수 있도록 다시 설정
-			BasePC->SetInitialInputMode();
+			BasePC->SetUIInputMode();
 			Input_UI_Confirm();
 		}
 	}

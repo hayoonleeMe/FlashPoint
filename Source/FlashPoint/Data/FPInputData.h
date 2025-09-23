@@ -40,7 +40,7 @@ public:
 	const UInputAction* FindAbilityInputActionForInputTag(const FGameplayTag& InputTag) const;
 	
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputMappingContext> DefaultMappingContext;
+	TObjectPtr<UInputMappingContext> GameplayMappingContext;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> UIMappingContext;

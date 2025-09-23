@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "FPPlayerController.generated.h"
 
+class UPauseMenu;
 class UFPAbilitySystemComponent;
 struct FInputActionValue;
 
@@ -19,21 +20,24 @@ class FLASHPOINT_API AFPPlayerController : public ABasePlayerController
 	GENERATED_BODY()
 
 public:
-	AFPPlayerController();
-
-	virtual void SetInitialInputMode() override;
+	virtual void SetUIInputMode() override;
+	virtual void SetGameplayInputMode() override;
 	
 protected:
-	virtual void BeginPlay() override;
+	virtual void SetInitialInputMode() override;
 	virtual void SetupInputComponent() override;
 
 private:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Look(const FInputActionValue& InputValue);
 	void Input_Crouch();
+	void Input_PauseMenu();
 
 	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
 	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
 
 	UFPAbilitySystemComponent* GetFPAbilitySystemComponent() const;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UPauseMenu> PauseMenuClass;
 };

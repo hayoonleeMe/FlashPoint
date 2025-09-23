@@ -7,35 +7,52 @@
 #include "FPGameplayTags.h"
 #include "FPPlayerState.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Input/FPInputComponent.h"
 #include "System/FPAssetManager.h"
+#include "UI/Gameplay/PauseMenu.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
 
-AFPPlayerController::AFPPlayerController()
+void AFPPlayerController::SetUIInputMode()
 {
-	bShowMouseCursor = false;
-}
-
-void AFPPlayerController::SetInitialInputMode()
-{
-	SetInputMode(FInputModeGameOnly());
-}
-
-void AFPPlayerController::BeginPlay()
-{
-	Super::BeginPlay();
+	Super::SetUIInputMode();
 
 	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
 	check(InputData);
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 	{
-		Subsystem->AddMappingContext(InputData->DefaultMappingContext, 0);
+		// 추가로, 게임플레이 중 UI Input을 활성화하면 Gameplay IMC 제거
+		Subsystem->RemoveMappingContext(InputData->GameplayMappingContext);
 	}
+	
+	// 마우스 커서를 화면 중앙에 설정
+	int32 ViewportX, ViewportY;
+	GetViewportSize(ViewportX, ViewportY);
+	SetMouseLocation(ViewportX * 0.5f, ViewportY * 0.5f);
+}
+
+void AFPPlayerController::SetGameplayInputMode()
+{
+	Super::SetGameplayInputMode();
+
+	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	check(InputData);
+	
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
+	{
+		Subsystem->AddMappingContext(InputData->GameplayMappingContext, 0);
+		Subsystem->RemoveMappingContext(InputData->UIMappingContext);
+	}
+}
+
+void AFPPlayerController::SetInitialInputMode()
+{
+	SetGameplayInputMode();
 }
 
 void AFPPlayerController::SetupInputComponent()
@@ -48,9 +65,10 @@ void AFPPlayerController::SetupInputComponent()
 	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
 
 	// Bind Native Inputs
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Action::Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Action::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Action::Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::PauseMenu, ETriggerEvent::Triggered, this, &ThisClass::Input_PauseMenu);
 
 	// Bind Ability Inputs
 	FPInputComponent->BindAbilityActions(InputData, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);
@@ -89,6 +107,17 @@ void AFPPlayerController::Input_Crouch()
 	{
 		GetCharacter()->bIsCrouched ? GetCharacter()->UnCrouch() : GetCharacter()->Crouch();  
 	}
+}
+
+void AFPPlayerController::Input_PauseMenu()
+{
+	UUserWidget* PauseMenuWidget = UIManageComponent->AddWidget(EWidgetLayer::Menu, PauseMenuClass);
+	PauseMenuWidget->OnNativeDestruct.AddLambda([this](UUserWidget* InWidget)
+	{
+		SetGameplayInputMode();
+	});
+
+	SetUIInputMode();
 }
 
 void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)

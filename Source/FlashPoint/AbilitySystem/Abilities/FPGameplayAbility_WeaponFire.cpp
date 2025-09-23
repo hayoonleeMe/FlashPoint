@@ -111,12 +111,14 @@ bool UFPGameplayAbility_WeaponFire::CheckCost(const FGameplayAbilitySpecHandle H
 	if (AmmoCostTag.IsValid())
 	{
 		// Check Ammo
-		AActor* AvatarActor = ActorInfo->AvatarActor.Get();
-		if (AWeapon_Base* Weapon = GetEquippedWeapon(AvatarActor))
+		if (AActor* AvatarActor = ActorInfo->AvatarActor.Get())
 		{
-			FGameplayTagStackContainer& WeaponTagStacks = Weapon->GetTagStacks();
-			return WeaponTagStacks.GetStackCount(AmmoCostTag) > 0;
-		}	
+			if (UWeaponManageComponent* WeaponManageComponent = AvatarActor->FindComponentByClass<UWeaponManageComponent>())
+			{
+				FGameplayTagStackContainer& AmmoTagStacks = WeaponManageComponent->GetAmmoTagStacks();
+				return AmmoTagStacks.GetStackCount(AmmoCostTag) > 0;	
+			}
+		}
 	}
 
 	return true;
@@ -131,13 +133,16 @@ void UFPGameplayAbility_WeaponFire::ApplyCost(const FGameplayAbilitySpecHandle H
 	{
 		if (AmmoCostTag.IsValid())
 		{
-			if (AWeapon_Base* Weapon = GetEquippedWeapon())
+			if (AActor* AvatarActor = ActorInfo->AvatarActor.Get())
 			{
-				// Consume Ammo
-				FGameplayTagStackContainer& WeaponTagStacks = Weapon->GetTagStacks();
-				const int32 NewAmmo = WeaponTagStacks.GetStackCount(AmmoCostTag) - 1;
-				WeaponTagStacks.AddTagStack(AmmoCostTag, NewAmmo);
-			}	
+				if (UWeaponManageComponent* WeaponManageComponent = AvatarActor->FindComponentByClass<UWeaponManageComponent>())
+				{
+					// Consume Ammo
+					FGameplayTagStackContainer& AmmoTagStacks = WeaponManageComponent->GetAmmoTagStacks();
+					const int32 NewAmmo = AmmoTagStacks.GetStackCount(AmmoCostTag) - 1;
+					AmmoTagStacks.AddTagStack(AmmoCostTag, NewAmmo);
+				}
+			}
 		}
 	}
 }

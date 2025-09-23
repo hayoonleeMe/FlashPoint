@@ -5,7 +5,6 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
-#include "System/GameplayTagStackContainer.h"
 #include "Weapon_Base.generated.h"
 
 class UAbilitySystemComponent;
@@ -36,8 +35,6 @@ struct FWeaponEquipInfo
 	FGameplayTagContainer CosmeticTags;
 };
 
-// TODO : UI Info
-
 /**
  * 무기를 정의하는 기본 액터 클래스
  */
@@ -48,7 +45,6 @@ class FLASHPOINT_API AWeapon_Base : public AActor
 
 public:
 	AWeapon_Base();
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	const FWeaponEquipInfo& GetEquipInfo() const { return EquipInfo; }
 	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
@@ -56,11 +52,15 @@ public:
 	float GetMaxDamageRange() const { return MaxDamageRange; }
 	int32 GetBulletsPerCartridge() const { return BulletsPerCartridge; }
 	float GetHeadShotMultiplier() const { return HeadShotMultiplier; }
+	float GetMagCapacity() const { return MagCapacity; }
+	FString GetDisplayName() const { return DisplayName; }
+	UTexture2D* GetDisplayIcon() const { return DisplayIcon; }
+
+	void SetServerRemainAmmo(int32 InServerRemainAmmo) { ServerRemainAmmo = InServerRemainAmmo; }
+	int32 GetServerRemainAmmo() const { return ServerRemainAmmo; }
 	
 	// Distance에 따른 감소를 적용한 데미지를 반환한다.
 	float GetDamageByDistance(float Distance) const;
-
-	FGameplayTagStackContainer& GetTagStacks() { return TagStacks; }
 
 	// Targeting 할 때 Weapon에서의 Source Location을 반환한다. (보통 총구)
 	FVector GetWeaponTargetingSourceLocation() const;
@@ -82,8 +82,6 @@ public:
 	void TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& ImpactPoints, const TArray<FVector_NetQuantize>& EndPoints);
 	
 protected:
-	virtual void BeginPlay() override;
-
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent;
 
@@ -159,11 +157,18 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	float HeadShotMultiplier;
 
-	UPROPERTY(Replicated)
-	FGameplayTagStackContainer TagStacks;
-
-	void InitializeTagStacks();
-
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	FName LeftHandAttachSocketName;
+
+	// 현재 탄창에 남은 총알 수
+	// 서버에서만 유효하다.
+	int32 ServerRemainAmmo = 0;
+
+	// HUD에 표시할 무기 이름
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FString DisplayName;
+
+	// HUD에 표시할 Icon
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	TObjectPtr<UTexture2D> DisplayIcon;
 };

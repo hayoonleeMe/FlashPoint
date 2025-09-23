@@ -35,8 +35,6 @@ struct FActiveWidgetArray
 
 /**
  * Widget Layer 별로 위젯을 생성하고 관리하는 액터 컴포넌트
- *
- * 또한 UI Input을 연동하고 관리한다.
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class FLASHPOINT_API UUIManageComponent : public UActorComponent
@@ -46,8 +44,8 @@ class FLASHPOINT_API UUIManageComponent : public UActorComponent
 public:
 	static UUIManageComponent* Get(const APlayerController* OwningPC);
 	
-	UUIManageComponent();
-	virtual void InitializeComponent() override;
+	// 우선순위가 가장 높은 최상단 위젯을 반환한다.
+	UUserWidget* GetTopWidget() const;
 
 	// HUD Layer의 메인 위젯을 반환한다.
 	UUserWidget* GetMainHUDWidget() const;
@@ -82,15 +80,4 @@ private:
 	// FActiveWidgetArray 내부 배열의 순서는 위젯 생성 순으로 보장된다.
 	UPROPERTY()
 	TMap<EWidgetLayer, FActiveWidgetArray> ActiveWidgetMap;
-
-	// 우선순위가 가장 높은 최상단 위젯을 반환한다.
-	UUserWidget* GetTopWidget() const;
-
-	// ============================================================================
-	// Input 
-	// ============================================================================
-	
-	void OnSetupInputComponent(UInputComponent* InputComponent);
-	void Input_UI_Back();
-	void Input_UI_Confirm();
 };

@@ -13,7 +13,6 @@
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Data/FPCosmeticData.h"
 #include "GameFramework/Character.h"
-#include "Net/UnrealNetwork.h"
 #include "System/FPAssetManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Weapon_Base) 
@@ -38,13 +37,6 @@ AWeapon_Base::AWeapon_Base()
 	});
 
 	LeftHandAttachSocketName = TEXT("LeftHandSocket");
-}
-
-void AWeapon_Base::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
-{
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(AWeapon_Base, TagStacks);
 }
 
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
@@ -77,7 +69,7 @@ void AWeapon_Base::OnUnEquipped()
 	if (UFPAbilitySystemComponent* ASC = GetOwnerASC<UFPAbilitySystemComponent>())
 	{
 		// 무기 발사 입력 Flush
-		ASC->FlushPressedInput(FPGameplayTags::Input::Action::WeaponFire);
+		ASC->FlushPressedInput(FPGameplayTags::Input::Gameplay::WeaponFire);
 	}
 	
 	LinkWeaponAnimLayer(true);
@@ -137,13 +129,6 @@ float AWeapon_Base::GetDamageByDistance(float Distance) const
 	return BaseDamage;
 }
 
-void AWeapon_Base::BeginPlay()
-{
-	Super::BeginPlay();
-
-	InitializeTagStacks();
-}
-
 UAbilitySystemComponent* AWeapon_Base::GetOwnerASC() const
 {
 	return UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
@@ -197,13 +182,5 @@ void AWeapon_Base::UpdateFireBlockTag(bool bBlockFire) const
 		{
 			ASC->RemoveLooseGameplayTag(FPGameplayTags::Weapon::NoFire);
 		}
-	}
-}
-
-void AWeapon_Base::InitializeTagStacks()
-{
-	if (HasAuthority())
-	{
-		TagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, MagCapacity);
 	}
 }

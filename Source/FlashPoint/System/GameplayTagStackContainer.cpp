@@ -16,6 +16,7 @@ void FGameplayTagStackContainer::AddTagStack(const FGameplayTag& InTag, int32 In
 			Entry.StackCount = InStackCount;
 			TagStackQueryMap[InTag] = InStackCount;
 			MarkItemDirty(Entry);
+			OnTagStackChangedDelegate.Broadcast(Entry.Tag, Entry.StackCount);
 			return;
 		}
 	}
@@ -24,6 +25,7 @@ void FGameplayTagStackContainer::AddTagStack(const FGameplayTag& InTag, int32 In
 	FGameplayTagStack& NewStack = TagStacks.Emplace_GetRef(InTag, InStackCount);
 	TagStackQueryMap.Add(InTag, InStackCount);
 	MarkItemDirty(NewStack);
+	OnTagStackChangedDelegate.Broadcast(NewStack.Tag, NewStack.StackCount);
 }
 
 void FGameplayTagStackContainer::RemoveTagStack(const FGameplayTag& InTag)
@@ -32,6 +34,7 @@ void FGameplayTagStackContainer::RemoveTagStack(const FGameplayTag& InTag)
 	{
 		if (It->Tag.MatchesTagExact(InTag))
 		{
+			OnTagStackChangedDelegate.Broadcast(It->Tag, 0);
 			It.RemoveCurrent();
 			TagStackQueryMap.Remove(InTag);
 			MarkArrayDirty();
@@ -54,7 +57,9 @@ void FGameplayTagStackContainer::PreReplicatedRemove(const TArrayView<int32> Rem
 {
 	for (int32 Index : RemovedIndices)
 	{
-		TagStackQueryMap.Remove(TagStacks[Index].Tag);
+		const FGameplayTagStack& TagStack = TagStacks[Index];
+		OnTagStackChangedDelegate.Broadcast(TagStack.Tag, 0);
+		TagStackQueryMap.Remove(TagStack.Tag);
 	}
 }
 
@@ -64,6 +69,7 @@ void FGameplayTagStackContainer::PostReplicatedAdd(const TArrayView<int32> Added
 	{
 		const FGameplayTagStack& TagStack = TagStacks[Index];
 		TagStackQueryMap.Add(TagStack.Tag, TagStack.StackCount);
+		OnTagStackChangedDelegate.Broadcast(TagStack.Tag, TagStack.StackCount);
 	}
 }
 
@@ -73,5 +79,6 @@ void FGameplayTagStackContainer::PostReplicatedChange(const TArrayView<int32> Ch
 	{
 		const FGameplayTagStack& TagStack = TagStacks[Index];
 		TagStackQueryMap[TagStack.Tag] = TagStack.StackCount;
+		OnTagStackChangedDelegate.Broadcast(TagStack.Tag, TagStack.StackCount);
 	}
 }
