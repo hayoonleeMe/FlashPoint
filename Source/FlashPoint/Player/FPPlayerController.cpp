@@ -9,6 +9,7 @@
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
+#include "Game/FPGameState.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Input/FPInputComponent.h"
@@ -69,6 +70,7 @@ void AFPPlayerController::SetupInputComponent()
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::PauseMenu, ETriggerEvent::Triggered, this, &ThisClass::Input_PauseMenu);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Scoreboard, ETriggerEvent::Triggered, this, &ThisClass::Input_Scoreboard);
 
 	// Bind Ability Inputs
 	FPInputComponent->BindAbilityActions(InputData, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);
@@ -118,6 +120,17 @@ void AFPPlayerController::Input_PauseMenu()
 	});
 
 	SetUIInputMode();
+}
+
+void AFPPlayerController::Input_Scoreboard(const FInputActionValue& InputValue)
+{
+	if (GetWorld())
+	{
+		if (AFPGameState* FPGameState = GetWorld()->GetGameState<AFPGameState>())
+		{
+			FPGameState->ShowScoreboard(InputValue.Get<bool>());
+		}
+	}
 }
 
 void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)
