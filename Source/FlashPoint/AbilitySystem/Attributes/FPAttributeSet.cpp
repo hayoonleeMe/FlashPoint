@@ -4,7 +4,9 @@
 #include "FPAttributeSet.h"
 
 #include "GameplayEffectExtension.h"
+#include "Game/FPGameState.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/FPPlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAttributeSet)
 
@@ -46,7 +48,28 @@ void UFPAttributeSet::HandleIncomingDamage(const FGameplayEffectModCallbackData&
 	float NewHealth = GetHealth() - LocalDamage;
 	SetHealth(NewHealth);
 
-	// TODO : 피격 효과, HUD
+	// Target Dead
+	if (NewHealth <= 0.f && GetWorld())
+	{
+		if (AFPGameState* FPGameState = GetWorld()->GetGameState<AFPGameState>())
+		{
+			if (AFPPlayerState* TargetPS = Cast<AFPPlayerState>(GetOwningActor()))
+			{
+				// 죽은 플레이어의 Death Count +1
+				TargetPS->AddToDeathCount(1);
+
+				FPGameState->UpdatePlayerInfo(TargetPS->MakePlayerInfo());
+			}
+			if (AFPPlayerState* InstigatorPS = Cast<AFPPlayerState>(Data.EffectSpec.GetEffectContext().GetInstigator()))
+			{
+				// 죽인 플레이어의 Kill Count +1
+				InstigatorPS->AddToKillCount(1);
+
+				FPGameState->UpdatePlayerInfo(InstigatorPS->MakePlayerInfo());
+			}
+		}
+	}
+	// TODO : 피격 효과, HUD, Respawn
 }
 
 void UFPAttributeSet::OnRep_Health(const FGameplayAttributeData& OldHealth) const
