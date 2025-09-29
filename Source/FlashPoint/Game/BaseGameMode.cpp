@@ -83,6 +83,8 @@ void ABaseGameMode::Logout(AController* Exiting)
 				// GameLift GameSession에 등록한 PlayerSession을 제거
 				OnlineServiceSubsystem->RemovePlayerSession(BasePS->GetServerPlayerSessionId());
 
+				BasePS->OnServerPlayerTeamChangedDelegate.RemoveAll(this);
+
 				if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
 				{
 					if (MatchInfo.MatchMode == EMatchMode::TeamDeathMatch)
@@ -93,6 +95,9 @@ void ABaseGameMode::Logout(AController* Exiting)
 
 					// 배열에서 제거
 					BaseGS->RemovePlayerInfo(BasePS->GetServerUsername());
+					
+					// 접속한 플레이어 수 업데이트
+					--MatchInfo.CurrentPlayers;
 				}
 
 				const bool bIsHost = MatchInfo.HostId == BasePS->GetServerUsername();
