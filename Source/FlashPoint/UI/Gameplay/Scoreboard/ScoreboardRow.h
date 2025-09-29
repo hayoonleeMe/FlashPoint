@@ -23,6 +23,10 @@ public:
 	// bShow에 따라 해당 위젯을 화면에 표시하거나 숨긴다.
 	void ShowRow(bool bShow) const;
 
+	// 해당 위젯이 화면에 표시 중인지 반환한다.
+	// 해당 위젯은 자체 Visibility를 변경하지 않고 내부 TextBlock의 Visibility만 변경하므로, 이 함수를 통해 표시 유무를 체크한다.
+	bool IsRowVisible() const;
+
 private:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> Text_Username;

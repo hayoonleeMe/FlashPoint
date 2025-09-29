@@ -15,12 +15,12 @@ void UTDMScoreboard::OnPlayerAdded(const FPlayerInfo& PlayerInfo)
 	if (Team == ETeam::RedTeam)
 	{
 		RedTeamPlayers.Add(PlayerInfo);
-		SortRowsByKillDeathIfVisible(VerticalBox_RedTeam, RedTeamPlayers);
+		SortRowsByKillDeathIfVisible(RedTeamRowWidgets, RedTeamPlayers);
 	}
 	else if (Team == ETeam::BlueTeam)
 	{
 		BlueTeamPlayers.Add(PlayerInfo);
-		SortRowsByKillDeathIfVisible(VerticalBox_BlueTeam, BlueTeamPlayers);
+		SortRowsByKillDeathIfVisible(BlueTeamRowWidgets, BlueTeamPlayers);
 	}
 }
 
@@ -31,13 +31,13 @@ void UTDMScoreboard::OnPlayerRemoved(const FPlayerInfo& PlayerInfo)
 	{
 		// 할당된 메모리 유지
 		RedTeamPlayers.RemoveSwap(PlayerInfo, EAllowShrinking::No);
-		SortRowsByKillDeathIfVisible(VerticalBox_RedTeam, RedTeamPlayers);
+		SortRowsByKillDeathIfVisible(RedTeamRowWidgets, RedTeamPlayers);
 	}
 	else if (Team == ETeam::BlueTeam)
 	{
 		// 할당된 메모리 유지
 		BlueTeamPlayers.RemoveSwap(PlayerInfo, EAllowShrinking::No);
-		SortRowsByKillDeathIfVisible(VerticalBox_BlueTeam, BlueTeamPlayers);
+		SortRowsByKillDeathIfVisible(BlueTeamRowWidgets, BlueTeamPlayers);
 	}
 }
 
@@ -50,8 +50,8 @@ void UTDMScoreboard::OnPlayerChanged(const FPlayerInfo& PlayerInfo)
 		if (RedTeamPlayers.Find(PlayerInfo, Index))
 		{
 			RedTeamPlayers[Index] = PlayerInfo;
+			SortRowsByKillDeathIfVisible(RedTeamRowWidgets, RedTeamPlayers);
 		}
-		SortRowsByKillDeathIfVisible(VerticalBox_RedTeam, RedTeamPlayers);
 	}
 	else if (Team == ETeam::BlueTeam)
 	{
@@ -59,8 +59,8 @@ void UTDMScoreboard::OnPlayerChanged(const FPlayerInfo& PlayerInfo)
 		if (BlueTeamPlayers.Find(PlayerInfo, Index))
 		{
 			BlueTeamPlayers[Index] = PlayerInfo;
+			SortRowsByKillDeathIfVisible(BlueTeamRowWidgets, BlueTeamPlayers);
 		}
-		SortRowsByKillDeathIfVisible(VerticalBox_BlueTeam, BlueTeamPlayers);
 	}
 }
 
@@ -69,8 +69,8 @@ void UTDMScoreboard::ShowScoreboard(bool bShow)
 	if (bShow)
 	{
 		SetVisibility(ESlateVisibility::Visible);
-		SortRowsByKillDeathIfVisible(VerticalBox_RedTeam, RedTeamPlayers);
-		SortRowsByKillDeathIfVisible(VerticalBox_BlueTeam, BlueTeamPlayers);
+		SortRowsByKillDeathIfVisible(RedTeamRowWidgets, RedTeamPlayers);
+		SortRowsByKillDeathIfVisible(BlueTeamRowWidgets, BlueTeamPlayers);
 	}
 	else
 	{
@@ -82,11 +82,15 @@ void UTDMScoreboard::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	RedTeamPlayers.Reserve(VerticalBox_RedTeam->GetChildrenCount());
-	BlueTeamPlayers.Reserve(VerticalBox_BlueTeam->GetChildrenCount());
+	// GetAllChildren()는 모든 Child를 새로운 배열로 복사하기 때문에 캐싱해서 사용
+	RedTeamRowWidgets = VerticalBox_RedTeam->GetAllChildren();
+	RedTeamPlayers.Reserve(RedTeamRowWidgets.Num());
+	
+	BlueTeamRowWidgets = VerticalBox_BlueTeam->GetAllChildren();
+	BlueTeamPlayers.Reserve(BlueTeamRowWidgets.Num());
 }
 
-void UTDMScoreboard::SortRowsByKillDeathIfVisible(const UVerticalBox* BoxToSort, TArray<FPlayerInfo>& Players) const
+void UTDMScoreboard::SortRowsByKillDeathIfVisible(const TArray<UWidget*>& RowWidgetsToSort, TArray<FPlayerInfo>& Players) const
 {
 	// 현재 화면에 표시 중이 아니면 수행하지 않음
 	if (!IsVisible())
@@ -105,10 +109,9 @@ void UTDMScoreboard::SortRowsByKillDeathIfVisible(const UVerticalBox* BoxToSort,
 	};
 	Players.Sort(Predicate);
 
-	const TArray<UWidget*>& Rows = BoxToSort->GetAllChildren();
-	for (int32 Index = 0; Index < Rows.Num(); ++Index)
+	for (int32 Index = 0; Index < RowWidgetsToSort.Num(); ++Index)
 	{
-		if (UScoreboardRow* Row = Cast<UScoreboardRow>(Rows[Index]))
+		if (UScoreboardRow* Row = Cast<UScoreboardRow>(RowWidgetsToSort[Index]))
 		{
 			if (Index < Players.Num())
 			{
@@ -117,6 +120,12 @@ void UTDMScoreboard::SortRowsByKillDeathIfVisible(const UVerticalBox* BoxToSort,
 			}
 			else
 			{
+				// 현재 순서의 Row가 화면에서 숨겨져 있으면, 나머지는 이미 숨겨져 있으므로 더 이상 진행 X
+				if (!Row->IsRowVisible())
+				{
+					break;
+				}
+				
 				Row->ShowRow(false);
 			}
 		}

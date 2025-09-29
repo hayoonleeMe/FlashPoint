@@ -29,3 +29,8 @@ void UScoreboardRow::ShowRow(bool bShow) const
 	Text_Kill->SetVisibility(NewVisibility);
 	Text_Death->SetVisibility(NewVisibility);
 }
+
+bool UScoreboardRow::IsRowVisible() const
+{
+	return Text_Username->IsVisible();
+}
