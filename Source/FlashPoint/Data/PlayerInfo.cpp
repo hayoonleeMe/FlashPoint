@@ -3,12 +3,10 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerInfo)
 
-void FPlayerInfoArray::AddPlayer(const FString& Username, ETeam Team)
+void FPlayerInfoArray::AddPlayer(const FPlayerInfo& InPlayerInfo)
 {
-	FPlayerInfo& PlayerInfo = Players.AddDefaulted_GetRef();
-	PlayerInfo.Username = Username;
-	PlayerInfo.Team = Team;
-	MarkItemDirty(PlayerInfo);
+	FPlayerInfo& NewPlayerInfo = Players.Add_GetRef(InPlayerInfo);
+	MarkItemDirty(NewPlayerInfo);
 }
 
 void FPlayerInfoArray::RemovePlayer(const FString& Username)
@@ -24,15 +22,24 @@ void FPlayerInfoArray::RemovePlayer(const FString& Username)
 	}
 }
 
-void FPlayerInfoArray::UpdatePlayer(const FString& Username, ETeam Team)
+void FPlayerInfoArray::UpdatePlayer(const FPlayerInfo& InPlayerInfo)
 {
 	for (auto It = Players.CreateIterator(); It; ++It)
 	{
-		FPlayerInfo& PlayerInfo = *It;
-		if (PlayerInfo.Username == Username)
+		FPlayerInfo& CurrentPlayerInfo = *It;
+		if (CurrentPlayerInfo == InPlayerInfo)
 		{
-			PlayerInfo.Team = Team;
-			MarkItemDirty(PlayerInfo);
+			// Update임을 나타내기 위해 기존 Item의 FFastArraySerializerItem 데이터를 복구
+			int32 ReplicationID = CurrentPlayerInfo.ReplicationID;
+			int32 ReplicationKey = CurrentPlayerInfo.ReplicationKey;
+			int32 MostRecentArrayReplicationKey = CurrentPlayerInfo.MostRecentArrayReplicationKey;
+			
+			CurrentPlayerInfo = InPlayerInfo;
+			CurrentPlayerInfo.ReplicationID = ReplicationID;
+			CurrentPlayerInfo.ReplicationKey = ReplicationKey;
+			CurrentPlayerInfo.MostRecentArrayReplicationKey = MostRecentArrayReplicationKey;
+			
+			MarkItemDirty(CurrentPlayerInfo);
 			return;
 		}
 	}

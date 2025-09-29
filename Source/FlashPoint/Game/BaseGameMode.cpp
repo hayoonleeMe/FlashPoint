@@ -57,7 +57,7 @@ FString ABaseGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 		{
 			// TDM이라면 플레이어의 팀을 선택하고, 배열에 추가해 관리
 			ChoosePlayerTeam(BasePS);
-			BaseGS->AddPlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
+			BaseGS->AddPlayerInfo(BasePS->MakePlayerInfo());
 		}
 	}
 	
@@ -133,7 +133,7 @@ void ABaseGameMode::PostSeamlessTravel()
 		{
 			if (ABasePlayerState* BasePS = Cast<ABasePlayerState>(PS))
 			{
-				BaseGS->AddPlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
+				BaseGS->AddPlayerInfo(BasePS->MakePlayerInfo());
 
 				// 팀 정보 유지
 				if (BasePS->GetTeam() == ETeam::RedTeam)
@@ -190,7 +190,7 @@ void ABaseGameMode::OnPlayerTeamChanged(ABasePlayerState* BasePS)
 {
 	if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
 	{
-		BaseGS->UpdatePlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
+		BaseGS->UpdatePlayerInfo(BasePS->MakePlayerInfo());
 	}
 }
 

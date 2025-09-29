@@ -68,35 +68,35 @@ void ULobbyWidget::InitializeLobby(const FMatchInfo& MatchInfo)
 	ButtonBox_Client->SetVisibility(bIsHost ? ESlateVisibility::Collapsed : ESlateVisibility::Visible);
 }
 
-void ULobbyWidget::OnPlayerJoined(const FString& Username, ETeam Team) const
+void ULobbyWidget::OnPlayerJoined(const FPlayerInfo& PlayerInfo) const
 {
 	if (MatchMode == EMatchMode::TeamDeathMatch)
 	{
-		TDMPlayerList->OnPlayerJoined(Username, Team);
+		TDMPlayerList->OnPlayerJoined(PlayerInfo.Username, PlayerInfo.Team);
 	}
 	else if (MatchMode == EMatchMode::FreeForAll)
 	{
-		FFAPlayerList->OnPlayerJoined(Username);
+		FFAPlayerList->OnPlayerJoined(PlayerInfo.Username);
 	}
 }
 
-void ULobbyWidget::OnPlayerLeft(const FString& Username, ETeam Team) const
+void ULobbyWidget::OnPlayerLeft(const FPlayerInfo& PlayerInfo) const
 {
 	if (MatchMode == EMatchMode::TeamDeathMatch)
 	{
-		TDMPlayerList->OnPlayerLeft(Username);
+		TDMPlayerList->OnPlayerLeft(PlayerInfo.Username);
 	}
 	else if (MatchMode == EMatchMode::FreeForAll)
 	{
-		FFAPlayerList->OnPlayerLeft(Username);
+		FFAPlayerList->OnPlayerLeft(PlayerInfo.Username);
 	}
 }
 
-void ULobbyWidget::OnPlayerUpdated(const FString& Username, ETeam Team) const
+void ULobbyWidget::OnPlayerUpdated(const FPlayerInfo& PlayerInfo) const
 {
 	if (MatchMode == EMatchMode::TeamDeathMatch)
 	{
-		TDMPlayerList->OnPlayerUpdated(Username, Team);
+		TDMPlayerList->OnPlayerUpdated(PlayerInfo.Username, PlayerInfo.Team);
 	}
 }
 

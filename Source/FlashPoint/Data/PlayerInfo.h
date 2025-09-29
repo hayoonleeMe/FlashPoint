@@ -14,11 +14,28 @@ struct FPlayerInfo : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
+public:
+	FPlayerInfo() { }
+	FPlayerInfo(const FString& InUsername, ETeam InTeam)
+		: Username(InUsername), Team(InTeam)
+	{ }
+
 	UPROPERTY()
 	FString Username;
 
 	UPROPERTY()
 	ETeam Team{};
+
+	UPROPERTY()
+	int32 KillCount{};
+
+	UPROPERTY()
+	int32 DeathCount{};
+
+	bool operator==(const FPlayerInfo& Other) const
+	{
+		return Username == Other.Username;
+	}
 };
 
 /**
@@ -32,9 +49,9 @@ struct FPlayerInfoArray : public FFastArraySerializer
 public:
 	const TArray<FPlayerInfo>& GetPlayers() const { return Players; }
 	
-	void AddPlayer(const FString& Username, ETeam Team);
+	void AddPlayer(const FPlayerInfo& InPlayerInfo);
 	void RemovePlayer(const FString& Username);
-	void UpdatePlayer(const FString& Username, ETeam Team);
+	void UpdatePlayer(const FPlayerInfo& InPlayerInfo);
 
 	//~FFastArraySerializer contract
 	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);

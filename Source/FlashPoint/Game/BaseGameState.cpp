@@ -21,9 +21,9 @@ void ABaseGameState::SetMatchInfo(const FMatchInfo& InMatchInfo)
 	MatchInfo = InMatchInfo;
 }
 
-void ABaseGameState::AddPlayerInfo(const FString& Username, ETeam Team)
+void ABaseGameState::AddPlayerInfo(const FPlayerInfo& PlayerInfo)
 {
-	PlayerInfoArray.AddPlayer(Username, Team);
+	PlayerInfoArray.AddPlayer(PlayerInfo);
 }
 
 void ABaseGameState::RemovePlayerInfo(const FString& Username)
@@ -31,9 +31,9 @@ void ABaseGameState::RemovePlayerInfo(const FString& Username)
 	PlayerInfoArray.RemovePlayer(Username);
 }
 
-void ABaseGameState::UpdatePlayerInfo(const FString& Username, ETeam Team)
+void ABaseGameState::UpdatePlayerInfo(const FPlayerInfo& PlayerInfo)
 {
-	PlayerInfoArray.UpdatePlayer(Username, Team);
+	PlayerInfoArray.UpdatePlayer(PlayerInfo);
 }
 
 void ABaseGameState::BeginPlay()
@@ -64,7 +64,7 @@ void ABaseGameState::HandleAddedPlayerInfos(TArray<FPlayerInfo>& AddedPlayerInfo
 	{
 		for (const FPlayerInfo& AddedPlayerInfo : AddedPlayerInfos)
 		{
-			OnClientPlayerInfoAddedDelegate.Broadcast(AddedPlayerInfo.Username, AddedPlayerInfo.Team);
+			OnClientPlayerInfoAddedDelegate.Broadcast(AddedPlayerInfo);
 		}
 		AddedPlayerInfos.Reset();
 	}
@@ -76,7 +76,7 @@ void ABaseGameState::HandleRemovedPlayerInfos(TArray<FPlayerInfo>& RemovedPlayer
 	{
 		for (const FPlayerInfo& RemovedPlayerInfo : RemovedPlayerInfos)
 		{
-			OnClientPlayerInfoRemovedDelegate.Broadcast(RemovedPlayerInfo.Username, ETeam::None);
+			OnClientPlayerInfoRemovedDelegate.Broadcast(RemovedPlayerInfo);
 		}
 		RemovedPlayerInfos.Reset();
 	}
@@ -88,7 +88,7 @@ void ABaseGameState::HandleChangedPlayerInfos(TArray<FPlayerInfo>& ChangedPlayer
 	{
 		for (const FPlayerInfo& ChangedPlayerInfo : ChangedPlayerInfos)
 		{
-			OnClientPlayerInfoChangedDelegate.Broadcast(ChangedPlayerInfo.Username, ChangedPlayerInfo.Team);
+			OnClientPlayerInfoChangedDelegate.Broadcast(ChangedPlayerInfo);
 		}
 		ChangedPlayerInfos.Reset();
 	}
