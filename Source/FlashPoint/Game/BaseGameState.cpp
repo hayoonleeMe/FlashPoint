@@ -4,7 +4,6 @@
 #include "BaseGameState.h"
 
 #include "Net/UnrealNetwork.h"
-#include "System/PlayerAuthSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(BaseGameState)
 
@@ -34,16 +33,6 @@ void ABaseGameState::RemovePlayerInfo(const FString& Username)
 void ABaseGameState::UpdatePlayerInfo(const FPlayerInfo& PlayerInfo)
 {
 	PlayerInfoArray.UpdatePlayer(PlayerInfo);
-}
-
-void ABaseGameState::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (UPlayerAuthSubsystem* PlayerAuthSubsystem = UPlayerAuthSubsystem::Get(this))
-	{
-		PlayerUsername = PlayerAuthSubsystem->GetUsername();
-	}
 }
 
 void ABaseGameState::OnRep_MatchInfo()

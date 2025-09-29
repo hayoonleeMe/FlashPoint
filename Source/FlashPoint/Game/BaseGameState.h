@@ -49,17 +49,12 @@ public:
 	FOnClientPlayerInfoArrayDelegate OnClientPlayerInfoChangedDelegate;
 
 protected:
-	virtual void BeginPlay() override;
-	
 	// 현재 매치 관련 정보를 저장하는 데이터
 	UPROPERTY(ReplicatedUsing=OnRep_MatchInfo);
 	FMatchInfo MatchInfo;
 
 	UFUNCTION()
 	void OnRep_MatchInfo();
-
-	// 로컬 플레이어의 Username
-	FString PlayerUsername;
 
 	// 실제 서버에 접속 중인 플레이어 정보를 저장하는 배열
 	// 서버에서만 변경되어야 한다.
