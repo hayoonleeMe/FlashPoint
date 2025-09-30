@@ -15,6 +15,7 @@
 #include "Input/FPInputComponent.h"
 #include "System/FPAssetManager.h"
 #include "UI/Gameplay/PauseMenu.h"
+#include "UI/Gameplay/Scoreboard/Scoreboard.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
 
@@ -124,12 +125,9 @@ void AFPPlayerController::Input_PauseMenu()
 
 void AFPPlayerController::Input_Scoreboard(const FInputActionValue& InputValue)
 {
-	if (GetWorld())
+	if (Scoreboard)
 	{
-		if (AFPGameState* FPGameState = GetWorld()->GetGameState<AFPGameState>())
-		{
-			FPGameState->ShowScoreboard(InputValue.Get<bool>());
-		}
+		Scoreboard->ShowWidget(InputValue.Get<bool>());
 	}
 }
 
@@ -156,4 +154,28 @@ UFPAbilitySystemComponent* AFPPlayerController::GetFPAbilitySystemComponent() co
 		return PS->GetFPAbilitySystemComponent();
 	}
 	return nullptr;
+}
+
+void AFPPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 클라이언트 로컬 플레이어 Only
+	if (IsLocalController() && GetWorld())
+	{
+		if (AFPGameState* FPGameState = GetWorld()->GetGameState<AFPGameState>())
+		{
+			FPGameState->OnClientMatchInfoReplicatedDelegate.AddUObject(this, &ThisClass::OnClientMatchInfoReplicated);
+		}
+	}
+}
+
+void AFPPlayerController::OnClientMatchInfoReplicated(const FMatchInfo& MatchInfo)
+{
+	if (TSubclassOf<UScoreboard>* ScoreboardClass = ScoreboardClasses.Find(MatchInfo.MatchMode))
+	{
+		// Scoreboard Widget 생성 후 숨김
+    	Scoreboard = UIManageComponent->AddWidget<UScoreboard>(EWidgetLayer::HUD, *ScoreboardClass);
+    	Scoreboard->ShowWidget(false);
+	}
 }

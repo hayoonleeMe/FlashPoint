@@ -9,7 +9,21 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(TDMScoreboard)
 
-void UTDMScoreboard::OnPlayerAdded(const FPlayerInfo& PlayerInfo)
+void UTDMScoreboard::ShowWidget(bool bShow)
+{
+	if (bShow)
+	{
+		SetVisibility(ESlateVisibility::Visible);
+		SortRowsByKillDeathIfVisible(RedTeamRowWidgets, RedTeamPlayers);
+		SortRowsByKillDeathIfVisible(BlueTeamRowWidgets, BlueTeamPlayers);
+	}
+	else
+	{
+		SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UTDMScoreboard::OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo)
 {
 	ETeam Team = PlayerInfo.Team;
 	if (Team == ETeam::RedTeam)
@@ -24,7 +38,7 @@ void UTDMScoreboard::OnPlayerAdded(const FPlayerInfo& PlayerInfo)
 	}
 }
 
-void UTDMScoreboard::OnPlayerRemoved(const FPlayerInfo& PlayerInfo)
+void UTDMScoreboard::OnClientPlayerInfoRemoved(const FPlayerInfo& PlayerInfo)
 {
 	ETeam Team = PlayerInfo.Team;
 	if (Team == ETeam::RedTeam)
@@ -41,7 +55,7 @@ void UTDMScoreboard::OnPlayerRemoved(const FPlayerInfo& PlayerInfo)
 	}
 }
 
-void UTDMScoreboard::OnPlayerChanged(const FPlayerInfo& PlayerInfo)
+void UTDMScoreboard::OnClientPlayerInfoChanged(const FPlayerInfo& PlayerInfo)
 {
 	ETeam Team = PlayerInfo.Team;
 	if (Team == ETeam::RedTeam)
@@ -61,20 +75,6 @@ void UTDMScoreboard::OnPlayerChanged(const FPlayerInfo& PlayerInfo)
 			BlueTeamPlayers[Index] = PlayerInfo;
 			SortRowsByKillDeathIfVisible(BlueTeamRowWidgets, BlueTeamPlayers);
 		}
-	}
-}
-
-void UTDMScoreboard::ShowScoreboard(bool bShow)
-{
-	if (bShow)
-	{
-		SetVisibility(ESlateVisibility::Visible);
-		SortRowsByKillDeathIfVisible(RedTeamRowWidgets, RedTeamPlayers);
-		SortRowsByKillDeathIfVisible(BlueTeamRowWidgets, BlueTeamPlayers);
-	}
-	else
-	{
-		SetVisibility(ESlateVisibility::Collapsed);
 	}
 }
 

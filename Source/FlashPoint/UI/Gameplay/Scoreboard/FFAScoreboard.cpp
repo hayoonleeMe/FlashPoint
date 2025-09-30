@@ -9,30 +9,7 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FFAScoreboard)
 
-void UFFAScoreboard::OnPlayerAdded(const FPlayerInfo& PlayerInfo)
-{
-	PlayerInfos.Add(PlayerInfo);
-	SortRowsByKillDeathIfVisible();
-}
-
-void UFFAScoreboard::OnPlayerRemoved(const FPlayerInfo& PlayerInfo)
-{
-	// 할당된 메모리 유지
-	PlayerInfos.RemoveSwap(PlayerInfo, EAllowShrinking::No);
-	SortRowsByKillDeathIfVisible();
-}
-
-void UFFAScoreboard::OnPlayerChanged(const FPlayerInfo& PlayerInfo)
-{
-	int32 Index;
-	if (PlayerInfos.Find(PlayerInfo, Index))
-	{
-		PlayerInfos[Index] = PlayerInfo;
-		SortRowsByKillDeathIfVisible();
-	}
-}
-
-void UFFAScoreboard::ShowScoreboard(bool bShow)
+void UFFAScoreboard::ShowWidget(bool bShow)
 {
 	if (bShow)
 	{
@@ -42,6 +19,29 @@ void UFFAScoreboard::ShowScoreboard(bool bShow)
 	else
 	{
 		SetVisibility(ESlateVisibility::Collapsed);
+	}
+}
+
+void UFFAScoreboard::OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo)
+{
+	PlayerInfos.Add(PlayerInfo);
+	SortRowsByKillDeathIfVisible();
+}
+
+void UFFAScoreboard::OnClientPlayerInfoRemoved(const FPlayerInfo& PlayerInfo)
+{
+	// 할당된 메모리 유지
+	PlayerInfos.RemoveSwap(PlayerInfo, EAllowShrinking::No);
+	SortRowsByKillDeathIfVisible();
+}
+
+void UFFAScoreboard::OnClientPlayerInfoChanged(const FPlayerInfo& PlayerInfo)
+{
+	int32 Index;
+	if (PlayerInfos.Find(PlayerInfo, Index))
+	{
+		PlayerInfos[Index] = PlayerInfo;
+		SortRowsByKillDeathIfVisible();
 	}
 }
 

@@ -10,9 +10,6 @@
 class UFPAttributeSet;
 class UFPAbilitySystemComponent;
 
-// Kill Count가 변경될 때 브로드캐스트하는 델레게이트
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnPlayerKillCountChangedDelegate, ETeam/*Team*/, int32/*AddAmount*/);
-
 /**
  * 게임플레이에서 사용할 PlayerState
  */
@@ -48,15 +45,10 @@ public:
 
 	virtual FPlayerInfo MakePlayerInfo() const override;
 
-	FOnPlayerKillCountChangedDelegate OnPlayerKillCountChangedDelegate;
-	
 private:
 	// 매치에서 적을 죽인 횟수 
-	UPROPERTY(ReplicatedUsing=OnRep_KillCount, VisibleAnywhere, Category="Match Stats")
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Match Stats")
 	int32 KillCount;
-
-	UFUNCTION()
-	void OnRep_KillCount(int32 OldKillCount);
 
 	// 매치에서 죽은 횟수
 	UPROPERTY(Replicated, VisibleAnywhere, Category="Match Stats")

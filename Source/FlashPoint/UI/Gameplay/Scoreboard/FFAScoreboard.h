@@ -18,10 +18,10 @@ class FLASHPOINT_API UFFAScoreboard : public UScoreboard
 	
 public:
 	// Begin UScoreboard
-	virtual void OnPlayerAdded(const FPlayerInfo& PlayerInfo) override;
-	virtual void OnPlayerRemoved(const FPlayerInfo& PlayerInfo) override;
-	virtual void OnPlayerChanged(const FPlayerInfo& PlayerInfo) override;
-	virtual void ShowScoreboard(bool bShow) override;
+	virtual void ShowWidget(bool bShow) override;
+	virtual void OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo) override;
+	virtual void OnClientPlayerInfoRemoved(const FPlayerInfo& PlayerInfo) override;
+	virtual void OnClientPlayerInfoChanged(const FPlayerInfo& PlayerInfo) override;
 	// End UScoreboard
 	
 protected:

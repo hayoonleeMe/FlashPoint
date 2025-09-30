@@ -17,21 +17,21 @@ class FLASHPOINT_API UScoreboard : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	// PlayerInfo로 나타나는 플레이어가 추가될 때
-	virtual void OnPlayerAdded(const FPlayerInfo& PlayerInfo) { }
-
-	// PlayerInfo로 나타나는 플레이어가 제거될 때
-	virtual void OnPlayerRemoved(const FPlayerInfo& PlayerInfo) { }
-
-	// PlayerInfo로 나타나는 플레이어가 변경될 때
-	virtual void OnPlayerChanged(const FPlayerInfo& PlayerInfo) { }
-
 	// Scoreboard를 표시한다.
-	virtual void ShowScoreboard(bool bShow) { }
+	virtual void ShowWidget(bool bShow) { }
 
 protected:
 	virtual void NativeOnInitialized() override;
 	
 	// 로컬 플레이어의 Username
 	FString PlayerUsername;
+	
+	// 클라이언트에 PlayerInfo 추가가 Replicate될 떄 호출되는 Callback
+	virtual void OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo) { }
+	
+	// 클라이언트에 PlayerInfo 제거가 Replicate될 떄 호출되는 Callback
+	virtual void OnClientPlayerInfoRemoved(const FPlayerInfo& PlayerInfo) { }
+	
+	// 클라이언트에 PlayerInfo 변경이 Replicate될 떄 호출되는 Callback
+	virtual void OnClientPlayerInfoChanged(const FPlayerInfo& PlayerInfo) { }
 };

@@ -47,7 +47,6 @@ UFPAttributeSet* AFPPlayerState::GetFPAttributeSet() const
 void AFPPlayerState::AddToKillCount(int32 AddAmount)
 {
 	KillCount += AddAmount;
-	OnPlayerKillCountChangedDelegate.Broadcast(Team, AddAmount);
 }
 
 void AFPPlayerState::AddToDeathCount(int32 AddAmount)
@@ -61,9 +60,4 @@ FPlayerInfo AFPPlayerState::MakePlayerInfo() const
 	Ret.KillCount = KillCount;
 	Ret.DeathCount = DeathCount;
 	return Ret;
-}
-
-void AFPPlayerState::OnRep_KillCount(int32 OldKillCount)
-{
-	OnPlayerKillCountChangedDelegate.Broadcast(Team, KillCount - OldKillCount);
 }

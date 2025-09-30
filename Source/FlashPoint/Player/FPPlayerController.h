@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "BasePlayerController.h"
 #include "GameplayTagContainer.h"
+#include "Data/MatchTypes.h"
 #include "FPPlayerController.generated.h"
 
+class UScoreboard;
 class UPauseMenu;
 class UFPAbilitySystemComponent;
 struct FInputActionValue;
@@ -39,6 +41,24 @@ private:
 
 	UFPAbilitySystemComponent* GetFPAbilitySystemComponent() const;
 
-	UPROPERTY(EditDefaultsOnly)
+	// ============================================================================
+	// UI
+	// ============================================================================
+protected:
+	virtual void BeginPlay() override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category="UI")
 	TSubclassOf<UPauseMenu> PauseMenuClass;
+
+	// 클라이언트로 MatchInfo 프로퍼티가 Replicate될 때 호출되는 Callback
+	void OnClientMatchInfoReplicated(const FMatchInfo& MatchInfo);
+
+	// Cached Scoreboard Widget
+	UPROPERTY()
+	TObjectPtr<UScoreboard> Scoreboard;
+
+	// MatchMode 별 Scoreboard Widget Class
+	UPROPERTY(EditDefaultsOnly, Category="UI")
+	TMap<EMatchMode, TSubclassOf<UScoreboard>> ScoreboardClasses;
 };
