@@ -13,5 +13,5 @@ class FLASHPOINT_API ALobbyGameMode : public ABaseGameMode
 
 public:
 	// MatchMode에 해당하는 레벨로 이동해 매치를 시작한다.
-	void StartMatch(EMatchMode MatchMode);
+	void TravelToMatchLevel(EMatchMode MatchMode) const;
 };

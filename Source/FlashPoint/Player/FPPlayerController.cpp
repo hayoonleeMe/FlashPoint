@@ -9,7 +9,7 @@
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
-#include "Game/FPGameState.h"
+#include "Game/BaseGameState.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Input/FPInputComponent.h"
@@ -163,9 +163,9 @@ void AFPPlayerController::BeginPlay()
 	// 클라이언트 로컬 플레이어 Only
 	if (IsLocalController() && GetWorld())
 	{
-		if (AFPGameState* FPGameState = GetWorld()->GetGameState<AFPGameState>())
+		if (ABaseGameState* BaseGS = GetWorld()->GetGameState<ABaseGameState>())
 		{
-			FPGameState->OnClientMatchInfoReplicatedDelegate.AddUObject(this, &ThisClass::OnClientMatchInfoReplicated);
+			BaseGS->OnClientMatchInfoReplicatedDelegate.AddUObject(this, &ThisClass::OnClientMatchInfoReplicated);
 		}
 	}
 }
