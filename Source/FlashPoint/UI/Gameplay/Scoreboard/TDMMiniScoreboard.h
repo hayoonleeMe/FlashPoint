@@ -17,6 +17,8 @@ class FLASHPOINT_API UTDMMiniScoreboard : public UMiniScoreboard
 	GENERATED_BODY()
 
 protected:
+	virtual void NativeOnInitialized() override;
+	
 	// Begin UMiniScoreboard
 	virtual void UpdateKillCount(ETeam Team, int32 KillCount) override;
 	// End UMiniScoreboard

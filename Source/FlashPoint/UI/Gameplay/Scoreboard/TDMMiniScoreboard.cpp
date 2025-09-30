@@ -7,6 +7,16 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(TDMMiniScoreboard)
 
+void UTDMMiniScoreboard::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	TeamKillCounts.Add(ETeam::RedTeam, 0);
+	UpdateKillCount(ETeam::RedTeam, 0);
+	TeamKillCounts.Add(ETeam::BlueTeam, 0);
+	UpdateKillCount(ETeam::BlueTeam, 0);
+}
+
 void UTDMMiniScoreboard::UpdateKillCount(ETeam Team, int32 KillCount)
 {
 	if (Team == ETeam::RedTeam)

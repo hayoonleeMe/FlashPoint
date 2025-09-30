@@ -7,6 +7,14 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FFAMiniScoreboard)
 
+void UFFAMiniScoreboard::NativeOnInitialized()
+{
+	Super::NativeOnInitialized();
+
+	TeamKillCounts.Add(ETeam::None, 0);
+	UpdateKillCount(ETeam::None, 0);
+}
+
 void UFFAMiniScoreboard::UpdateKillCount(ETeam Team, int32 KillCount)
 {
 	if (Team == ETeam::None)

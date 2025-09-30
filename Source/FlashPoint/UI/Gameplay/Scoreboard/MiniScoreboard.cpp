@@ -25,12 +25,6 @@ void UMiniScoreboard::NativeOnInitialized()
 void UMiniScoreboard::OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo)
 {
 	PlayerKillCounts.Add(PlayerInfo.GetUsernameAsFName(), PlayerInfo.KillCount);
-
-	if (!TeamKillCounts.Contains(PlayerInfo.Team))
-	{
-		int32 KillCount = TeamKillCounts.FindOrAdd(PlayerInfo.Team, 0);
-		UpdateKillCount(PlayerInfo.Team, KillCount);
-	}
 }
 
 void UMiniScoreboard::OnClientPlayerInfoRemoved(const FPlayerInfo& PlayerInfo)
