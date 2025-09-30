@@ -51,6 +51,7 @@ void ULobbyWidget::InitializeLobby(const FMatchInfo& MatchInfo)
 	
 	Text_RoomName->SetText(FText::FromString(MatchInfo.RoomName));
 	Text_MatchMode->SetText(FText::FromString(LexToString(MatchInfo.MatchMode)));
+	Text_GoalKillCount->SetText(FText::AsNumber(MatchInfo.GoalKillCount));
 
 	if (MatchMode == EMatchMode::TeamDeathMatch)
 	{

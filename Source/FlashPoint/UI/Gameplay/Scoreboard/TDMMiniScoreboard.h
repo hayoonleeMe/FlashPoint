@@ -29,6 +29,4 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> Text_BlueKillCount;
-
-	// TODO : Goal Kill Count
 };

@@ -26,6 +26,4 @@ protected:
 private:
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UTextBlock> Text_KillCount;
-
-	// TODO : Goal Kill Count
 };

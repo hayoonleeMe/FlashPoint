@@ -7,6 +7,7 @@
 #include "Data/MatchTypes.h"
 #include "MiniScoreboard.generated.h"
 
+class UTextBlock;
 struct FPlayerInfo;
 
 /**
@@ -16,6 +17,9 @@ UCLASS(Abstract)
 class FLASHPOINT_API UMiniScoreboard : public UUserWidget
 {
 	GENERATED_BODY()
+
+public:
+	void SetGoalKillCount(int32 GoalKillCount);
 
 protected:
 	virtual void NativeOnInitialized() override;
@@ -38,4 +42,7 @@ protected:
 	// 플레이어 별 KillCount
 	// Key: Username, Value: KillCount
 	TMap<FName, int32> PlayerKillCounts;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> Text_GoalKillCount;
 };
