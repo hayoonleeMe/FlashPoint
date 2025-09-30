@@ -4,8 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Data/MatchTypes.h"
 #include "PlayerHUD.generated.h"
 
+class UMiniScoreboard;
 class AWeapon_Base;
 struct FGameplayTag;
 struct FOnAttributeChangeData;
@@ -26,6 +28,14 @@ protected:
 	virtual void NativePreConstruct() override;
 
 private:
+	// 클라이언트로 MatchInfo 프로퍼티가 Replicate될 때 호출되는 Callback
+	void OnClientMatchInfoReplicated(const FMatchInfo& MatchInfo);
+
+	// MatchMode 별 Mini Scoreboard Widget Class
+	UPROPERTY(EditDefaultsOnly)
+	TMap<EMatchMode, TSubclassOf<UMiniScoreboard>> MiniScoreboardClasses;
+
+	// 클라이언트로 PlayerState가 Replicate될 때 호출되는 Callback
 	void OnPlayerStateReplicated(APlayerState* PlayerState);
 	
 	UPROPERTY(meta=(BindWidget))
@@ -73,4 +83,7 @@ private:
 	// 무기를 장착하지 않은 슬롯에 표시할 아이콘
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UTexture2D> UnarmedIcon;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UNamedSlot> NamedSlot_MiniScoreboard;
 };

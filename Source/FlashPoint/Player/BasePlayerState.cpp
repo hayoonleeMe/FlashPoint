@@ -46,7 +46,7 @@ void ABasePlayerState::OverrideWith(APlayerState* PlayerState)
 FPlayerInfo ABasePlayerState::MakePlayerInfo() const
 {
 	FPlayerInfo Ret;
-	Ret.Username = ServerUsername;
+	Ret.SetUsername(ServerUsername);
 	Ret.Team = Team;
 	return Ret;
 }

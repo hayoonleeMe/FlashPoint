@@ -14,14 +14,19 @@ struct FPlayerInfo : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
+	friend struct FPlayerInfoArray;
+
 public:
 	FPlayerInfo() { }
 	FPlayerInfo(const FString& InUsername, ETeam InTeam)
-		: Username(InUsername), Team(InTeam)
-	{ }
+		: Team(InTeam)
+	{
+		SetUsername(InUsername);
+	}
 
-	UPROPERTY()
-	FString Username;
+	void SetUsername(const FString& InUsername);
+	FString GetUsername() const { return Username; }
+	FName GetUsernameAsFName() const { return Username_FName; }
 
 	UPROPERTY()
 	ETeam Team{};
@@ -36,6 +41,15 @@ public:
 	{
 		return Username == Other.Username;
 	}
+
+private:
+	UPROPERTY()
+	FString Username;
+
+	// FName 타입의 Username 데이터
+	// Username이 설정될 때 함께 설정된다.
+	UPROPERTY()
+	FName Username_FName;
 };
 
 /**

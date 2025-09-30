@@ -89,7 +89,7 @@ void UFFAScoreboard::SortRowsByKillDeathIfVisible()
 			if (Index < PlayerInfos.Num())
 			{
 				const FPlayerInfo& PlayerInfo = PlayerInfos[Index];
-				Row->SetRow(Index + 1, PlayerInfo.Username, PlayerInfo.KillCount, PlayerInfo.DeathCount, PlayerInfo.Username == PlayerUsername);
+				Row->SetRow(Index + 1, PlayerInfo.GetUsername(), PlayerInfo.KillCount, PlayerInfo.DeathCount, PlayerInfo.GetUsername() == PlayerUsername);
 			}
 			else
 			{

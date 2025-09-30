@@ -116,7 +116,7 @@ void UTDMScoreboard::SortRowsByKillDeathIfVisible(const TArray<UWidget*>& RowWid
 			if (Index < Players.Num())
 			{
 				const FPlayerInfo& PlayerInfo = Players[Index];
-				Row->SetRow(PlayerInfo.Username, PlayerInfo.KillCount, PlayerInfo.DeathCount, PlayerInfo.Username == PlayerUsername);
+				Row->SetRow(PlayerInfo.GetUsername(), PlayerInfo.KillCount, PlayerInfo.DeathCount, PlayerInfo.GetUsername() == PlayerUsername);
 			}
 			else
 			{

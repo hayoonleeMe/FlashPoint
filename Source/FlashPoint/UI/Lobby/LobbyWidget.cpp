@@ -72,11 +72,11 @@ void ULobbyWidget::OnPlayerJoined(const FPlayerInfo& PlayerInfo) const
 {
 	if (MatchMode == EMatchMode::TeamDeathMatch)
 	{
-		TDMPlayerList->OnPlayerJoined(PlayerInfo.Username, PlayerInfo.Team);
+		TDMPlayerList->OnPlayerJoined(PlayerInfo.GetUsername(), PlayerInfo.Team);
 	}
 	else if (MatchMode == EMatchMode::FreeForAll)
 	{
-		FFAPlayerList->OnPlayerJoined(PlayerInfo.Username);
+		FFAPlayerList->OnPlayerJoined(PlayerInfo.GetUsername());
 	}
 }
 
@@ -84,11 +84,11 @@ void ULobbyWidget::OnPlayerLeft(const FPlayerInfo& PlayerInfo) const
 {
 	if (MatchMode == EMatchMode::TeamDeathMatch)
 	{
-		TDMPlayerList->OnPlayerLeft(PlayerInfo.Username);
+		TDMPlayerList->OnPlayerLeft(PlayerInfo.GetUsername());
 	}
 	else if (MatchMode == EMatchMode::FreeForAll)
 	{
-		FFAPlayerList->OnPlayerLeft(PlayerInfo.Username);
+		FFAPlayerList->OnPlayerLeft(PlayerInfo.GetUsername());
 	}
 }
 
@@ -96,7 +96,7 @@ void ULobbyWidget::OnPlayerUpdated(const FPlayerInfo& PlayerInfo) const
 {
 	if (MatchMode == EMatchMode::TeamDeathMatch)
 	{
-		TDMPlayerList->OnPlayerUpdated(PlayerInfo.Username, PlayerInfo.Team);
+		TDMPlayerList->OnPlayerUpdated(PlayerInfo.GetUsername(), PlayerInfo.Team);
 	}
 }
 

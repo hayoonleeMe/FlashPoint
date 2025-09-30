@@ -3,6 +3,12 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerInfo)
 
+void FPlayerInfo::SetUsername(const FString& InUsername)
+{
+	Username = InUsername;
+	Username_FName = FName(InUsername);
+}
+
 void FPlayerInfoArray::AddPlayer(const FPlayerInfo& InPlayerInfo)
 {
 	FPlayerInfo& NewPlayerInfo = Players.Add_GetRef(InPlayerInfo);
