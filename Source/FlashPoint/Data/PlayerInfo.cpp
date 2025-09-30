@@ -17,14 +17,14 @@ void FPlayerInfoArray::AddPlayer(const FPlayerInfo& InPlayerInfo)
 
 void FPlayerInfoArray::RemovePlayer(const FString& Username)
 {
-	for (auto It = Players.CreateIterator(); It; ++It)
+	const int32 NumRemoved = Players.RemoveAllSwap([&](const FPlayerInfo& Info)
 	{
-		FPlayerInfo& PlayerInfo = *It;
-		if (PlayerInfo.Username == Username)
-		{
-			It.RemoveCurrent();
-			MarkArrayDirty();
-		}
+		return Info.Username == Username;
+	}, false);
+
+	if (NumRemoved > 0)
+	{
+		MarkArrayDirty();
 	}
 }
 
