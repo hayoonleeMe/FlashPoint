@@ -57,7 +57,7 @@ FString ABaseGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 		{
 			// TDM이라면 플레이어의 팀을 선택하고, 배열에 추가해 관리
 			ChoosePlayerTeam(BasePS);
-			BaseGS->AddPlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
+			BaseGS->AddPlayerInfo(BasePS->MakePlayerInfo());
 		}
 	}
 	
@@ -83,6 +83,8 @@ void ABaseGameMode::Logout(AController* Exiting)
 				// GameLift GameSession에 등록한 PlayerSession을 제거
 				OnlineServiceSubsystem->RemovePlayerSession(BasePS->GetServerPlayerSessionId());
 
+				BasePS->OnServerPlayerTeamChangedDelegate.RemoveAll(this);
+
 				if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
 				{
 					if (MatchInfo.MatchMode == EMatchMode::TeamDeathMatch)
@@ -93,6 +95,9 @@ void ABaseGameMode::Logout(AController* Exiting)
 
 					// 배열에서 제거
 					BaseGS->RemovePlayerInfo(BasePS->GetServerUsername());
+					
+					// 접속한 플레이어 수 업데이트
+					--MatchInfo.CurrentPlayers;
 				}
 
 				const bool bIsHost = MatchInfo.HostId == BasePS->GetServerUsername();
@@ -133,7 +138,7 @@ void ABaseGameMode::PostSeamlessTravel()
 		{
 			if (ABasePlayerState* BasePS = Cast<ABasePlayerState>(PS))
 			{
-				BaseGS->AddPlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
+				BaseGS->AddPlayerInfo(BasePS->MakePlayerInfo());
 
 				// 팀 정보 유지
 				if (BasePS->GetTeam() == ETeam::RedTeam)
@@ -190,7 +195,7 @@ void ABaseGameMode::OnPlayerTeamChanged(ABasePlayerState* BasePS)
 {
 	if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
 	{
-		BaseGS->UpdatePlayerInfo(BasePS->GetServerUsername(), BasePS->GetTeam());
+		BaseGS->UpdatePlayerInfo(BasePS->MakePlayerInfo());
 	}
 }
 

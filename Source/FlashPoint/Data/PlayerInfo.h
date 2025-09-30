@@ -14,11 +14,42 @@ struct FPlayerInfo : public FFastArraySerializerItem
 {
 	GENERATED_BODY()
 
-	UPROPERTY()
-	FString Username;
+	friend struct FPlayerInfoArray;
+
+public:
+	FPlayerInfo() { }
+	FPlayerInfo(const FString& InUsername, ETeam InTeam)
+		: Team(InTeam)
+	{
+		SetUsername(InUsername);
+	}
+
+	void SetUsername(const FString& InUsername);
+	FString GetUsername() const { return Username; }
+	FName GetUsernameAsFName() const { return Username_FName; }
 
 	UPROPERTY()
 	ETeam Team{};
+
+	UPROPERTY()
+	int32 KillCount{};
+
+	UPROPERTY()
+	int32 DeathCount{};
+
+	bool operator==(const FPlayerInfo& Other) const
+	{
+		return Username == Other.Username;
+	}
+
+private:
+	UPROPERTY()
+	FString Username;
+
+	// FName 타입의 Username 데이터
+	// Username이 설정될 때 함께 설정된다.
+	UPROPERTY()
+	FName Username_FName;
 };
 
 /**
@@ -32,9 +63,9 @@ struct FPlayerInfoArray : public FFastArraySerializer
 public:
 	const TArray<FPlayerInfo>& GetPlayers() const { return Players; }
 	
-	void AddPlayer(const FString& Username, ETeam Team);
+	void AddPlayer(const FPlayerInfo& InPlayerInfo);
 	void RemovePlayer(const FString& Username);
-	void UpdatePlayer(const FString& Username, ETeam Team);
+	void UpdatePlayer(const FPlayerInfo& InPlayerInfo);
 
 	//~FFastArraySerializer contract
 	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);

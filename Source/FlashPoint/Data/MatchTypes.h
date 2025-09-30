@@ -15,9 +15,9 @@ constexpr const TCHAR* SessionTerminatedKickReason = TEXT("The game session has 
 UENUM()
 enum class EMatchMode : uint8
 {
+	None,
 	TeamDeathMatch,
-	FreeForAll,
-	None
+	FreeForAll
 };
 
 // EMatchMode 값을 FString으로 변환한다.

@@ -20,6 +20,7 @@ class FLASHPOINT_API AFPPlayerState : public ABasePlayerState, public IAbilitySy
 
 public:
 	AFPPlayerState();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UFPAbilitySystemComponent* GetFPAbilitySystemComponent() const;
@@ -31,4 +32,25 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UFPAttributeSet> AttributeSet;
+
+	// ============================================================================
+	// Match Stats
+	// ============================================================================
+public:
+	void AddToKillCount(int32 AddAmount);
+	int32 GetKillCount() const { return KillCount; }
+
+	void AddToDeathCount(int32 AddAmount);
+	int32 GetDeathCount() const { return DeathCount; }
+
+	virtual FPlayerInfo MakePlayerInfo() const override;
+
+private:
+	// 매치에서 적을 죽인 횟수 
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Match Stats")
+	int32 KillCount;
+
+	// 매치에서 죽은 횟수
+	UPROPERTY(Replicated, VisibleAnywhere, Category="Match Stats")
+	int32 DeathCount;
 };

@@ -9,11 +9,13 @@
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
+#include "Game/BaseGameState.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Input/FPInputComponent.h"
 #include "System/FPAssetManager.h"
 #include "UI/Gameplay/PauseMenu.h"
+#include "UI/Gameplay/Scoreboard/Scoreboard.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
 
@@ -69,6 +71,7 @@ void AFPPlayerController::SetupInputComponent()
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::PauseMenu, ETriggerEvent::Triggered, this, &ThisClass::Input_PauseMenu);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Scoreboard, ETriggerEvent::Triggered, this, &ThisClass::Input_Scoreboard);
 
 	// Bind Ability Inputs
 	FPInputComponent->BindAbilityActions(InputData, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);
@@ -120,6 +123,14 @@ void AFPPlayerController::Input_PauseMenu()
 	SetUIInputMode();
 }
 
+void AFPPlayerController::Input_Scoreboard(const FInputActionValue& InputValue)
+{
+	if (Scoreboard)
+	{
+		Scoreboard->ShowWidget(InputValue.Get<bool>());
+	}
+}
+
 void AFPPlayerController::Input_AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (UFPAbilitySystemComponent* ASC = GetFPAbilitySystemComponent())
@@ -143,4 +154,28 @@ UFPAbilitySystemComponent* AFPPlayerController::GetFPAbilitySystemComponent() co
 		return PS->GetFPAbilitySystemComponent();
 	}
 	return nullptr;
+}
+
+void AFPPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// 클라이언트 로컬 플레이어 Only
+	if (IsLocalController() && GetWorld())
+	{
+		if (ABaseGameState* BaseGS = GetWorld()->GetGameState<ABaseGameState>())
+		{
+			BaseGS->OnClientMatchInfoReplicatedDelegate.AddUObject(this, &ThisClass::OnClientMatchInfoReplicated);
+		}
+	}
+}
+
+void AFPPlayerController::OnClientMatchInfoReplicated(const FMatchInfo& MatchInfo)
+{
+	if (TSubclassOf<UScoreboard>* ScoreboardClass = ScoreboardClasses.Find(MatchInfo.MatchMode))
+	{
+		// Scoreboard Widget 생성 후 숨김
+    	Scoreboard = UIManageComponent->AddWidget<UScoreboard>(EWidgetLayer::HUD, *ScoreboardClass);
+    	Scoreboard->ShowWidget(false);
+	}
 }

@@ -22,7 +22,7 @@ void ALobbyPlayerController::ServerStartMatch_Implementation(EMatchMode MatchMod
 	{
 		if (ALobbyGameMode* LobbyGameMode = GetWorld()->GetAuthGameMode<ALobbyGameMode>())
 		{
-			LobbyGameMode->StartMatch(MatchMode);
+			LobbyGameMode->TravelToMatchLevel(MatchMode);
 		}
 	}
 }

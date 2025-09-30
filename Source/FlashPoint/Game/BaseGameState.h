@@ -12,7 +12,7 @@
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnClientMatchInfoReplicatedDelegate, const FMatchInfo&/*MatchInfo*/);
 
 // 클라이언트에서 PlayerInfoArray가 변경될 때 브로드캐스트하는 델레게이트
-DECLARE_MULTICAST_DELEGATE_TwoParams(FOnClientPlayerInfoArrayDelegate, const FString&/*Username*/, ETeam/*Team*/);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnClientPlayerInfoArrayDelegate, const FPlayerInfo&/*PlayerInfo*/);
 
 /**
  * 매치 정보와 서버에 접속한 플레이어 정보를 관리하는 GameState
@@ -29,13 +29,13 @@ public:
 	void SetMatchInfo(const FMatchInfo& InMatchInfo);
 
 	// 새로 접속한 플레이어 정보를 추가한다.
-	void AddPlayerInfo(const FString& Username, ETeam Team);
+	void AddPlayerInfo(const FPlayerInfo& PlayerInfo);
 
 	// 퇴장한 플레이어 정보를 제거한다.
 	void RemovePlayerInfo(const FString& Username);
 
 	// 플레이어 정보를 변경한다.
-	void UpdatePlayerInfo(const FString& Username, ETeam Team);
+	void UpdatePlayerInfo(const FPlayerInfo& PlayerInfo);
 
 	FOnClientMatchInfoReplicatedDelegate OnClientMatchInfoReplicatedDelegate;
 
@@ -49,17 +49,12 @@ public:
 	FOnClientPlayerInfoArrayDelegate OnClientPlayerInfoChangedDelegate;
 
 protected:
-	virtual void BeginPlay() override;
-	
 	// 현재 매치 관련 정보를 저장하는 데이터
 	UPROPERTY(ReplicatedUsing=OnRep_MatchInfo);
 	FMatchInfo MatchInfo;
 
 	UFUNCTION()
 	void OnRep_MatchInfo();
-
-	// 로컬 플레이어의 Username
-	FString PlayerUsername;
 
 	// 실제 서버에 접속 중인 플레이어 정보를 저장하는 배열
 	// 서버에서만 변경되어야 한다.

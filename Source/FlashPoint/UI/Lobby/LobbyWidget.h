@@ -7,6 +7,7 @@
 #include "Data/MatchTypes.h"
 #include "LobbyWidget.generated.h"
 
+struct FPlayerInfo;
 class UButton;
 class UHorizontalBox;
 class UFFAPlayerList;
@@ -29,9 +30,9 @@ private:
 	// MatchInfo로 위젯을 초기화한다.
 	void InitializeLobby(const FMatchInfo& MatchInfo);
 	
-	void OnPlayerJoined(const FString& Username, ETeam Team) const;
-	void OnPlayerLeft(const FString& Username, ETeam Team) const;
-	void OnPlayerUpdated(const FString& Username, ETeam Team) const;
+	void OnPlayerJoined(const FPlayerInfo& PlayerInfo) const;
+	void OnPlayerLeft(const FPlayerInfo& PlayerInfo) const;
+	void OnPlayerUpdated(const FPlayerInfo& PlayerInfo) const;
 	
 	// 로컬 플레이어의 Username
 	FString PlayerUsername;

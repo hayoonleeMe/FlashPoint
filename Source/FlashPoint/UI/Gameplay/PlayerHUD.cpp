@@ -8,10 +8,13 @@
 #include "FPGameplayTags.h"
 #include "AbilitySystem/Attributes/FPAttributeSet.h"
 #include "Components/Image.h"
+#include "Components/NamedSlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Game/BaseGameState.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/BasePlayerController.h"
+#include "Scoreboard/MiniScoreboard.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
 
@@ -20,6 +23,14 @@
 void UPlayerHUD::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+
+	if (GetWorld())
+	{
+		if (ABaseGameState* BaseGS = GetWorld()->GetGameState<ABaseGameState>())
+		{
+			BaseGS->OnClientMatchInfoReplicatedDelegate.AddUObject(this, &ThisClass::OnClientMatchInfoReplicated);
+		}
+	}
 
 	if (ABasePlayerController* BasePC = GetOwningPlayer<ABasePlayerController>())
 	{
@@ -55,6 +66,15 @@ void UPlayerHUD::NativePreConstruct()
 	Text_Ammo->SetVisibility(ESlateVisibility::Hidden);
 	Text_ReserveAmmo->SetVisibility(ESlateVisibility::Hidden);
 	Text_WeaponName->SetVisibility(ESlateVisibility::Hidden);
+}
+
+void UPlayerHUD::OnClientMatchInfoReplicated(const FMatchInfo& MatchInfo)
+{
+	if (TSubclassOf<UMiniScoreboard>* MiniScoreboardClass = MiniScoreboardClasses.Find(MatchInfo.MatchMode))
+	{
+		UUserWidget* MiniScoreboard = CreateWidget(NamedSlot_MiniScoreboard, *MiniScoreboardClass);
+		NamedSlot_MiniScoreboard->AddChild(MiniScoreboard);
+	}
 }
 
 void UPlayerHUD::OnPlayerStateReplicated(APlayerState* PlayerState)

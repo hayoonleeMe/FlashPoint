@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Data/MatchTypes.h"
+#include "Data/PlayerInfo.h"
 #include "GameFramework/PlayerState.h"
 #include "BasePlayerState.generated.h"
 
@@ -28,6 +29,9 @@ public:
 	virtual void CopyProperties(APlayerState* PlayerState) override;
 	virtual void OverrideWith(APlayerState* PlayerState) override;
 
+	// PlayerState 정보로 FPlayerInfo 구조체를 만들어 반환한다.
+	virtual FPlayerInfo MakePlayerInfo() const;
+	
 	// 서버에서만 브로드캐스트한다.
 	FOnServerPlayerTeamChangedDelegate OnServerPlayerTeamChangedDelegate;
 	

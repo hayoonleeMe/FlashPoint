@@ -43,6 +43,14 @@ void ABasePlayerState::OverrideWith(APlayerState* PlayerState)
 	}
 }
 
+FPlayerInfo ABasePlayerState::MakePlayerInfo() const
+{
+	FPlayerInfo Ret;
+	Ret.SetUsername(ServerUsername);
+	Ret.Team = Team;
+	return Ret;
+}
+
 void ABasePlayerState::SetTeam(ETeam InTeam)
 {
 	ETeam LastTeam = Team;

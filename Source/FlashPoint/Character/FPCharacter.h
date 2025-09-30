@@ -14,6 +14,9 @@ class USpringArmComponent;
 class UFPAttributeSet;
 class UFPAbilitySystemComponent;
 
+/**
+ * Gameplay에서 사용할 Character
+ */
 UCLASS()
 class FLASHPOINT_API AFPCharacter : public ACharacter, public IAbilitySystemInterface
 {
