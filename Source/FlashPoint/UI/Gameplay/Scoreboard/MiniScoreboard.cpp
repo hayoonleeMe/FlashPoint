@@ -3,9 +3,15 @@
 
 #include "MiniScoreboard.h"
 
+#include "Components/TextBlock.h"
 #include "Game/BaseGameState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MiniScoreboard)
+
+void UMiniScoreboard::SetGoalKillCount(int32 GoalKillCount)
+{
+	Text_GoalKillCount->SetText(FText::AsNumber(GoalKillCount));
+}
 
 void UMiniScoreboard::NativeOnInitialized()
 {

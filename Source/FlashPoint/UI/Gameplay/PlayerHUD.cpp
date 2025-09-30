@@ -72,7 +72,8 @@ void UPlayerHUD::OnClientMatchInfoReplicated(const FMatchInfo& MatchInfo)
 {
 	if (TSubclassOf<UMiniScoreboard>* MiniScoreboardClass = MiniScoreboardClasses.Find(MatchInfo.MatchMode))
 	{
-		UUserWidget* MiniScoreboard = CreateWidget(NamedSlot_MiniScoreboard, *MiniScoreboardClass);
+		UMiniScoreboard* MiniScoreboard = CreateWidget<UMiniScoreboard>(NamedSlot_MiniScoreboard, *MiniScoreboardClass);
+		MiniScoreboard->SetGoalKillCount(MatchInfo.GoalKillCount);
 		NamedSlot_MiniScoreboard->AddChild(MiniScoreboard);
 	}
 }

@@ -29,6 +29,14 @@ void FMatchInfo::RetrieveGameProperties(const TArray<FKeyValueStruct>& GamePrope
 		{
 			MaxPlayers = Property.Value;
 		}
+		else if (Property.Key == TEXT("goalKillCount"))
+		{
+			// int32로 변환해 저장
+			if (!LexTryParseString(GoalKillCount, *Property.Value))
+			{
+				UE_LOG(LogFP, Warning, TEXT("[%hs] Can't parse goalKillCount property to int32 value."), __FUNCTION__);				
+			}
+		}
 	}
 }
 
@@ -40,4 +48,5 @@ void FMatchInfo::Dump() const
 	UE_LOG(LogFP, Log, TEXT("  MatchMode %s"), *LexToString(MatchMode));
 	UE_LOG(LogFP, Log, TEXT("  MaxPlayers %s"), *MaxPlayers);
 	UE_LOG(LogFP, Log, TEXT("  CurrentPlayers %d"), CurrentPlayers);
+	UE_LOG(LogFP, Log, TEXT("  GoalKillCount %d"), GoalKillCount);
 }

@@ -168,7 +168,7 @@ private:
 	// 플레이어가 수행하는 Aws GameSessions API 관련 기능
 	// 서버 접속 전 Standalone, 서버 접속 후 Client
 public:
-	void CreateGameSession(const FString& RoomName, const FString& MatchMode, const FString& MaxPlayers, const FString& CreatorId);
+	void CreateGameSession(const FString& RoomName, const FString& MatchMode, const FString& MaxPlayers, const FString& CreatorId, const FString& GoalKillCount);
 	void DescribeGameSessionStatus(const FString& GameSessionId);
 	void DescribeGameSessions();
 	void CreatePlayerSession(const FString& Username, const FString& GameSessionId);

@@ -1050,7 +1050,7 @@ void UOnlineServiceSubsystem::ParseCommandLinePort(int32& OutPort)
 #endif
 }
 
-void UOnlineServiceSubsystem::CreateGameSession(const FString& RoomName, const FString& MatchMode, const FString& MaxPlayers, const FString& CreatorId)
+void UOnlineServiceSubsystem::CreateGameSession(const FString& RoomName, const FString& MatchMode, const FString& MaxPlayers, const FString& CreatorId, const FString& GoalKillCount)
 {
 	CreateGameSessionStatusMessageDelegate.Broadcast(OnlineServiceStatusMessage::CreateGameSession::CreateMatchPending, false);
 
@@ -1062,7 +1062,8 @@ void UOnlineServiceSubsystem::CreateGameSession(const FString& RoomName, const F
 		{ TEXT("roomName"), RoomName },
 		{ TEXT("matchMode"), MatchMode },
 		{ TEXT("maxPlayers"), MaxPlayers },
-		{ TEXT("creatorId"), CreatorId }
+		{ TEXT("creatorId"), CreatorId },
+		{ TEXT("goalKillCount"), GoalKillCount }
 	};
 	const FString Content = SerializeJsonContent(Params);
 	Request->SetContentAsString(Content);

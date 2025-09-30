@@ -22,6 +22,8 @@ UCreateMatchPopup::UCreateMatchPopup(const FObjectInitializer& ObjectInitializer
 	
 	TDMPlayerCountOptions = { 2, 4, 6, 8, 10 };
 	FFAPlayerCountOptions = { 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+
+	GoalKillCountOptions = { 10, 30, 50, 100 };
 }
 
 void UCreateMatchPopup::Input_UI_Back()
@@ -68,6 +70,13 @@ void UCreateMatchPopup::NativeOnInitialized()
 		ComboBox_MaxPlayers->AddOption(FString::FromInt(Option));
 	}
 	ComboBox_MaxPlayers->SetSelectedIndex(0);
+
+	ComboBox_GoalKillCount->ClearOptions();
+	for (int32 Option : GoalKillCountOptions)
+	{
+		ComboBox_GoalKillCount->AddOption(FString::FromInt(Option));
+	}
+	ComboBox_GoalKillCount->SetSelectedIndex(0);
 
 	UpdateCreateButtonState();
 
@@ -150,8 +159,9 @@ void UCreateMatchPopup::OnCreateButtonClicked()
 			const FString RoomName = TextBox_RoomName->GetText().ToString();
 			const FString MatchMode = ComboBox_MatchMode->GetSelectedOption();
 			const FString MaxPlayers = ComboBox_MaxPlayers->GetSelectedOption();
+			const FString GoalKillCount = ComboBox_GoalKillCount->GetSelectedOption();
 			const FString Username = PlayerAuthSubsystem->GetUsername();	// 방장 이름
-			OnlineServiceSubsystem->CreateGameSession(RoomName, MatchMode, MaxPlayers, Username);
+			OnlineServiceSubsystem->CreateGameSession(RoomName, MatchMode, MaxPlayers, Username, GoalKillCount);
 		}
 
 		Button_Create->SetIsEnabled(false);

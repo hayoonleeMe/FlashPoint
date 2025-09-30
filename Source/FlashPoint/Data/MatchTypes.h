@@ -81,6 +81,9 @@ struct FMatchInfo
 	UPROPERTY()
 	int32 CurrentPlayers{};
 
+	UPROPERTY()
+	int32 GoalKillCount{};
+
 	// TArray<FKeyValueStruct> 타입의 데이터를 변환해 내부 데이터를 설정한다.
 	void RetrieveGameProperties(const TArray<FKeyValueStruct>& GameProperties);
 	void Dump() const;

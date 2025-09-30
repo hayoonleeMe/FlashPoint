@@ -47,6 +47,9 @@ private:
 	TObjectPtr<UTextBlock> Text_MatchMode;
 
 	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UTextBlock> Text_GoalKillCount;
+
+	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UWidgetSwitcher> WidgetSwitcher;
 
 	UPROPERTY(meta=(BindWidget))

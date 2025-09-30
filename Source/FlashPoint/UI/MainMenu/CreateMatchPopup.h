@@ -61,6 +61,12 @@ private:
 	TArray<int32> FFAPlayerCountOptions;
 
 	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UComboBoxString> ComboBox_GoalKillCount;
+
+	UPROPERTY(EditDefaultsOnly)
+	TArray<int32> GoalKillCountOptions;
+
+	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UButton> Button_Create;
 
 	UFUNCTION()
