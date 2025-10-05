@@ -7,6 +7,7 @@
 #include "Data/MatchTypes.h"
 #include "PlayerHUD.generated.h"
 
+class UMatchTimer;
 class UMiniScoreboard;
 class AWeapon_Base;
 struct FGameplayTag;
@@ -86,4 +87,7 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UNamedSlot> NamedSlot_MiniScoreboard;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UMatchTimer> MatchTimer;
 };

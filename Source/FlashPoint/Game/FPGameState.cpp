@@ -22,4 +22,5 @@ void AFPGameState::SetMatchEndTime(float InMatchEndTime)
 
 void AFPGameState::OnRep_MatchEndTime()
 {
+	OnClientMatchEndTimeReplicatedDelegate.Broadcast(MatchEndTime);
 }
