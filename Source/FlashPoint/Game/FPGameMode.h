@@ -39,4 +39,15 @@ private:
 	// 팀 별로 ATeamPlayerStart 액터 배열을 저장하는 맵
 	UPROPERTY()
 	TMap<ETeam, FTeamPlayerStartArray> TeamPlayerStartsMap;
+
+	// ============================================================================
+	// Match
+	// ============================================================================
+protected:
+	virtual void HandleMatchHasStarted() override;
+
+private:
+	// 매치를 진행할 시간(초)
+	UPROPERTY(EditDefaultsOnly, Category="Match")
+	float MatchTime;
 };
