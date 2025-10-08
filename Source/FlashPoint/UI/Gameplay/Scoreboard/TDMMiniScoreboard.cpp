@@ -11,9 +11,7 @@ void UTDMMiniScoreboard::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	TeamKillCounts.Add(ETeam::RedTeam, 0);
 	UpdateKillCount(ETeam::RedTeam, 0);
-	TeamKillCounts.Add(ETeam::BlueTeam, 0);
 	UpdateKillCount(ETeam::BlueTeam, 0);
 }
 
