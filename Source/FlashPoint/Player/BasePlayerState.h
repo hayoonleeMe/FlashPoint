@@ -38,22 +38,22 @@ public:
 	void SetTeam(ETeam InTeam);
 	ETeam GetTeam() const { return Team; }
 
+	void SetUsername(const FString& InUsername) { Username = InUsername; }
+	FString GetUsername() const { return Username; }
+	
 	void SetServerPlayerSessionId(const FString& InPlayerSessionId) { ServerPlayerSessionId = InPlayerSessionId; }
 	FString GetServerPlayerSessionId() const { return ServerPlayerSessionId; }
-	
-	void SetServerUsername(const FString& InUsername) { ServerUsername = InUsername; }
-	FString GetServerUsername() const { return ServerUsername; }
 
 protected:
 	// TDM인 경우 설정되는 팀 데이터
 	UPROPERTY(VisibleAnywhere, Replicated)
 	ETeam Team;
 
+	// 서버에 접속한 플레이어의 Username
+	UPROPERTY(VisibleAnywhere, Replicated)
+	FString Username;
+	
 	// Player Session을 생성하고 서버에 접속한 플레이어의 Player Session Id
 	// 서버에서만 설정된다.
 	FString ServerPlayerSessionId;
-
-	// 서버에 접속한 플레이어의 Username
-	// 서버에서만 설정된다.
-	FString ServerUsername;
 };

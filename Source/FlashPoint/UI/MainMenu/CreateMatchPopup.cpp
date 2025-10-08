@@ -10,8 +10,8 @@
 #include "Components/TextBlock.h"
 #include "Data/MatchTypes.h"
 #include "Player/BasePlayerController.h"
+#include "Player/BasePlayerState.h"
 #include "System/OnlineServiceSubsystem.h"
-#include "System/PlayerAuthSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(CreateMatchPopup)
 
@@ -154,13 +154,13 @@ void UCreateMatchPopup::OnCreateButtonClicked()
 {
 	if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
 	{
-		if (UPlayerAuthSubsystem* PlayerAuthSubsystem = UPlayerAuthSubsystem::Get(this))
+		if (ABasePlayerState* BasePS = GetOwningPlayerState<ABasePlayerState>())
 		{
 			const FString RoomName = TextBox_RoomName->GetText().ToString();
 			const FString MatchMode = ComboBox_MatchMode->GetSelectedOption();
 			const FString MaxPlayers = ComboBox_MaxPlayers->GetSelectedOption();
 			const FString GoalKillCount = ComboBox_GoalKillCount->GetSelectedOption();
-			const FString Username = PlayerAuthSubsystem->GetUsername();	// 방장 이름
+			const FString Username = BasePS->GetUsername();	// 방장 이름
 			OnlineServiceSubsystem->CreateGameSession(RoomName, MatchMode, MaxPlayers, Username, GoalKillCount);
 		}
 

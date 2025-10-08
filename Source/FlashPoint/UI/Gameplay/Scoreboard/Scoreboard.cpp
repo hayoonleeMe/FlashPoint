@@ -4,7 +4,7 @@
 #include "Scoreboard.h"
 
 #include "Game/BaseGameState.h"
-#include "System/PlayerAuthSubsystem.h"
+#include "Player/BasePlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Scoreboard)
 
@@ -12,9 +12,9 @@ void UScoreboard::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	if (UPlayerAuthSubsystem* PlayerAuthSubsystem = UPlayerAuthSubsystem::Get(this))
+	if (ABasePlayerState* BasePS = GetOwningPlayerState<ABasePlayerState>())
 	{
-		PlayerUsername = PlayerAuthSubsystem->GetUsername();
+		PlayerUsername = BasePS->GetUsername();
 	}
 
 	if (GetWorld())

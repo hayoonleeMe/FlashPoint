@@ -11,9 +11,9 @@
 #include "Components/TextBlock.h"
 #include "Components/WidgetSwitcher.h"
 #include "Game/BaseGameState.h"
+#include "Player/BasePlayerState.h"
 #include "Player/LobbyPlayerController.h"
 #include "System/FPAssetManager.h"
-#include "System/PlayerAuthSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(LobbyWidget)
 
@@ -44,9 +44,9 @@ void ULobbyWidget::InitializeLobby(const FMatchInfo& MatchInfo)
 {
 	MatchMode = MatchInfo.MatchMode;
 	
-	if (UPlayerAuthSubsystem* PlayerAuthSubsystem = UPlayerAuthSubsystem::Get(this))
+	if (ABasePlayerState* BasePS = GetOwningPlayerState<ABasePlayerState>())
 	{
-		PlayerUsername = PlayerAuthSubsystem->GetUsername();
+		PlayerUsername = BasePS->GetUsername();
 	}
 	
 	Text_RoomName->SetText(FText::FromString(MatchInfo.RoomName));

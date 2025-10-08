@@ -48,7 +48,7 @@ FString ABaseGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	{
 		// 추후 PlayerSession을 제거하기 위해 저장
 		BasePS->SetServerPlayerSessionId(PlayerSessionId);
-		BasePS->SetServerUsername(Username);
+		BasePS->SetUsername(Username);
 
 		// 플레이어의 팀이 변경될 때 PlayerInfoArray와 위젯을 업데이트하도록 등록
 		BasePS->OnServerPlayerTeamChangedDelegate.AddUObject(this, &ThisClass::OnPlayerTeamChanged);
@@ -94,13 +94,13 @@ void ABaseGameMode::Logout(AController* Exiting)
 					}
 
 					// 배열에서 제거
-					BaseGS->RemovePlayerInfo(BasePS->GetServerUsername());
+					BaseGS->RemovePlayerInfo(BasePS->GetUsername());
 					
 					// 접속한 플레이어 수 업데이트
 					--MatchInfo.CurrentPlayers;
 				}
 
-				const bool bIsHost = MatchInfo.HostId == BasePS->GetServerUsername();
+				const bool bIsHost = MatchInfo.HostId == BasePS->GetUsername();
 				if (bIsHost)
 				{
 					// 방장이 나가면 GameSession 제거
@@ -248,7 +248,7 @@ bool ABaseGameMode::IsHostStillRemain() const
 			if (ABasePlayerState* BasePS = PC->GetPlayerState<ABasePlayerState>())
 			{
 				// Host Still Remain
-				if (BasePS->GetServerUsername() == MatchInfo.HostId)
+				if (BasePS->GetUsername() == MatchInfo.HostId)
 				{
 					return true;
 				}
