@@ -29,6 +29,12 @@ public:
 	// GameMode에서 전달한 MatchEndTime을 설정한다.
 	void SetMatchEndTime(float InMatchEndTime);
 
+	// 매치를 이긴 팀을 반환한다.
+	// MatchMode가 FreeForAll이거나, 비겼으면 ETeam::None을 반환한다.
+	ETeam GetWinningTeam() const;
+
+	// Username에 해당하는 유저의 순위를 반환한다.
+	int32 GetUserRank(const FString& Username);
 
 protected:
 	virtual void BeginPlay() override;

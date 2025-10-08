@@ -62,6 +62,12 @@ struct FPlayerInfoArray : public FFastArraySerializer
 
 public:
 	const TArray<FPlayerInfo>& GetPlayers() const { return Players; }
+
+	template <class PREDICATE_CLASS>
+	void Sort(const PREDICATE_CLASS& Predicate)
+	{
+		Players.Sort(Predicate);
+	}
 	
 	void AddPlayer(const FPlayerInfo& InPlayerInfo);
 	void RemovePlayer(const FString& Username);

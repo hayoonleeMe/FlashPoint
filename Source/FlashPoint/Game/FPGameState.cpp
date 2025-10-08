@@ -19,6 +19,57 @@ void AFPGameState::SetMatchEndTime(float InMatchEndTime)
 	MatchEndTime = InMatchEndTime;
 }
 
+ETeam AFPGameState::GetWinningTeam() const
+{
+	if (MatchInfo.MatchMode == EMatchMode::FreeForAll)
+	{
+		// 개인전에 WinningTeam은 없으므로 ETeam::None 반환하고 종료
+		return ETeam::None;
+	}
+	
+	int32 MaxKillCount = -1;
+	ETeam WinningTeam = ETeam::None;
+	for (const auto& Pair : TeamKillCounts)
+	{
+		if (MaxKillCount < Pair.Value)
+		{
+			WinningTeam = Pair.Key;
+			MaxKillCount = Pair.Value;
+		}
+		else if (MaxKillCount == Pair.Value)
+		{
+			// 모든 팀이 비기면 ETeam::None 반환
+			WinningTeam = ETeam::None;
+		}
+	}
+	return WinningTeam;
+}
+
+int32 AFPGameState::GetUserRank(const FString& Username)
+{
+	// Sort by Kill, Death
+	auto Predicate = [](const FPlayerInfo& A, const FPlayerInfo& B)
+	{
+		if (A.KillCount == B.KillCount)
+		{
+			return A.DeathCount < B.DeathCount;
+		}
+		return A.KillCount > B.KillCount;
+	};
+	PlayerInfoArray.Sort(Predicate);
+
+	const TArray<FPlayerInfo>& PlayerInfos = PlayerInfoArray.GetPlayers();
+	for (int32 Index = 0; Index < PlayerInfos.Num(); ++Index)
+	{
+		if (PlayerInfos[Index].GetUsername() == Username)
+		{
+			return Index + 1;
+		}
+	}
+	
+	return 0;
+}
+
 void AFPGameState::BeginPlay()
 {
 	Super::BeginPlay();

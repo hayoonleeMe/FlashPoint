@@ -114,3 +114,32 @@ static FString LexToString(ETeam Team)
 		return TEXT("None");
 	}
 }
+
+// Rank에 해당되는 서수 문자열을 반환한다.
+static FString GetOrdinalString(int32 Rank)
+{
+	if (Rank <= 0)
+	{
+		return FString();
+	}
+
+	// 마지막 두 자리 숫자가 11, 12, 13인 경우는 항상 'th'를 사용한다.
+	const int32 LastTwoDigits = Rank % 100;
+	if (LastTwoDigits >= 11 && LastTwoDigits <= 13)
+	{
+		return FString::Printf(TEXT("%dth"), Rank);
+	}
+
+	// 그 외의 경우, 마지막 한 자리 숫자에 따라 접미사를 결정한다.
+	switch (Rank % 10)
+	{
+	case 1:
+		return FString::Printf(TEXT("%dst"), Rank);
+	case 2:
+		return FString::Printf(TEXT("%dnd"), Rank);
+	case 3:
+		return FString::Printf(TEXT("%drd"), Rank);
+	default:
+		return FString::Printf(TEXT("%dth"), Rank);
+	}
+}

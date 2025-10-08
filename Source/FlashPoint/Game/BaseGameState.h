@@ -28,6 +28,8 @@ public:
 	// MatchInfo를 저장한다.
 	void SetMatchInfo(const FMatchInfo& InMatchInfo);
 
+	const FMatchInfo& GetMatchInfo() const { return MatchInfo; }
+
 	// 새로 접속한 플레이어 정보를 추가한다.
 	void AddPlayerInfo(const FPlayerInfo& PlayerInfo);
 
