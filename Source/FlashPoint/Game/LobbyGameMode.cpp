@@ -10,10 +10,7 @@
 void ALobbyGameMode::TravelToMatchLevel(EMatchMode MatchMode) const
 {
 	// 로비에서 Seamless Travel을 수행하기 전, MatchInfo 데이터 캐싱
-	if (UFPGameInstance* FPGameInstance = GetGameInstance<UFPGameInstance>())
-	{
-		FPGameInstance->CacheMatchInfo(MatchInfo);
-	}
+	CacheMatchInfo();
 	
 	FString URL;	
 	if (MatchMode == EMatchMode::TeamDeathMatch)

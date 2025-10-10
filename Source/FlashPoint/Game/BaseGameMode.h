@@ -33,6 +33,9 @@ protected:
 	// 이 데이터는 GameLift SDK의 콜백 함수를 통해 가져오기 때문에, 내부 데이터 CurrentPlayers의 초기값은 0이다.
 	FMatchInfo MatchInfo;
 
+	// MatchInfo를 GameInstance에 캐싱한다.
+	void CacheMatchInfo() const;
+
 	// Red Team 플레이어 배열
 	UPROPERTY()
 	TArray<TWeakObjectPtr<ABasePlayerState>> RedTeamPlayers;

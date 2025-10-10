@@ -45,9 +45,21 @@ private:
 	// ============================================================================
 protected:
 	virtual void HandleMatchHasStarted() override;
+	virtual void HandleMatchHasEnded() override;
 
 private:
 	// 매치를 진행할 시간(초)
 	UPROPERTY(EditDefaultsOnly, Category="Match")
 	float MatchTime;
+
+	// 매치가 종료된 후, 로비로 이동할 때까지 기다릴 시간
+	UPROPERTY(EditDefaultsOnly, Category="Match")
+	float MatchEndDelay;
+
+	// 매치가 종료될 때 슬로우 모션 강도
+	UPROPERTY(EditDefaultsOnly, Category="Match", meta=(ClampMin="0.1", ClampMax="1.0"))
+	float MatchEndTimeDilation;
+
+	// 모든 플레이어를 로비로 이동시킨다.
+	void TravelToLobby() const;
 };

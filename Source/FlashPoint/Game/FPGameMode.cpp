@@ -4,12 +4,14 @@
 #include "FPGameMode.h"
 
 #include "EngineUtils.h"
+#include "FPGameplayTags.h"
 #include "FPGameState.h"
 #include "FPLogChannels.h"
 #include "Character/FPCharacter.h"
 #include "Player/FPPlayerController.h"
 #include "Player/FPPlayerState.h"
 #include "Player/TeamPlayerStart.h"
+#include "System/FPAssetManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameMode)
 
@@ -21,6 +23,8 @@ AFPGameMode::AFPGameMode()
 	GameStateClass = AFPGameState::StaticClass();
 
 	MatchTime = 600;
+	MatchEndDelay = 12.f;
+	MatchEndTimeDilation = 0.2f;
 }
 
 AActor* AFPGameMode::ChoosePlayerStart_Implementation(AController* Player)
@@ -68,6 +72,32 @@ void AFPGameMode::HandleMatchHasStarted()
 			// 클라에서 타이머 표시를 위해 MatchEndTime 설정
 			FPGameState->SetMatchEndTime(World->GetTimeSeconds() + MatchTime);
 		}
+	}
+}
+
+void AFPGameMode::HandleMatchHasEnded()
+{
+	Super::HandleMatchHasEnded();
+
+	if (AFPGameState* FPGameState = GetGameState<AFPGameState>())
+	{
+		FPGameState->SetGlobalTimeDilation(MatchEndTimeDilation);
+	}
+
+	// Time Dilation에 의해 Timer Rate도 영향을 받으므로, 이를 반영해 Rate 설정
+	FTimerHandle MatchTimer;
+	GetWorldTimerManager().SetTimer(MatchTimer, FTimerDelegate::CreateUObject(this, &ThisClass::TravelToLobby), MatchEndDelay * MatchEndTimeDilation, false);
+}
+
+void AFPGameMode::TravelToLobby() const
+{
+	// 매치에서 로비로 Seamless Travel을 수행하기 전, MatchInfo 데이터 캐싱
+	CacheMatchInfo();
+	
+	if (UWorld* World = GetWorld())
+	{
+		const FString LobbyLevelPath = UFPAssetManager::GetAssetPathByTag(FPGameplayTags::Asset::Level::Lobby).GetAssetName();
+		World->ServerTravel(LobbyLevelPath);
 	}
 }
 

@@ -30,6 +30,7 @@ public:
 	virtual void OverrideWith(APlayerState* PlayerState) override;
 
 	// PlayerState 정보로 FPlayerInfo 구조체를 만들어 반환한다.
+	// 서버에서만 유효하다.
 	virtual FPlayerInfo MakePlayerInfo() const;
 	
 	// 서버에서만 브로드캐스트한다.
@@ -38,8 +39,8 @@ public:
 	void SetTeam(ETeam InTeam);
 	ETeam GetTeam() const { return Team; }
 
-	void SetUsername(const FString& InUsername) { Username = InUsername; }
-	FString GetUsername() const { return Username; }
+	void SetServerUsername(const FString& InUsername) { ServerUsername = InUsername; }
+	FString GetServerUsername() const { return ServerUsername; }
 	
 	void SetServerPlayerSessionId(const FString& InPlayerSessionId) { ServerPlayerSessionId = InPlayerSessionId; }
 	FString GetServerPlayerSessionId() const { return ServerPlayerSessionId; }
@@ -50,8 +51,8 @@ protected:
 	ETeam Team;
 
 	// 서버에 접속한 플레이어의 Username
-	UPROPERTY(VisibleAnywhere, Replicated)
-	FString Username;
+	// 서버에서만 설정된다.
+	FString ServerUsername;
 	
 	// Player Session을 생성하고 서버에 접속한 플레이어의 Player Session Id
 	// 서버에서만 설정된다.

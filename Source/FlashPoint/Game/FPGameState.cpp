@@ -3,20 +3,34 @@
 
 #include "FPGameState.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameState)
+
+AFPGameState::AFPGameState()
+{
+	MatchEndTimeDilationDelay = 6.f;
+	GlobalTimeDilation = 1.f;
+}
 
 void AFPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AFPGameState, MatchEndTime);
+	DOREPLIFETIME(AFPGameState, GlobalTimeDilation);
 }
 
 void AFPGameState::SetMatchEndTime(float InMatchEndTime)
 {
 	MatchEndTime = InMatchEndTime;
+}
+
+void AFPGameState::SetGlobalTimeDilation(float TimeDilation)
+{
+	GlobalTimeDilation = TimeDilation;
+	OnRep_GlobalTimeDilation();
 }
 
 ETeam AFPGameState::GetWinningTeam() const
@@ -79,6 +93,13 @@ void AFPGameState::BeginPlay()
 	OnClientPlayerInfoChangedDelegate.AddUObject(this, &ThisClass::OnClientPlayerInfoChanged);
 }
 
+void AFPGameState::HandleMatchHasEnded()
+{
+	Super::HandleMatchHasEnded();
+
+	OnMatchEndedDelegate.Broadcast();
+}
+
 void AFPGameState::OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo)
 {
 	PlayerKillCounts.Add(PlayerInfo.GetUsernameAsFName(), PlayerInfo.KillCount);
@@ -106,4 +127,27 @@ void AFPGameState::OnClientPlayerInfoChanged(const FPlayerInfo& PlayerInfo)
 void AFPGameState::OnRep_MatchEndTime()
 {
 	OnClientMatchEndTimeReplicatedDelegate.Broadcast(MatchEndTime);
+}
+
+void AFPGameState::OnRep_GlobalTimeDilation()
+{
+	// 슬로우 모션
+	UGameplayStatics::SetGlobalTimeDilation(GetWorld(), GlobalTimeDilation);
+
+	// Sound Pitch
+	UGameplayStatics::SetGlobalPitchModulation(GetWorld(), GlobalTimeDilation, 0.6f);
+
+	// MatchEndTimeDilationDelay 뒤 델레게이트 브로드캐스트
+	// Time Dilation이 반영된 Rate로 설정
+	FTimerHandle MatchTimer;
+	GetWorldTimerManager().SetTimer(MatchTimer, FTimerDelegate::CreateUObject(this, &ThisClass::OnMatchEndTimeDilationFinished), MatchEndTimeDilationDelay * GlobalTimeDilation, false);
+}
+
+void AFPGameState::OnMatchEndTimeDilationFinished()
+{
+	if (HasAuthority())
+	{
+		GlobalTimeDilation = 1.f;
+	}
+	OnMatchEndTimeDilationFinishedDelegate.Broadcast();
 }

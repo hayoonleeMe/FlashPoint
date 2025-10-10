@@ -15,7 +15,6 @@ void ABasePlayerState::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ABasePlayerState, Team);
-	DOREPLIFETIME(ABasePlayerState, Username);
 }
 
 void ABasePlayerState::CopyProperties(APlayerState* PlayerState)
@@ -26,7 +25,7 @@ void ABasePlayerState::CopyProperties(APlayerState* PlayerState)
 	if (ABasePlayerState* OtherPS = Cast<ABasePlayerState>(PlayerState))
 	{
 		OtherPS->Team = Team;
-		OtherPS->Username = Username;
+		OtherPS->ServerUsername = ServerUsername;
 		OtherPS->ServerPlayerSessionId = ServerPlayerSessionId;
 	}
 }
@@ -39,7 +38,7 @@ void ABasePlayerState::OverrideWith(APlayerState* PlayerState)
 	if (ABasePlayerState* OtherPS = Cast<ABasePlayerState>(PlayerState))
 	{
 		Team = OtherPS->Team;
-		Username = OtherPS->Username;
+		ServerUsername = OtherPS->ServerUsername;
 		ServerPlayerSessionId = OtherPS->ServerPlayerSessionId;
 	}
 }
@@ -47,7 +46,7 @@ void ABasePlayerState::OverrideWith(APlayerState* PlayerState)
 FPlayerInfo ABasePlayerState::MakePlayerInfo() const
 {
 	FPlayerInfo Ret;
-	Ret.SetUsername(Username);
+	Ret.SetUsername(ServerUsername);
 	Ret.Team = Team;
 	return Ret;
 }

@@ -6,6 +6,7 @@
 #include "Components/TextBlock.h"
 #include "Game/FPGameState.h"
 #include "Player/FPPlayerState.h"
+#include "System/PlayerAuthSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MatchResult)
 
@@ -28,7 +29,9 @@ void UMatchResult::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	if (AFPPlayerState* FPPlayerState = GetOwningPlayerState<AFPPlayerState>())
+	AFPPlayerState* FPPlayerState = GetOwningPlayerState<AFPPlayerState>();
+	UPlayerAuthSubsystem* PlayerAuthSubsystem = UPlayerAuthSubsystem::Get(this);
+	if (FPPlayerState && PlayerAuthSubsystem)
 	{
 		if (UWorld* World = GetWorld())
 		{
@@ -41,7 +44,7 @@ void UMatchResult::NativeOnInitialized()
 				}
 				else if (MatchInfo.MatchMode == EMatchMode::FreeForAll)
 				{
-					InitializeFFA(FPGameState->GetUserRank(FPPlayerState->GetUsername()));
+					InitializeFFA(FPGameState->GetUserRank(PlayerAuthSubsystem->GetUsername()));
 				}
 			}
 		}	

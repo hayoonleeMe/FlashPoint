@@ -8,6 +8,7 @@
 #include "Data/MatchTypes.h"
 #include "FPPlayerController.generated.h"
 
+class UMatchResult;
 class UScoreboard;
 class UPauseMenu;
 class UFPAbilitySystemComponent;
@@ -61,4 +62,21 @@ private:
 	// MatchMode 별 Scoreboard Widget Class
 	UPROPERTY(EditDefaultsOnly, Category="UI")
 	TMap<EMatchMode, TSubclassOf<UScoreboard>> ScoreboardClasses;
+
+	// ============================================================================
+	// Match 
+	// ============================================================================
+	
+	// 매치가 종료될 때 필요한 로직을 처리한다.
+	void OnMatchEnded();
+
+	// 매치가 종료된 후 슬로우 모션이 끝날 때 필요한 로직을 처리한다.
+	void OnMatchEndTimeDilationFinished();
+
+	// MatchResult Widget Class
+	UPROPERTY(EditDefaultsOnly, Category="Match")
+	TSubclassOf<UMatchResult> MatchResultClass;
+
+	UPROPERTY()
+	TObjectPtr<UMatchResult> MatchResult;
 };

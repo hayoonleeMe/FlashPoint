@@ -12,6 +12,9 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnClientMatchEndTimeReplicatedDelegate, flo
 // Team의 KillCount가 업데이트될 때 브로드캐스트하는 델레게이트
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnTeamKillCountUpdatedDelegate, ETeam/*Team*/, int32/*KillCount*/);
 
+// MatchState가 변경됨을 알리는 델레게이트
+DECLARE_MULTICAST_DELEGATE(FOnMatchStateChangedDelegate);
+
 /**
  * 게임플레이에서 사용할 GameState
  */
@@ -21,13 +24,20 @@ class FLASHPOINT_API AFPGameState : public ABaseGameState
 	GENERATED_BODY()
 
 public:
+	AFPGameState();
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	FOnClientMatchEndTimeReplicatedDelegate OnClientMatchEndTimeReplicatedDelegate;
 	FOnTeamKillCountUpdatedDelegate OnTeamKillCountUpdatedDelegate;
+	
+	FOnMatchStateChangedDelegate OnMatchEndedDelegate;
+	FOnMatchStateChangedDelegate OnMatchEndTimeDilationFinishedDelegate;
 
 	// GameMode에서 전달한 MatchEndTime을 설정한다.
 	void SetMatchEndTime(float InMatchEndTime);
+
+	// TimeDilation 강도만큼 서버와 클라이언트에 슬로우 모션을 적용한다.
+	void SetGlobalTimeDilation(float TimeDilation);
 
 	// 매치를 이긴 팀을 반환한다.
 	// MatchMode가 FreeForAll이거나, 비겼으면 ETeam::None을 반환한다.
@@ -38,6 +48,8 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void HandleMatchHasEnded() override;
+
 private:
 	// 팀 별 합산 KillCount
 	TMap<ETeam, int32> TeamKillCounts;
@@ -62,4 +74,18 @@ private:
 	
 	UFUNCTION()
 	void OnRep_MatchEndTime();
+
+	// 전체 월드에 적용하는 슬로우 모션 강도
+	UPROPERTY(ReplicatedUsing=OnRep_GlobalTimeDilation)
+	float GlobalTimeDilation;
+
+	UFUNCTION()
+	void OnRep_GlobalTimeDilation();
+
+	// 매치가 종료된 후, 슬로우 모션을 수행할 시간
+	UPROPERTY(EditDefaultsOnly, Category="Match")
+	float MatchEndTimeDilationDelay;
+
+	// 매치가 종료된 후 슬로우 모션이 종료될 때 호출되는 Callback
+	void OnMatchEndTimeDilationFinished();
 };

@@ -47,8 +47,8 @@ FString ABaseGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	if (ABasePlayerState* BasePS = NewPlayerController->GetPlayerState<ABasePlayerState>())
 	{
 		// 추후 PlayerSession을 제거하기 위해 저장
+		BasePS->SetServerUsername(Username);
 		BasePS->SetServerPlayerSessionId(PlayerSessionId);
-		BasePS->SetUsername(Username);
 
 		// 플레이어의 팀이 변경될 때 PlayerInfoArray와 위젯을 업데이트하도록 등록
 		BasePS->OnServerPlayerTeamChangedDelegate.AddUObject(this, &ThisClass::OnPlayerTeamChanged);
@@ -94,13 +94,13 @@ void ABaseGameMode::Logout(AController* Exiting)
 					}
 
 					// 배열에서 제거
-					BaseGS->RemovePlayerInfo(BasePS->GetUsername());
+					BaseGS->RemovePlayerInfo(BasePS->GetServerUsername());
 					
 					// 접속한 플레이어 수 업데이트
 					--MatchInfo.CurrentPlayers;
 				}
 
-				const bool bIsHost = MatchInfo.HostId == BasePS->GetUsername();
+				const bool bIsHost = MatchInfo.HostId == BasePS->GetServerUsername();
 				if (bIsHost)
 				{
 					// 방장이 나가면 GameSession 제거
@@ -169,6 +169,15 @@ void ABaseGameMode::BeginPlay()
 			OnlineServiceSubsystem->OnProcessTerminateDelegate.AddUObject(this, &ThisClass::OnGameSessionTerminated);
 		}
 		OnlineServiceSubsystem->InitGameLift();
+	}
+
+}
+
+void ABaseGameMode::CacheMatchInfo() const
+{
+	if (UFPGameInstance* FPGameInstance = GetGameInstance<UFPGameInstance>())
+	{
+		FPGameInstance->CacheMatchInfo(MatchInfo);
 	}
 }
 
@@ -248,7 +257,7 @@ bool ABaseGameMode::IsHostStillRemain() const
 			if (ABasePlayerState* BasePS = PC->GetPlayerState<ABasePlayerState>())
 			{
 				// Host Still Remain
-				if (BasePS->GetUsername() == MatchInfo.HostId)
+				if (BasePS->GetServerUsername() == MatchInfo.HostId)
 				{
 					return true;
 				}

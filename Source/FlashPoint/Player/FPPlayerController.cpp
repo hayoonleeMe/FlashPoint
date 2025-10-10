@@ -3,17 +3,19 @@
 
 #include "FPPlayerController.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
 #include "EnhancedInputSubsystems.h"
 #include "FPGameplayTags.h"
 #include "FPPlayerState.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
-#include "Game/BaseGameState.h"
+#include "Game/FPGameState.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Input/FPInputComponent.h"
 #include "System/FPAssetManager.h"
+#include "UI/Gameplay/MatchResult.h"
 #include "UI/Gameplay/PauseMenu.h"
 #include "UI/Gameplay/Scoreboard/Scoreboard.h"
 
@@ -163,9 +165,11 @@ void AFPPlayerController::BeginPlay()
 	// 클라이언트 로컬 플레이어 Only
 	if (IsLocalController() && GetWorld())
 	{
-		if (ABaseGameState* BaseGS = GetWorld()->GetGameState<ABaseGameState>())
+		if (AFPGameState* FPGameState = GetWorld()->GetGameState<AFPGameState>())
 		{
-			BaseGS->OnClientMatchInfoReplicatedDelegate.AddUObject(this, &ThisClass::OnClientMatchInfoReplicated);
+			FPGameState->OnClientMatchInfoReplicatedDelegate.AddUObject(this, &ThisClass::OnClientMatchInfoReplicated);
+			FPGameState->OnMatchEndedDelegate.AddUObject(this, &ThisClass::OnMatchEnded);
+			FPGameState->OnMatchEndTimeDilationFinishedDelegate.AddUObject(this, &ThisClass::OnMatchEndTimeDilationFinished);
 		}
 	}
 }
@@ -177,5 +181,37 @@ void AFPPlayerController::OnClientMatchInfoReplicated(const FMatchInfo& MatchInf
 		// Scoreboard Widget 생성 후 숨김
     	Scoreboard = UIManageComponent->AddWidget<UScoreboard>(EWidgetLayer::HUD, *ScoreboardClass);
     	Scoreboard->ShowWidget(false);
+	}
+}
+
+void AFPPlayerController::OnMatchEnded()
+{
+	if (MatchResultClass)
+	{
+		MatchResult = UIManageComponent->AddWidget<UMatchResult>(EWidgetLayer::Popup, MatchResultClass);
+	}
+}
+
+void AFPPlayerController::OnMatchEndTimeDilationFinished()
+{
+	// MatchResult Widget 제거
+	if (MatchResult)
+	{
+		UIManageComponent->RemoveWidget(EWidgetLayer::Popup, MatchResult);
+	}
+	
+	// Scoreboard를 표시
+	if (Scoreboard)
+	{
+		Scoreboard->ShowWidget(true);
+	}
+
+	// 입력 제한
+	DisableInput(this);
+
+	// 모든 어빌리티 취소
+	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn()))
+	{
+		ASC->CancelAllAbilities();
 	}
 }

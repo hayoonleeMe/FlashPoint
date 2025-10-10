@@ -10,8 +10,8 @@
 #include "Components/ListView.h"
 #include "Components/TextBlock.h"
 #include "Data/MatchTypes.h"
-#include "Player/BasePlayerState.h"
 #include "System/OnlineServiceSubsystem.h"
+#include "System/PlayerAuthSubsystem.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(MatchListPage)
 
@@ -129,9 +129,9 @@ void UMatchListPage::OnJoinButtonClicked()
 		
 		if (UOnlineServiceSubsystem* OnlineServiceSubsystem = UOnlineServiceSubsystem::Get(this))
 		{
-			if (ABasePlayerState* BasePS = GetOwningPlayerState<ABasePlayerState>())
+			if (UPlayerAuthSubsystem* PlayerAuthSubsystem = UPlayerAuthSubsystem::Get(this))
 			{
-				OnlineServiceSubsystem->CreatePlayerSession(BasePS->GetUsername(), SelectedMatchList->GameSessionId);
+				OnlineServiceSubsystem->CreatePlayerSession(PlayerAuthSubsystem->GetUsername(), SelectedMatchList->GameSessionId);
 			}
 		}
 	}

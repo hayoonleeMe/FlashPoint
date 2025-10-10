@@ -9,6 +9,7 @@ namespace FPGameplayTags
 		{
 			UE_DEFINE_GAMEPLAY_TAG(SignScreen, "Asset.Level.SignScreen");
 			UE_DEFINE_GAMEPLAY_TAG(MainMenu, "Asset.Level.MainMenu");
+			UE_DEFINE_GAMEPLAY_TAG(Lobby, "Asset.Level.Lobby");
 			UE_DEFINE_GAMEPLAY_TAG(Warehouse_TDM, "Asset.Level.Warehouse_TDM");
 			UE_DEFINE_GAMEPLAY_TAG(Warehouse_FFA, "Asset.Level.Warehouse_FFA");
 		}
