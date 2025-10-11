@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "MatchTypes.h"
 #include "Engine/DataAsset.h"
 #include "FPCosmeticData.generated.h"
 
@@ -40,6 +41,34 @@ struct FAnimLayerSet
 };
 
 /**
+ * 캐릭터 메시를 설정하는데 필요한 항목들을 저장
+ */
+USTRUCT(BlueprintType)
+struct FCharacterMeshEntry
+{
+	GENERATED_BODY()
+
+	// 원소 순서대로 메시에 설정한다.
+	UPROPERTY(EditDefaultsOnly)
+	TArray<TObjectPtr<UMaterialInterface>> Materials;
+};
+
+/**
+ * 캐릭터 메시 항목들을 저장
+ */
+USTRUCT(BlueprintType)
+struct FCharacterMeshSet
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<USkeletalMesh> CharacterMesh;
+	
+	UPROPERTY(EditDefaultsOnly)
+	TMap<ETeam, FCharacterMeshEntry> TeamMeshMap;
+};
+
+/**
  * Cosmetic Data를 저장하는 DataAsset
  */
 UCLASS()
@@ -54,7 +83,16 @@ public:
 	// DefaultAnimLayer를 반환한다.
 	TSubclassOf<UAnimInstance> GetDefaultAnimLayer() const;
 
+	// 캐릭터 메시를 반환한다.
+	USkeletalMesh* GetCharacterMesh() const;
+
+	// Team에 해당하는 FCharacterMeshEntry를 반환한다.
+	const FCharacterMeshEntry* GetCharacterMeshEntryByTeam(ETeam Team) const;
+
 protected:
 	UPROPERTY(EditDefaultsOnly)
 	FAnimLayerSet AnimLayerSet;
+
+	UPROPERTY(EditDefaultsOnly)
+	FCharacterMeshSet CharacterMeshSet;
 };

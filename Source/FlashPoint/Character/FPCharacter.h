@@ -39,7 +39,8 @@ public:
 	virtual bool CanJumpInternal_Implementation() const override;
 	
 protected:
-	virtual void BeginPlay() override;
+	// 캐릭터 메시를 설정한다.
+	void SetCharacterMesh();
 
 	// ============================================================================
 	// Ability System
