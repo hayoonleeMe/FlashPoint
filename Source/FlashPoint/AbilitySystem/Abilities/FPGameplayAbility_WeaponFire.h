@@ -86,7 +86,7 @@ protected:
 	TSubclassOf<UGameplayEffect> DamageEffectClass;
 
 	// 플레이어 캐릭터가 TargetActor를 공격해 데미지를 입힐 수 있는지 체크
-	static bool CanApplyDamage(const AActor* TargetActor);
+	bool CanApplyDamage(const AActor* TargetActor) const;
 
 	// Cost로 소모할 Ammo를 나타내는 GameplayTag
 	UPROPERTY(EditDefaultsOnly)

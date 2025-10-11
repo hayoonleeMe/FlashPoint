@@ -5,7 +5,7 @@
 #include "CoreMinimal.h"
 #include "Data/PlayerInfo.h"
 #include "Data/MatchTypes.h"
-#include "GameFramework/GameStateBase.h"
+#include "GameFramework/GameState.h"
 #include "BaseGameState.generated.h"
 
 // 클라이언트에서 MatchInfo 프로퍼티가 복제됐을 때 브로드캐스트하는 델레게이트
@@ -18,7 +18,7 @@ DECLARE_MULTICAST_DELEGATE_OneParam(FOnClientPlayerInfoArrayDelegate, const FPla
  * 매치 정보와 서버에 접속한 플레이어 정보를 관리하는 GameState
  */
 UCLASS()
-class FLASHPOINT_API ABaseGameState : public AGameStateBase
+class FLASHPOINT_API ABaseGameState : public AGameState
 {
 	GENERATED_BODY()
 
@@ -28,14 +28,16 @@ public:
 	// MatchInfo를 저장한다.
 	void SetMatchInfo(const FMatchInfo& InMatchInfo);
 
+	const FMatchInfo& GetMatchInfo() const { return MatchInfo; }
+
 	// 새로 접속한 플레이어 정보를 추가한다.
-	void AddPlayerInfo(const FPlayerInfo& PlayerInfo);
+	virtual void AddPlayerInfo(const FPlayerInfo& PlayerInfo);
 
 	// 퇴장한 플레이어 정보를 제거한다.
-	void RemovePlayerInfo(const FString& Username);
+	virtual void RemovePlayerInfo(const FString& Username);
 
 	// 플레이어 정보를 변경한다.
-	void UpdatePlayerInfo(const FPlayerInfo& PlayerInfo);
+	virtual void UpdatePlayerInfo(const FPlayerInfo& PlayerInfo);
 
 	FOnClientMatchInfoReplicatedDelegate OnClientMatchInfoReplicatedDelegate;
 

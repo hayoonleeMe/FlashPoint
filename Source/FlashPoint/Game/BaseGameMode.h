@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Data/MatchTypes.h"
-#include "GameFramework/GameModeBase.h"
+#include "GameFramework/GameMode.h"
 #include "BaseGameMode.generated.h"
 
 class ABasePlayerState;
@@ -13,7 +13,7 @@ class ABasePlayerState;
  * 매치 정보와 서버에 접속한 플레이어 정보를 관리하는 GameMode
  */
 UCLASS()
-class FLASHPOINT_API ABaseGameMode : public AGameModeBase
+class FLASHPOINT_API ABaseGameMode : public AGameMode
 {
 	GENERATED_BODY()
 
@@ -32,6 +32,9 @@ protected:
 	// 현재 매치 관련 정보를 저장하는 데이터
 	// 이 데이터는 GameLift SDK의 콜백 함수를 통해 가져오기 때문에, 내부 데이터 CurrentPlayers의 초기값은 0이다.
 	FMatchInfo MatchInfo;
+
+	// MatchInfo를 GameInstance에 캐싱한다.
+	void CacheMatchInfo() const;
 
 	// Red Team 플레이어 배열
 	UPROPERTY()

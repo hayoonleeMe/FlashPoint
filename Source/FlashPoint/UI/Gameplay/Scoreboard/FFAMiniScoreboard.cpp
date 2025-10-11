@@ -11,7 +11,6 @@ void UFFAMiniScoreboard::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	TeamKillCounts.Add(ETeam::None, 0);
 	UpdateKillCount(ETeam::None, 0);
 }
 
