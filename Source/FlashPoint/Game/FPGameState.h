@@ -33,6 +33,10 @@ public:
 	FOnMatchStateChangedDelegate OnMatchEndedDelegate;
 	FOnMatchStateChangedDelegate OnMatchEndTimeDilationFinishedDelegate;
 
+	virtual void AddPlayerInfo(const FPlayerInfo& PlayerInfo) override;
+	virtual void RemovePlayerInfo(const FString& Username) override;
+	virtual void UpdatePlayerInfo(const FPlayerInfo& PlayerInfo) override;
+
 	// GameMode에서 전달한 MatchEndTime을 설정한다.
 	void SetMatchEndTime(float InMatchEndTime);
 
@@ -52,20 +56,22 @@ protected:
 
 private:
 	// 팀 별 합산 KillCount
+	// 서버와 클라이언트에서 각각 설정된다.
 	TMap<ETeam, int32> TeamKillCounts;
 
 	// 플레이어 별 KillCount
 	// Key: Username, Value: KillCount
+	// 서버와 클라이언트에서 각각 설정된다.
 	TMap<FName, int32> PlayerKillCounts;
 
-	// 클라이언트에 PlayerInfo 추가가 Replicate될 떄 호출되는 Callback
-	void OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo);
+	// PlayerInfo가 추가될 때 호출된다.
+	void OnPlayerInfoAdded(const FPlayerInfo& PlayerInfo);
 	
-	// 클라이언트에 PlayerInfo 제거가 Replicate될 떄 호출되는 Callback
-	void OnClientPlayerInfoRemoved(const FPlayerInfo& PlayerInfo);
+	// PlayerInfo가 제거될 때 호출된다.
+	void OnPlayerInfoRemoved(const FPlayerInfo& PlayerInfo);
 
-	// 클라이언트에 PlayerInfo 변경이 Replicate될 떄 호출되는 Callback
-	void OnClientPlayerInfoChanged(const FPlayerInfo& PlayerInfo);
+	// PlayerInfo가 변경될 때 호출된다.
+	void OnPlayerInfoChanged(const FPlayerInfo& PlayerInfo);
 	
 	// 매치가 종료되는 WorldTimeSeconds을 나타낸다.
 	// 서버에서 매치를 시작한 뒤 설정된다.

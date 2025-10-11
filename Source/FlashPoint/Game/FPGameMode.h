@@ -43,14 +43,23 @@ private:
 	// ============================================================================
 	// Match
 	// ============================================================================
+public:
+	virtual void EndMatch() override;
+	
 protected:
+	virtual void BeginPlay() override;
 	virtual void HandleMatchHasStarted() override;
 	virtual void HandleMatchHasEnded() override;
 
 private:
+	// Team KillCount가 변경될 때 호출되는 Callback
+	void OnTeamKillCountUpdated(ETeam Team, int32 KillCount);
+	
 	// 매치를 진행할 시간(초)
 	UPROPERTY(EditDefaultsOnly, Category="Match")
 	float MatchTime;
+
+	FTimerHandle MatchEndTimer;
 
 	// 매치가 종료된 후, 로비로 이동할 때까지 기다릴 시간
 	UPROPERTY(EditDefaultsOnly, Category="Match")

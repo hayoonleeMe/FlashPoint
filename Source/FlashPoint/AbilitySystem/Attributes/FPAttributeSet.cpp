@@ -53,19 +53,23 @@ void UFPAttributeSet::HandleIncomingDamage(const FGameplayEffectModCallbackData&
 	{
 		if (ABaseGameState* BaseGS = GetWorld()->GetGameState<ABaseGameState>())
 		{
-			if (AFPPlayerState* TargetPS = Cast<AFPPlayerState>(GetOwningActor()))
+			// 매치가 진행 중일 때만
+			if (!BaseGS->HasMatchEnded())
 			{
-				// 죽은 플레이어의 Death Count +1
-				TargetPS->AddToDeathCount(1);
+				if (AFPPlayerState* TargetPS = Cast<AFPPlayerState>(GetOwningActor()))
+				{
+					// 죽은 플레이어의 Death Count +1
+					TargetPS->AddToDeathCount(1);
 
-				BaseGS->UpdatePlayerInfo(TargetPS->MakePlayerInfo());
-			}
-			if (AFPPlayerState* InstigatorPS = Cast<AFPPlayerState>(Data.EffectSpec.GetEffectContext().GetInstigator()))
-			{
-				// 죽인 플레이어의 Kill Count +1
-				InstigatorPS->AddToKillCount(1);
+					BaseGS->UpdatePlayerInfo(TargetPS->MakePlayerInfo());
+				}
+				if (AFPPlayerState* InstigatorPS = Cast<AFPPlayerState>(Data.EffectSpec.GetEffectContext().GetInstigator()))
+				{
+					// 죽인 플레이어의 Kill Count +1
+					InstigatorPS->AddToKillCount(1);
 
-				BaseGS->UpdatePlayerInfo(InstigatorPS->MakePlayerInfo());
+					BaseGS->UpdatePlayerInfo(InstigatorPS->MakePlayerInfo());
+				}	
 			}
 		}
 	}

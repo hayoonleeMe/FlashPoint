@@ -63,5 +63,12 @@ void UMatchTimer::NativePreConstruct()
 void UMatchTimer::OnClientMatchEndTimeReplicated(float InMatchEndTime)
 {
 	MatchEndTime = InMatchEndTime;
-	Text_Time->SetVisibility(ESlateVisibility::Visible);
+	if (MatchEndTime > 0.f)
+	{
+		Text_Time->SetVisibility(ESlateVisibility::Visible);
+	}
+	else
+	{
+		Text_Time->SetVisibility(ESlateVisibility::Hidden);
+	}
 }

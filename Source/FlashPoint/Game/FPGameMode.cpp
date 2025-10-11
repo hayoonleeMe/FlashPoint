@@ -56,14 +56,35 @@ AActor* AFPGameMode::ChoosePlayerStart_Implementation(AController* Player)
 	return Super::ChoosePlayerStart_Implementation(Player);
 }
 
+void AFPGameMode::EndMatch()
+{
+	Super::EndMatch();
+
+	GetWorldTimerManager().ClearTimer(MatchEndTimer);
+
+	if (AFPGameState* FPGameState = GetGameState<AFPGameState>())
+	{
+		FPGameState->SetMatchEndTime(0.f);
+	}
+}
+
+void AFPGameMode::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (AFPGameState* FPGameState = GetGameState<AFPGameState>())
+	{
+		FPGameState->OnTeamKillCountUpdatedDelegate.AddUObject(this, &ThisClass::OnTeamKillCountUpdated);
+	}
+}
+
 void AFPGameMode::HandleMatchHasStarted()
 {
 	Super::HandleMatchHasStarted();
 
 	// MatchTime만큼 시간이 지나면 매치를 종료하도록 타이머 설정
 	// EndMatch()가 호출되면 GameMode, GameState의 HandleMatchHasEnded()가 호출된다.
-	FTimerHandle MatchTimer;
-	GetWorldTimerManager().SetTimer(MatchTimer, FTimerDelegate::CreateUObject(this, &ThisClass::EndMatch), MatchTime, false);
+	GetWorldTimerManager().SetTimer(MatchEndTimer, FTimerDelegate::CreateUObject(this, &ThisClass::EndMatch), MatchTime, false);
 
 	if (AFPGameState* FPGameState = GetGameState<AFPGameState>())
 	{
@@ -87,6 +108,14 @@ void AFPGameMode::HandleMatchHasEnded()
 	// Time Dilation에 의해 Timer Rate도 영향을 받으므로, 이를 반영해 Rate 설정
 	FTimerHandle MatchTimer;
 	GetWorldTimerManager().SetTimer(MatchTimer, FTimerDelegate::CreateUObject(this, &ThisClass::TravelToLobby), MatchEndDelay * MatchEndTimeDilation, false);
+}
+
+void AFPGameMode::OnTeamKillCountUpdated(ETeam Team, int32 KillCount)
+{
+	if (KillCount == MatchInfo.GoalKillCount)
+	{
+		EndMatch();
+	}
 }
 
 void AFPGameMode::TravelToLobby() const

@@ -31,13 +31,13 @@ public:
 	const FMatchInfo& GetMatchInfo() const { return MatchInfo; }
 
 	// 새로 접속한 플레이어 정보를 추가한다.
-	void AddPlayerInfo(const FPlayerInfo& PlayerInfo);
+	virtual void AddPlayerInfo(const FPlayerInfo& PlayerInfo);
 
 	// 퇴장한 플레이어 정보를 제거한다.
-	void RemovePlayerInfo(const FString& Username);
+	virtual void RemovePlayerInfo(const FString& Username);
 
 	// 플레이어 정보를 변경한다.
-	void UpdatePlayerInfo(const FPlayerInfo& PlayerInfo);
+	virtual void UpdatePlayerInfo(const FPlayerInfo& PlayerInfo);
 
 	FOnClientMatchInfoReplicatedDelegate OnClientMatchInfoReplicatedDelegate;
 

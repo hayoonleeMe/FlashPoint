@@ -22,6 +22,29 @@ void AFPGameState::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLife
 	DOREPLIFETIME(AFPGameState, GlobalTimeDilation);
 }
 
+void AFPGameState::AddPlayerInfo(const FPlayerInfo& PlayerInfo)
+{
+	Super::AddPlayerInfo(PlayerInfo);
+	
+	OnPlayerInfoAdded(PlayerInfo);
+}
+
+void AFPGameState::RemovePlayerInfo(const FString& Username)
+{
+	Super::RemovePlayerInfo(Username);
+
+	FPlayerInfo PlayerInfo;
+	PlayerInfo.SetUsername(Username);
+	OnPlayerInfoRemoved(PlayerInfo);
+}
+
+void AFPGameState::UpdatePlayerInfo(const FPlayerInfo& PlayerInfo)
+{
+	Super::UpdatePlayerInfo(PlayerInfo);
+	
+	OnPlayerInfoChanged(PlayerInfo);
+}
+
 void AFPGameState::SetMatchEndTime(float InMatchEndTime)
 {
 	MatchEndTime = InMatchEndTime;
@@ -88,9 +111,9 @@ void AFPGameState::BeginPlay()
 {
 	Super::BeginPlay();
 
-	OnClientPlayerInfoAddedDelegate.AddUObject(this, &ThisClass::OnClientPlayerInfoAdded);
-	OnClientPlayerInfoRemovedDelegate.AddUObject(this, &ThisClass::OnClientPlayerInfoRemoved);
-	OnClientPlayerInfoChangedDelegate.AddUObject(this, &ThisClass::OnClientPlayerInfoChanged);
+	OnClientPlayerInfoAddedDelegate.AddUObject(this, &ThisClass::OnPlayerInfoAdded);
+	OnClientPlayerInfoRemovedDelegate.AddUObject(this, &ThisClass::OnPlayerInfoRemoved);
+	OnClientPlayerInfoChangedDelegate.AddUObject(this, &ThisClass::OnPlayerInfoChanged);
 }
 
 void AFPGameState::HandleMatchHasEnded()
@@ -100,17 +123,17 @@ void AFPGameState::HandleMatchHasEnded()
 	OnMatchEndedDelegate.Broadcast();
 }
 
-void AFPGameState::OnClientPlayerInfoAdded(const FPlayerInfo& PlayerInfo)
+void AFPGameState::OnPlayerInfoAdded(const FPlayerInfo& PlayerInfo)
 {
 	PlayerKillCounts.Add(PlayerInfo.GetUsernameAsFName(), PlayerInfo.KillCount);
 }
 
-void AFPGameState::OnClientPlayerInfoRemoved(const FPlayerInfo& PlayerInfo)
+void AFPGameState::OnPlayerInfoRemoved(const FPlayerInfo& PlayerInfo)
 {
 	PlayerKillCounts.Remove(PlayerInfo.GetUsernameAsFName());
 }
 
-void AFPGameState::OnClientPlayerInfoChanged(const FPlayerInfo& PlayerInfo)
+void AFPGameState::OnPlayerInfoChanged(const FPlayerInfo& PlayerInfo)
 {
 	int32& PrevKillCount = PlayerKillCounts.FindOrAdd(PlayerInfo.GetUsernameAsFName());
 	if (PrevKillCount != PlayerInfo.KillCount)
