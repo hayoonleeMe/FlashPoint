@@ -10,12 +10,11 @@
 #include "FPLogChannels.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitInputRelease.h"
-#include "AbilitySystem/FPGameplayAbilityTargetData_SingleTargetHit.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
-#include "GameFramework/Character.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Player/BasePlayerState.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameplayAbility_WeaponFire)
 
@@ -228,12 +227,28 @@ AWeapon_Base* UFPGameplayAbility_WeaponFire::GetEquippedWeapon(const AActor* Ava
 	return nullptr;
 }
 
-bool UFPGameplayAbility_WeaponFire::CanApplyDamage(const AActor* TargetActor)
+bool UFPGameplayAbility_WeaponFire::CanApplyDamage(const AActor* TargetActor) const
 {
-	if (IsValid(TargetActor))
+	if (const APawn* TargetPawn = Cast<APawn>(TargetActor))
 	{
-		// TODO : 적인지 체크
-		return TargetActor->IsA<ACharacter>();
+		if (const ABasePlayerState* TargetPS = TargetPawn->GetPlayerState<ABasePlayerState>())
+		{
+			const ETeam TargetTeam = TargetPS->GetTeam();
+			
+			if (const APlayerController* PC = GetPlayerController())
+			{
+				if (const ABasePlayerState* InstigatorPS = PC->GetPlayerState<ABasePlayerState>())
+				{
+					const ETeam InstigatorTeam = InstigatorPS->GetTeam();
+
+					// 개인전이면 팀이 None일 때, 팀전이면 팀이 None이 아니고 다른 팀일 떄 공격할 수 있다.
+					const bool bCanAttackInFFA = InstigatorTeam == ETeam::None && InstigatorTeam == TargetTeam;
+					const bool bCanAttackInTDM = InstigatorTeam != ETeam::None && InstigatorTeam != TargetTeam;
+					
+					return bCanAttackInFFA || bCanAttackInTDM;
+				}
+			}
+		}
 	}
 	return false;
 }
@@ -252,9 +267,7 @@ void UFPGameplayAbility_WeaponFire::StartTargeting()
 	
 	for (const FHitResult& HitResult : HitResults)
 	{
-		FFPGameplayAbilityTargetData_SingleTargetHit* NewTargetData = new FFPGameplayAbilityTargetData_SingleTargetHit(HitResult);
-		NewTargetData->bCanApplyDamage = CanApplyDamage(HitResult.GetActor()); 
-		TargetDataHandle.Add(NewTargetData);
+		TargetDataHandle.Add(new FGameplayAbilityTargetData_SingleTargetHit(HitResult));
 	}
 
 	OnTargetDataReady(TargetDataHandle, FGameplayTag());
@@ -447,29 +460,31 @@ void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(FGameplayAbilityTargetDa
 
 	for (int32 Index = 0; Index < InData.Num(); ++Index)
 	{
-		if (FFPGameplayAbilityTargetData_SingleTargetHit* HitData = static_cast<FFPGameplayAbilityTargetData_SingleTargetHit*>(InData.Get(Index)))
+		if (FGameplayAbilityTargetData_SingleTargetHit* HitData = static_cast<FGameplayAbilityTargetData_SingleTargetHit*>(InData.Get(Index)))
 		{
-			// 데미지를 입힐 대상인지가 bHitReplaced에 저장됨
-			if (HitData->bCanApplyDamage)
+			if (const AActor* TargetActor = HitData->HitResult.GetActor())
 			{
-				float BaseDamage = Weapon->GetDamageByDistance(HitData->HitResult.Distance);
-
-				const bool bHeadShot = HitData->HitResult.BoneName == TEXT("head");
-				if (bHeadShot)
+				if (CanApplyDamage(TargetActor))
 				{
-					BaseDamage *= Weapon->GetHeadShotMultiplier();
-					NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("HeadShot"));
-				}
+					float BaseDamage = Weapon->GetDamageByDistance(HitData->HitResult.Distance);
 
-				// 소수점 둘째 자리까지 반올림
-				BaseDamage = FMath::RoundToFloat(BaseDamage * 100.f) / 100.f;
+					const bool bHeadShot = HitData->HitResult.BoneName == TEXT("head");
+					if (bHeadShot)
+					{
+						BaseDamage *= Weapon->GetHeadShotMultiplier();
+						NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("HeadShot"));
+					}
 
-				// TODO : Indicates Damage and Update HUD
+					// 소수점 둘째 자리까지 반올림
+					BaseDamage = FMath::RoundToFloat(BaseDamage * 100.f) / 100.f;
 
-				FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass);
-				EffectSpecHandle.Data->SetSetByCallerMagnitude(FPGameplayTags::Attributes::IncomingDamage, BaseDamage);
+					// TODO : Indicates Damage and Update HUD
+
+					FGameplayEffectSpecHandle EffectSpecHandle = MakeOutgoingGameplayEffectSpec(DamageEffectClass);
+					EffectSpecHandle.Data->SetSetByCallerMagnitude(FPGameplayTags::Attributes::IncomingDamage, BaseDamage);
 				
-				HitData->ApplyGameplayEffectSpec(*EffectSpecHandle.Data);
+					HitData->ApplyGameplayEffectSpec(*EffectSpecHandle.Data);
+				}
 			}
 		}
 	}
