@@ -22,3 +22,13 @@ TSubclassOf<UAnimInstance> UFPCosmeticData::GetDefaultAnimLayer() const
 {
 	return AnimLayerSet.DefaultAnimLayer;
 }
+
+USkeletalMesh* UFPCosmeticData::GetCharacterMesh() const
+{
+	return CharacterMeshSet.CharacterMesh;
+}
+
+const FCharacterMeshEntry* UFPCosmeticData::GetCharacterMeshEntryByTeam(ETeam Team) const
+{
+	return CharacterMeshSet.TeamMeshMap.Find(Team);
+}

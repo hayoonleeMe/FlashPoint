@@ -8,6 +8,7 @@
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Data/FPAssetData.h"
 #include "Data/FPCosmeticData.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -94,6 +95,7 @@ void AFPCharacter::OnRep_PlayerState()
 	Super::OnRep_PlayerState();
 
 	InitAbilitySystem();
+	SetCharacterMesh();
 }
 
 UAbilitySystemComponent* AFPCharacter::GetAbilitySystemComponent() const
@@ -122,23 +124,37 @@ bool AFPCharacter::CanJumpInternal_Implementation() const
 	return JumpIsAllowedInternal();
 }
 
-void AFPCharacter::BeginPlay()
+void AFPCharacter::SetCharacterMesh()
 {
-	Super::BeginPlay();
+	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));
+	check(CosmeticData);
 
 	// Initialize Player Skeletal Mesh Component
-	if (USkeletalMesh* SKM = UFPAssetManager::GetAssetById<USkeletalMesh>(TEXT("SKM_Player")))
+	if (USkeletalMesh* SKM = CosmeticData->GetCharacterMesh())
 	{
 		GetMesh()->SetSkeletalMesh(SKM);
 	}
+
+	// Set Materials By Team
+	if (ABasePlayerState* BasePS = GetPlayerState<ABasePlayerState>())
+	{
+		if (BasePS->GetTeam() != ETeam::None)
+		{
+			if (const FCharacterMeshEntry* Entry = CosmeticData->GetCharacterMeshEntryByTeam(BasePS->GetTeam()))
+			{
+				const TArray<TObjectPtr<UMaterialInterface>>& Materials = Entry->Materials;
+				for (int32 Index = 0; Index < Materials.Num(); ++Index)
+				{
+					GetMesh()->SetMaterial(Index, Materials[Index]);	
+				}
+			}
+		}
+	}
 	
-	// Link Default Weapon Anim Layer
+	// Anim Layer
 	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
 	{
-		if (UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData")))
-		{
-			AnimInstance->LinkAnimClassLayers(CosmeticData->GetDefaultAnimLayer());
-		}
+		AnimInstance->LinkAnimClassLayers(CosmeticData->GetDefaultAnimLayer());
 	}
 }
 
