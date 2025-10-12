@@ -41,6 +41,7 @@ namespace FPGameplayTags
 	{
 		extern FNativeGameplayTag Jump;
 		extern FNativeGameplayTag WeaponFire;
+		extern FNativeGameplayTag Sprint;
 	}
 
 	namespace CharacterState

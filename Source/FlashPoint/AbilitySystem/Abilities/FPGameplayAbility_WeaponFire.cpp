@@ -23,8 +23,11 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 	AbilityTags.AddTag(FPGameplayTags::Ability::WeaponFire);
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState::IsFiring);
 	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon::NoFire);
-	AmmoCostTag = FPGameplayTags::Weapon::Data::Ammo;
+	
+	// Sprint 중 발사 시 Sprint 취소
+	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::Sprint);
 
+	AmmoCostTag = FPGameplayTags::Weapon::Data::Ammo;
 	ScatterDistribution = 1.f;
 }
 
