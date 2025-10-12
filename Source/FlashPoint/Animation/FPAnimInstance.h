@@ -86,14 +86,6 @@ protected:
 
 	void UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon);
 
-	// 무기를 발사하고 난 뒤, 지난 시간
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float TimeSinceLastFire;
-
-	// 무기를 발사하고 난 뒤, 무기를 들지 않고 다시 원래 동작을 수행할 때까지 기다릴 시간
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float AimHoldDuration;
-
 	// 점프 이후의 체공 시간
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float TimeFalling;

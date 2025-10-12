@@ -21,15 +21,11 @@ const FVector2D UFPAnimInstance::LandRecoveryAlphaOutRange = { 0.f, 1.f };
 UFPAnimInstance::UFPAnimInstance()
 {
 	CardinalDirectionDeadZone = 10.f;
-	AimHoldDuration = 1.5f;
 }
 
 void UFPAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
-
-	// 0으로 시작해 Blend Weight를 업데이트 하지 않도록 방지
-	TimeSinceLastFire = AimHoldDuration;
 
 	if (UWeaponManageComponent* WeaponManageComp = GetOwningActor() ? GetOwningActor()->FindComponentByClass<UWeaponManageComponent>() : nullptr)
 	{
@@ -84,15 +80,6 @@ void UFPAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 			bShouldMove = GroundSpeed > 0.f && MoveComponent->GetCurrentAcceleration() != FVector::ZeroVector;
 			bIsOnGround = MoveComponent->IsMovingOnGround();
 			bIsCrouching = Character->bIsCrouched;
-
-			if (GameplayTag_IsFiring)
-			{
-				TimeSinceLastFire = 0.f;
-			}
-			else if (TimeSinceLastFire < AimHoldDuration)
-			{
-				TimeSinceLastFire += DeltaSeconds;
-			}
 
 			UpdateJumpData(DeltaSeconds, MoveComponent);
 			UpdateAimingData(Character);
@@ -192,7 +179,7 @@ void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds)
 	// Update HipFireUpperBodyBlendWeight
 	if (bHasEquippedWeapon)
 	{
-		const bool bHipFire = GameplayTag_IsFiring || TimeSinceLastFire < AimHoldDuration || (bIsOnGround && !GameplayTag_IsSprinting);
+		const bool bHipFire = GameplayTag_IsFiring || (bIsOnGround && !GameplayTag_IsSprinting);
 		HipFireUpperBodyBlendWeight = FMath::FInterpTo(HipFireUpperBodyBlendWeight, bHipFire ? 1.f : 0.f, DeltaSeconds, bHipFire ? 20.f : 3.f);
 	}
 	else
