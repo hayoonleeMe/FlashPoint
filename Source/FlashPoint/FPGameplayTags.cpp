@@ -41,6 +41,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(Jump, "Ability.Jump");
 		UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Ability.WeaponFire");
 		UE_DEFINE_GAMEPLAY_TAG(Sprint, "Ability.Sprint");
+		UE_DEFINE_GAMEPLAY_TAG(Crouch, "Ability.Crouch");
 	}
 
 	namespace CharacterState

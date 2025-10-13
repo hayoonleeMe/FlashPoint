@@ -14,7 +14,6 @@ UFPGameplayAbility_Sprint::UFPGameplayAbility_Sprint()
 
 	// 총 발사 시 Sprint 제한
 	ActivationBlockedTags.AddTag(FPGameplayTags::CharacterState::IsFiring);
-	// TODO : Crouch 시 Cancel
 
 	SpeedMultiplier = 1.5f;
 }
@@ -53,8 +52,11 @@ void UFPGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle
 	{
 		if (UCharacterMovementComponent* MovementComponent = AvatarCharacter->GetCharacterMovement())
 		{
-			// Crouch 상태면 해제
-			AvatarCharacter->UnCrouch();
+			if (AvatarCharacter->bIsCrouched)
+			{
+				// Crouch 상태면 해제
+				AvatarCharacter->UnCrouch();
+			}
 			
 			if (BaseWalkSpeed <= 0.f)
 			{
