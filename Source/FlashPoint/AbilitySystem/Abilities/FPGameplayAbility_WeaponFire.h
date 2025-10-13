@@ -30,14 +30,11 @@ protected:
 	// 실제 발사를 수행한다.
 	virtual void Fire();
 
+	// FireDelay마다 호출되고, Fire를 수행한다.
 	void AutoFire();
-	void SemiAutoFire();
-	void OnSemiAutoFireDelayEnded();
 
-	// true라면, 입력 키가 떼어졌을 때 어빌리티를 종료한다.
-	bool bEndWhenInputReleased = false;
 	// 입력 키가 떼어졌는지 여부를 나타낸다.
-	bool bInputReleased = false;
+	bool bInputReleased = true;
 
 	// Wait Input Released에 등록된 콜백 함수
 	UFUNCTION()
