@@ -23,8 +23,11 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 	AbilityTags.AddTag(FPGameplayTags::Ability::WeaponFire);
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState::IsFiring);
 	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon::NoFire);
-	AmmoCostTag = FPGameplayTags::Weapon::Data::Ammo;
+	
+	// Sprint 중 발사 시 Sprint 취소
+	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::Sprint);
 
+	AmmoCostTag = FPGameplayTags::Weapon::Data::Ammo;
 	ScatterDistribution = 1.f;
 }
 
@@ -51,7 +54,6 @@ bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpe
 void UFPGameplayAbility_WeaponFire::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                                     const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	bEndWhenInputReleased = false;
 	bInputReleased = false;
 	
 	UAbilitySystemComponent* ASC = GetAbilitySystemComponentFromActorInfo_Checked();
@@ -71,17 +73,24 @@ void UFPGameplayAbility_WeaponFire::ActivateAbility(const FGameplayAbilitySpecHa
 	
 	if (bAutoFire)
 	{
-		World->GetTimerManager().SetTimer(FireDelayTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::AutoFire), FireDelay, true, 0.f);
+		World->GetTimerManager().SetTimer(FireDelayTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::AutoFire), FireDelay, true, 0);
 	}
 	else
 	{
-		SemiAutoFire();
+		Fire();
+		World->GetTimerManager().SetTimer(FireDelayTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::K2_EndAbility), FireDelay, false);	
 	}
 }
 
 void UFPGameplayAbility_WeaponFire::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
+	if (!bAutoFire)
+	{
+		// SemiAuto의 경우, 발사가 끝나고 입력을 Release 후 Trigger 하도록 Flush 
+		FlushPressedInput();
+	}
+	
 	if (GetWorld())
 	{
 		// Fire Delay Timer 해제
@@ -183,34 +192,9 @@ void UFPGameplayAbility_WeaponFire::AutoFire()
 	Fire();
 }
 
-void UFPGameplayAbility_WeaponFire::SemiAutoFire()
-{
-	Fire();
-
-	// FireDelay가 지나면 종료
-	GetWorld()->GetTimerManager().SetTimer(FireDelayTimerHandle, FTimerDelegate::CreateUObject(this, &ThisClass::OnSemiAutoFireDelayEnded), FireDelay, false);
-}
-
-void UFPGameplayAbility_WeaponFire::OnSemiAutoFireDelayEnded()
-{
-	if (bInputReleased)	
-	{
-		K2_EndAbility();
-	}
-	else
-	{
-		// 입력이 떼어지면 종료시킴
-		bEndWhenInputReleased = true;
-	}
-}
-
 void UFPGameplayAbility_WeaponFire::OnInputReleased(float TimeHeld)
 {
 	bInputReleased = true;
-	if (bEndWhenInputReleased)
-	{
-		K2_EndAbility();
-	}
 }
 
 AWeapon_Base* UFPGameplayAbility_WeaponFire::GetEquippedWeapon() const

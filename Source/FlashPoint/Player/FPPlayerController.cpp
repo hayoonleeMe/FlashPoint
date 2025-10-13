@@ -71,7 +71,6 @@ void AFPPlayerController::SetupInputComponent()
 	// Bind Native Inputs
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Move, ETriggerEvent::Triggered, this, &ThisClass::Input_Move);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
-	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Crouch, ETriggerEvent::Triggered, this, &ThisClass::Input_Crouch);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::PauseMenu, ETriggerEvent::Triggered, this, &ThisClass::Input_PauseMenu);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Scoreboard, ETriggerEvent::Triggered, this, &ThisClass::Input_Scoreboard);
 
@@ -104,14 +103,6 @@ void AFPPlayerController::Input_Look(const FInputActionValue& InputValue)
 	const FVector2D LookAxisVector = InputValue.Get<FVector2D>();
 	AddYawInput(LookAxisVector.X);
 	AddPitchInput(-LookAxisVector.Y);
-}
-
-void AFPPlayerController::Input_Crouch()
-{
-	if (GetCharacter() && GetCharacter()->GetCharacterMovement()->IsMovingOnGround())
-	{
-		GetCharacter()->bIsCrouched ? GetCharacter()->UnCrouch() : GetCharacter()->Crouch();  
-	}
 }
 
 void AFPPlayerController::Input_PauseMenu()

@@ -33,7 +33,6 @@ protected:
 private:
 	void Input_Move(const FInputActionValue& InputValue);
 	void Input_Look(const FInputActionValue& InputValue);
-	void Input_Crouch();
 	void Input_PauseMenu();
 	void Input_Scoreboard(const FInputActionValue& InputValue);
 

@@ -26,6 +26,7 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Jump, "Input.Gameplay.Jump");
 			UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Input.Gameplay.WeaponFire");
 			UE_DEFINE_GAMEPLAY_TAG(Scoreboard, "Input.Gameplay.Scoreboard");
+			UE_DEFINE_GAMEPLAY_TAG(Sprint, "Input.Gameplay.Sprint");
 		}
 
 		namespace UI
@@ -39,6 +40,8 @@ namespace FPGameplayTags
 	{
 		UE_DEFINE_GAMEPLAY_TAG(Jump, "Ability.Jump");
 		UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Ability.WeaponFire");
+		UE_DEFINE_GAMEPLAY_TAG(Sprint, "Ability.Sprint");
+		UE_DEFINE_GAMEPLAY_TAG(Crouch, "Ability.Crouch");
 	}
 
 	namespace CharacterState
