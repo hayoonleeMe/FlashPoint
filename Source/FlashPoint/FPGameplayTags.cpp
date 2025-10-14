@@ -27,6 +27,7 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Input.Gameplay.WeaponFire");
 			UE_DEFINE_GAMEPLAY_TAG(Scoreboard, "Input.Gameplay.Scoreboard");
 			UE_DEFINE_GAMEPLAY_TAG(Sprint, "Input.Gameplay.Sprint");
+			UE_DEFINE_GAMEPLAY_TAG(Reload, "Input.Gameplay.Reload");
 		}
 
 		namespace UI

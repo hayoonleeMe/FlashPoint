@@ -29,6 +29,7 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag WeaponFire;
 			extern FNativeGameplayTag Scoreboard;
 			extern FNativeGameplayTag Sprint;
+			extern FNativeGameplayTag Reload;
 		}
 
 		namespace UI
