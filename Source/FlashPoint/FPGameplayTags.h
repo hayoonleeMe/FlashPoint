@@ -44,6 +44,7 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag WeaponFire;
 		extern FNativeGameplayTag Sprint;
 		extern FNativeGameplayTag Crouch;
+		extern FNativeGameplayTag Reload;
 	}
 
 	namespace CharacterState
@@ -77,5 +78,10 @@ namespace FPGameplayTags
 	namespace Attributes
 	{
 		extern FNativeGameplayTag IncomingDamage;
+	}
+
+	namespace GameplayEvent
+	{
+		extern FNativeGameplayTag ReloadFinished;
 	}
 }

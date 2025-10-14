@@ -42,6 +42,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(WeaponFire, "Ability.WeaponFire");
 		UE_DEFINE_GAMEPLAY_TAG(Sprint, "Ability.Sprint");
 		UE_DEFINE_GAMEPLAY_TAG(Crouch, "Ability.Crouch");
+		UE_DEFINE_GAMEPLAY_TAG(Reload, "Ability.Reload");
 	}
 
 	namespace CharacterState
@@ -75,5 +76,10 @@ namespace FPGameplayTags
 	namespace Attributes
 	{
 		UE_DEFINE_GAMEPLAY_TAG(IncomingDamage, "Attributes.IncomingDamage");
+	}
+
+	namespace GameplayEvent
+	{
+		UE_DEFINE_GAMEPLAY_TAG(ReloadFinished, "GameplayEvent.ReloadFinished");
 	}
 }

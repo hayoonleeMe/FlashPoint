@@ -52,7 +52,7 @@ public:
 	float GetMaxDamageRange() const { return MaxDamageRange; }
 	int32 GetBulletsPerCartridge() const { return BulletsPerCartridge; }
 	float GetHeadShotMultiplier() const { return HeadShotMultiplier; }
-	float GetMagCapacity() const { return MagCapacity; }
+	int32 GetMagCapacity() const { return MagCapacity; }
 	FString GetDisplayName() const { return DisplayName; }
 	UTexture2D* GetDisplayIcon() const { return DisplayIcon; }
 
