@@ -34,8 +34,8 @@ class FLASHPOINT_API UFPAnimInstance : public UAnimInstance
 public:
 	UFPAnimInstance();
 	virtual void NativeInitializeAnimation() override;
-	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 	virtual void NativePostEvaluateAnimation() override;
+	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
 	
@@ -45,6 +45,8 @@ protected:
 	
 	// GameplayTag에 해당하는 프로퍼티 값을 업데이트
 	void GameplayTagEventCallback(const FGameplayTag Tag, int32 NewCount);
+
+	bool bIsFirstUpdate = true;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GameplayTag_IsSprinting;
@@ -56,6 +58,12 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector Velocity;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float YawDeltaSinceLastUpdate;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRotator WorldRotation;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float GroundSpeed;
@@ -140,4 +148,49 @@ protected:
 	float LeftHandModifyAlpha;
 
 	void UpdateLeftHandModifyTransform();
+
+	// TurnInPlace가 Blend Out 상태인지 여부
+	// Idle State 일 때 false로 설정되고, 그 외에는 true이다.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8 bIsTurnInPlaceBlendingOut : 1;
+
+	// Anim Graph의 Rotate Root Bone 노드의 Yaw 값으로 사용되고, Idle 상태일 때 bUseControllerRotationYaw 옵션을 사용하는 캐릭터가 시점 방향으로 회전하지 않도록 역방향으로 회전시키는 역할을 한다.
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RootYawOffset;
+
+	// RootYawOffset 값을 설정할 때 Clamp 설정
+	// X: Min, Y: Max
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector2D RootYawOffsetAngleClamp;
+
+	// Crouch 상태에서 RootYawOffset 값을 설정할 때 Clamp 설정
+	// X: Min, Y: Max
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector2D RootYawOffsetAngleCrouchClamp;
+
+	// RootYawOffset을 보정한 뒤 InValue로 설정한다.
+	void SetRootYawOffset(float InValue);
+
+	// Turn Animation의 TurnYawWeight Curve Name
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName TurnYawWeightCurveName;
+
+	// Turn Animation의 RemainingTurnYaw Curve Name
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName RemainingTurnYawCurveName;
+
+	// Turn Animation의 Turn Yaw Curve Value 들로 계산된 값
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float TurnYawCurveValue;
+
+	// 이전 프레임에 설정된 TurnYawCurveValue
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float PreviousTurnYawCurveValue;
+
+	void UpdateRootYawOffset(float DeltaSeconds);
+
+	// 현재 애니메이션의 TurnYawWeightCurveName, RemainingTurnYawCurveName Curve 값에 따라 RootYawOffset을 업데이트한다.
+	// Idle State일 때 호출된다. (Idle에서 Blending Out 될 때 제외)
+	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
+	void ProcessTurnYawCurve();
 };
