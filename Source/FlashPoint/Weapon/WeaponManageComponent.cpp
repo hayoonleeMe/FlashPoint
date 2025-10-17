@@ -41,6 +41,21 @@ void UWeaponManageComponent::InitializeComponent()
 	}
 }
 
+int32 UWeaponManageComponent::GetReserveAmmoStackCount(const AActor* Actor)
+{
+	if (IsValid(Actor))
+	{
+		if (UWeaponManageComponent* WeaponManageComponent = Actor->FindComponentByClass<UWeaponManageComponent>())
+		{
+			if (const AWeapon_Base* Weapon = WeaponManageComponent->GetEquippedWeapon())
+			{
+				return WeaponManageComponent->GetAmmoTagStacks().GetStackCount(Weapon->GetWeaponTypeTag());
+			}
+		}
+	}
+	return 0;
+}
+
 void UWeaponManageComponent::RegisterAmmoTagStackChangedEvent(const FGameplayTag& Tag, const FOnAmmoTagStackChangedDelegate::FDelegate& InDelegate)
 {
 	AmmoTagStackChangedEventMap.FindOrAdd(Tag).Add(InDelegate);

@@ -41,6 +41,10 @@ public:
 	
 	FGameplayTagStackContainer& GetAmmoTagStacks() { return AmmoTagStacks; }
 
+	// Actor가 장착 중인 무기 타입에 맞는 ReserveAmmo Stack Count를 반환한다.
+	// Actor가 유효하지 않거나 무기를 장착하고 있지 않으면 0을 반환한다.
+	static int32 GetReserveAmmoStackCount(const AActor* Actor);
+
 	// AmmoTagStacks에서 Tag의 Stack Count가 변경될 때 InDelegate를 브로드캐스트하도록 등록한다.
 	void RegisterAmmoTagStackChangedEvent(const FGameplayTag& Tag, const FOnAmmoTagStackChangedDelegate::FDelegate& InDelegate);
 

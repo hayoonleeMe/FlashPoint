@@ -29,6 +29,10 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	// AbilityFailedCallbacks 델레게이트에 등록할 Callback
+	// Ability 실행이 실패할 때 호출된다.
+	void OnAbilityFailed(const UGameplayAbility* Ability, const FGameplayTagContainer& FailureTags);
+	
 	/// 어빌리티를 Input Pressed로 설정하고, InputPressed Replicated Event를 호출한다.
 	/// AbilityReplicatedEventDelegate() 델레게이트로 Event를 받을 수 있다.
 	/// @see UAbilityTask_WaitInputPress

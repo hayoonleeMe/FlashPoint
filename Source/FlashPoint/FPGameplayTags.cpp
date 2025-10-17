@@ -44,6 +44,11 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(Sprint, "Ability.Sprint");
 		UE_DEFINE_GAMEPLAY_TAG(Crouch, "Ability.Crouch");
 		UE_DEFINE_GAMEPLAY_TAG(Reload, "Ability.Reload");
+
+		namespace Fail
+		{
+			UE_DEFINE_GAMEPLAY_TAG(NoAmmo, "Ability.Fail.NoAmmo");
+		}
 	}
 
 	namespace CharacterState

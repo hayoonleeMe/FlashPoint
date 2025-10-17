@@ -124,7 +124,12 @@ bool UFPGameplayAbility_WeaponFire::CheckCost(const FGameplayAbilitySpecHandle H
 			if (UWeaponManageComponent* WeaponManageComponent = AvatarActor->FindComponentByClass<UWeaponManageComponent>())
 			{
 				FGameplayTagStackContainer& AmmoTagStacks = WeaponManageComponent->GetAmmoTagStacks();
-				return AmmoTagStacks.GetStackCount(AmmoCostTag) > 0;	
+				const bool bHasAmmo = AmmoTagStacks.GetStackCount(AmmoCostTag) > 0;
+				if (!bHasAmmo && OptionalRelevantTags)
+				{
+					OptionalRelevantTags->AddTag(FPGameplayTags::Ability::Fail::NoAmmo);
+				}
+				return bHasAmmo;
 			}
 		}
 	}
@@ -173,11 +178,6 @@ void UFPGameplayAbility_WeaponFire::Fire()
 				MontageTask->ReadyForActivation();
 			}
 		}
-	}
-	else
-	{
-		// TODO : Reload, Dry fire
-		NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("Can't Commit Ability"));
 	}
 }
 

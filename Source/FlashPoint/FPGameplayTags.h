@@ -46,6 +46,11 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag Sprint;
 		extern FNativeGameplayTag Crouch;
 		extern FNativeGameplayTag Reload;
+
+		namespace Fail
+		{
+			extern FNativeGameplayTag NoAmmo;
+		}
 	}
 
 	namespace CharacterState
