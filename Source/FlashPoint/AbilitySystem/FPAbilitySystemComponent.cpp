@@ -3,8 +3,10 @@
 
 #include "FPAbilitySystemComponent.h"
 
+#include "FPGameplayTags.h"
 #include "Abilities/FPGameplayAbility.h"
 #include "Animation/FPAnimInstance.h"
+#include "Weapon/WeaponManageComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAbilitySystemComponent)
 
@@ -72,6 +74,30 @@ bool UFPAbilitySystemComponent::IsAvatarLocallyControlled() const
 void UFPAbilitySystemComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (IsAvatarLocallyControlled())
+	{
+		AbilityFailedCallbacks.AddUObject(this, &ThisClass::OnAbilityFailed);
+	}
+}
+
+void UFPAbilitySystemComponent::OnAbilityFailed(const UGameplayAbility* Ability, const FGameplayTagContainer& FailureTags)
+{
+	// NoAmmo 때문에 실패한 경우에만
+	if (FailureTags.Num() == 1 && FailureTags.HasTagExact(FPGameplayTags::Ability::Fail::NoAmmo))
+	{
+		const int32 ReserveAmmo = UWeaponManageComponent::GetReserveAmmoStackCount(GetAvatarActor());
+		if (ReserveAmmo <= 0)
+		{
+			// Ammo와 ReserveAmmo 모두 없으므로 Dry Fire를 수행한다.
+			TryActivateAbilitiesByTag(FGameplayTagContainer(FPGameplayTags::Ability::DryFire), false);
+		}
+		else
+		{
+			// Ammo만 없으므로 재장전을 수행한다.
+			TryActivateAbilitiesByTag(FGameplayTagContainer(FPGameplayTags::Ability::Reload), false);
+		}
+	}
 }
 
 void UFPAbilitySystemComponent::AbilitySpecInputPressed(FGameplayAbilitySpec& Spec)

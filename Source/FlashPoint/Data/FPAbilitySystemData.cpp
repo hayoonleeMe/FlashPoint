@@ -3,6 +3,7 @@
 
 #include "FPAbilitySystemData.h"
 
+#include "FPGameplayTags.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "AbilitySystem/Abilities/FPGameplayAbility.h"
 
@@ -20,7 +21,7 @@ void UFPAbilitySystemData::GiveDataToAbilitySystem(UFPAbilitySystemComponent* AS
 	// Give Ability and Save Ability Handle
 	for (const FFPAbilitySystemData_Ability& AbilityData : AbilitiesToGrant)
 	{
-		if (AbilityData.AbilityClass && AbilityData.InputTag.IsValid())
+		if (ensureAlways(AbilityData.AbilityClass && AbilityData.InputTag.IsValid()))
 		{
 			FGameplayAbilitySpec AbilitySpec(AbilityData.AbilityClass, AbilityData.AbilityLevel);
 			AbilitySpec.DynamicAbilityTags.AddTag(AbilityData.InputTag);
@@ -65,6 +66,9 @@ void UFPAbilitySystemData::RemoveDataFromAbilitySystem(UFPAbilitySystemComponent
 		{
 			Tags.AddTag(AbilityData.InputTag);
 		}
+
+		// 입력을 사용하지 않는 어빌리티 제거
+		Tags.AddTag(FPGameplayTags::Input::NoInput);
 
 		TArray<FGameplayAbilitySpecHandle> SpecHandles;
 		ASC->FindAllAbilitiesWithInputTags(SpecHandles, Tags);

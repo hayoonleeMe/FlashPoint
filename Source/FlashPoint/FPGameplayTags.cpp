@@ -17,6 +17,8 @@ namespace FPGameplayTags
 	
 	namespace Input
 	{
+		UE_DEFINE_GAMEPLAY_TAG(NoInput, "Input.NoInput");
+		
 		namespace Gameplay
 		{
 			UE_DEFINE_GAMEPLAY_TAG(PauseMenu, "Input.Gameplay.PauseMenu");
@@ -44,6 +46,12 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(Sprint, "Ability.Sprint");
 		UE_DEFINE_GAMEPLAY_TAG(Crouch, "Ability.Crouch");
 		UE_DEFINE_GAMEPLAY_TAG(Reload, "Ability.Reload");
+		UE_DEFINE_GAMEPLAY_TAG(DryFire, "Ability.DryFire");
+
+		namespace Fail
+		{
+			UE_DEFINE_GAMEPLAY_TAG(NoAmmo, "Ability.Fail.NoAmmo");
+		}
 	}
 
 	namespace CharacterState
