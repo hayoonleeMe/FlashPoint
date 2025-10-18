@@ -90,8 +90,7 @@ void UFPAbilitySystemComponent::OnAbilityFailed(const UGameplayAbility* Ability,
 		if (ReserveAmmo <= 0)
 		{
 			// Ammo와 ReserveAmmo 모두 없으므로 Dry Fire를 수행한다.
-			// TODO : Dry Fire
-			UE_LOG(LogTemp, Warning, TEXT("%hs, DryFire"), __FUNCTION__);
+			TryActivateAbilitiesByTag(FGameplayTagContainer(FPGameplayTags::Ability::DryFire), false);
 		}
 		else
 		{

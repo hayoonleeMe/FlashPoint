@@ -19,6 +19,8 @@ namespace FPGameplayTags
 	
 	namespace Input
 	{
+		extern FNativeGameplayTag NoInput;
+		
 		namespace Gameplay
 		{
 			extern FNativeGameplayTag PauseMenu;
@@ -46,6 +48,7 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag Sprint;
 		extern FNativeGameplayTag Crouch;
 		extern FNativeGameplayTag Reload;
+		extern FNativeGameplayTag DryFire;
 
 		namespace Fail
 		{
