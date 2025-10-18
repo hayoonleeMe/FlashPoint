@@ -179,6 +179,15 @@ void UFPGameplayAbility_WeaponFire::Fire()
 			}
 		}
 	}
+	else
+	{
+		if (bAutoFire)
+		{
+			// 연사를 사용하는 총의 경우, CheckCost()를 통과하지 못하면 입력을 끊고 종료한다.
+			FlushPressedInput();
+			K2_EndAbility();
+		}
+	}
 }
 
 void UFPGameplayAbility_WeaponFire::AutoFire()
