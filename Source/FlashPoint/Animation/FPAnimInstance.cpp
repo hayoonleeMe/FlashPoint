@@ -7,8 +7,8 @@
 #include "AbilitySystemComponent.h"
 #include "FPGameplayTags.h"
 #include "KismetAnimationLibrary.h"
+#include "Character/FPCharacterMovementComponent.h"
 #include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
@@ -20,6 +20,7 @@ const FVector2D UFPAnimInstance::LandRecoveryAlphaOutRange = { 0.f, 1.f };
 
 UFPAnimInstance::UFPAnimInstance()
 {
+	JumpDistanceCurveName = TEXT("GroundDistance");
 	CardinalDirectionDeadZone = 10.f;
 	RootYawOffsetAngleClamp = { -120.f, 100.f };
 	RootYawOffsetAngleCrouchClamp = { -90.f, 80.f };
@@ -75,7 +76,7 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 
 	if (const ACharacter* Character = Cast<ACharacter>(GetOwningActor()))
 	{
-		if (const UCharacterMovementComponent* MoveComponent = Character->GetCharacterMovement())
+		if (const UFPCharacterMovementComponent* MoveComponent = Character->GetCharacterMovement<UFPCharacterMovementComponent>())
 		{
 			const FRotator Rotation = Character->GetActorRotation();
 			if (!bIsFirstUpdate)
@@ -122,7 +123,7 @@ void UFPAnimInstance::UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon)
 	bHasEquippedWeapon = EquippedWeapon != nullptr;
 }
 
-void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UCharacterMovementComponent* MoveComponent)
+void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UFPCharacterMovementComponent* MoveComponent)
 {
 	bIsJumping = bIsFalling = false;
 	if (MoveComponent->IsFalling())
@@ -140,6 +141,7 @@ void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UCharacterMovemen
 	}
 	
 	LandRecoveryAlpha = FMath::GetMappedRangeValueClamped(LandRecoveryAlphaInRange, LandRecoveryAlphaOutRange, TimeFalling);
+	GroundDistance = MoveComponent->GetGroundDistance();
 }
 
 void UFPAnimInstance::UpdateAimingData(const ACharacter* Character)
