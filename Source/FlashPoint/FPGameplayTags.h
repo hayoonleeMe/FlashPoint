@@ -60,6 +60,7 @@ namespace FPGameplayTags
 	{
 		extern FNativeGameplayTag IsSprinting;
 		extern FNativeGameplayTag IsFiring;
+		extern FNativeGameplayTag IsMoving;
 	}
 
 	namespace Weapon
