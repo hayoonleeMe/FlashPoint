@@ -7,8 +7,8 @@
 #include "Animation/AnimInstance.h"
 #include "FPAnimInstance.generated.h"
 
+class UFPCharacterMovementComponent;
 class AWeapon_Base;
-class UCharacterMovementComponent;
 class UAbilitySystemComponent;
 
 /**
@@ -94,6 +94,14 @@ protected:
 
 	void UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon);
 
+	// 캐릭터 최하단에서 땅까지 거리
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float GroundDistance;
+
+	// Fall Land Anim의 Distance Curve 이름
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName JumpDistanceCurveName;
+	
 	// 점프 이후의 체공 시간
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float TimeFalling;
@@ -106,7 +114,7 @@ protected:
 	const static FVector2D LandRecoveryAlphaInRange;
 	const static FVector2D LandRecoveryAlphaOutRange;
 
-	void UpdateJumpData(float DeltaSeconds, const UCharacterMovementComponent* MoveComponent);
+	void UpdateJumpData(float DeltaSeconds, const UFPCharacterMovementComponent* MoveComponent);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AimYaw;
