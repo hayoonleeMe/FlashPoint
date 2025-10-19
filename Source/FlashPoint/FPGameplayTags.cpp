@@ -30,6 +30,13 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Scoreboard, "Input.Gameplay.Scoreboard");
 			UE_DEFINE_GAMEPLAY_TAG(Sprint, "Input.Gameplay.Sprint");
 			UE_DEFINE_GAMEPLAY_TAG(Reload, "Input.Gameplay.Reload");
+
+			namespace QuickSlot
+			{
+				UE_DEFINE_GAMEPLAY_TAG(Slot1, "Input.Gameplay.QuickSlot.Slot1");
+				UE_DEFINE_GAMEPLAY_TAG(Slot2, "Input.Gameplay.QuickSlot.Slot2");
+				UE_DEFINE_GAMEPLAY_TAG(Slot3, "Input.Gameplay.QuickSlot.Slot3");
+			}
 		}
 
 		namespace UI
