@@ -5,6 +5,7 @@
 
 #include "FlashPoint.h"
 #include "FPCharacterMovementComponent.h"
+#include "FPGameplayTags.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -72,8 +73,23 @@ void AFPCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
+	const bool bIsMovingFromInput = IsMovingFromInput();
+	if (AbilitySystemComponent && bIsMovingFromInput != bWasMovingFromInput)
+	{
+		// 캐릭터 움직임 여부에 따라 IsMoving 태그 업데이트
+		if (bIsMovingFromInput)
+		{
+			AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsMoving);
+		}
+		else
+		{
+			AbilitySystemComponent->RemoveLooseGameplayTag(FPGameplayTags::CharacterState::IsMoving);
+		}
+	}
+	bWasMovingFromInput = bIsMovingFromInput;
+
 	TargetCameraHeight = BaseEyeHeight * 2.f;
-	if (bIsCrouched && IsMovingFromInput())
+	if (bIsCrouched && bWasMovingFromInput)
 	{
 		// Crouch + Walk 하면 캐릭터가 살짝 일어나서 걸으므로 카메라 위치도 높여준다.
 		TargetCameraHeight += 20.f;
