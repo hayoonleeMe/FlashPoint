@@ -18,6 +18,7 @@
 #include "UI/Gameplay/MatchResult.h"
 #include "UI/Gameplay/PauseMenu.h"
 #include "UI/Gameplay/Scoreboard/Scoreboard.h"
+#include "Weapon/WeaponManageComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
 
@@ -73,6 +74,9 @@ void AFPPlayerController::SetupInputComponent()
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Look, ETriggerEvent::Triggered, this, &ThisClass::Input_Look);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::PauseMenu, ETriggerEvent::Triggered, this, &ThisClass::Input_PauseMenu);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::Scoreboard, ETriggerEvent::Triggered, this, &ThisClass::Input_Scoreboard);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::QuickSlot::Slot1, ETriggerEvent::Triggered, this, &ThisClass::Input_QuickSlot1);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::QuickSlot::Slot2, ETriggerEvent::Triggered, this, &ThisClass::Input_QuickSlot2);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::QuickSlot::Slot3, ETriggerEvent::Triggered, this, &ThisClass::Input_QuickSlot3);
 
 	// Bind Ability Inputs
 	FPInputComponent->BindAbilityActions(InputData, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);
@@ -121,6 +125,30 @@ void AFPPlayerController::Input_Scoreboard(const FInputActionValue& InputValue)
 	if (Scoreboard)
 	{
 		Scoreboard->ShowWidget(InputValue.Get<bool>());
+	}
+}
+
+void AFPPlayerController::Input_QuickSlot1()
+{
+	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetPawn()))
+	{
+		WeaponManageComponent->ServerEquipWeaponAtSlot(1);
+	}
+}
+
+void AFPPlayerController::Input_QuickSlot2()
+{
+	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetPawn()))
+	{
+		WeaponManageComponent->ServerEquipWeaponAtSlot(2);
+	}
+}
+
+void AFPPlayerController::Input_QuickSlot3()
+{
+	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetPawn()))
+	{
+		WeaponManageComponent->ServerEquipWeaponAtSlot(3);
 	}
 }
 

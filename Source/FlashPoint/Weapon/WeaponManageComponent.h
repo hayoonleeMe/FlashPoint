@@ -29,6 +29,8 @@ class FLASHPOINT_API UWeaponManageComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	static UWeaponManageComponent* Get(const AActor* OwnerActor);
+	
 	UWeaponManageComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void InitializeComponent() override;
