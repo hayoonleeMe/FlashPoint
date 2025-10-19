@@ -11,6 +11,15 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(WeaponManageComponent) 
 
+UWeaponManageComponent* UWeaponManageComponent::Get(const AActor* OwnerActor)
+{
+	if (IsValid(OwnerActor))
+	{
+		return OwnerActor->FindComponentByClass<UWeaponManageComponent>();
+	}
+	return nullptr;
+}
+
 UWeaponManageComponent::UWeaponManageComponent()
 {
 	bAutoActivate = true;

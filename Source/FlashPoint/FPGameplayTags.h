@@ -32,6 +32,13 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag Scoreboard;
 			extern FNativeGameplayTag Sprint;
 			extern FNativeGameplayTag Reload;
+
+			namespace QuickSlot
+			{
+				extern FNativeGameplayTag Slot1;
+				extern FNativeGameplayTag Slot2;
+				extern FNativeGameplayTag Slot3;
+			}
 		}
 
 		namespace UI

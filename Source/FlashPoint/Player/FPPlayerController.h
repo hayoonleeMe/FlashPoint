@@ -35,6 +35,9 @@ private:
 	void Input_Look(const FInputActionValue& InputValue);
 	void Input_PauseMenu();
 	void Input_Scoreboard(const FInputActionValue& InputValue);
+	void Input_QuickSlot1();
+	void Input_QuickSlot2();
+	void Input_QuickSlot3();
 
 	void Input_AbilityInputTagPressed(FGameplayTag InputTag);
 	void Input_AbilityInputTagReleased(FGameplayTag InputTag);
