@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AbilitySystemComponent.h"
+#include "Data/FPAbilitySystemData.h"
 #include "FPAbilitySystemComponent.generated.h"
 
 
@@ -24,6 +25,8 @@ public:
 
 	// AvatarActor가 Locally Controlled 인지 반환한다.
 	bool IsAvatarLocallyControlled() const;
+
+	FFPAbilitySystemData_GrantedHandles& GetGrantedHandles() { return GrantedHandles; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -52,4 +55,8 @@ public:
 	/// 이번 프레임에서 Input Released된 Ability Spec Handle을 저장하고, ProcessAbilityInput()에서 처리한다.
 	/// @see AFPPlayerController::Input_AbilityInputTagReleased
 	void AbilityInputTagReleased(const FGameplayTag& InputTag);
+
+private:
+	// 부여된 Ability Handle, 적용된 Effect Handle을 저장한다.
+	FFPAbilitySystemData_GrantedHandles GrantedHandles;
 };

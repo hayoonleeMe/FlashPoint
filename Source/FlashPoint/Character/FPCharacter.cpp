@@ -195,7 +195,7 @@ void AFPCharacter::ApplyAbilitySystemData(const FName& DataId)
 
 	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
 	{
-		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent);
 	}
 }
 
@@ -205,7 +205,7 @@ void AFPCharacter::ApplyAbilitySystemData(const FGameplayTag& DataTag)
 	
 	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
 	{
-		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent);
 	}
 }
 
@@ -215,7 +215,7 @@ void AFPCharacter::RemoveAbilitySystemData(const FName& DataId)
 	
 	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
 	{
-		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent);
 	}
 }
 
@@ -225,6 +225,6 @@ void AFPCharacter::RemoveAbilitySystemData(const FGameplayTag& DataTag)
 	
 	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
 	{
-		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent, &GrantedHandles);
+		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent);
 	}
 }

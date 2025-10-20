@@ -58,10 +58,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UFPAttributeSet> AttributeSet;
 
-	// AbilitySystemComponent에 부여된 Ability Handle, 적용된 Effect Handle을 저장한다.
-	UPROPERTY()
-	FFPAbilitySystemData_GrantedHandles GrantedHandles;
-
 public:
 	// DataId에 해당하는 UFPAbilitySystemData를 ASC에 적용한다.
 	// Server Only
