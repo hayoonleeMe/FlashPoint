@@ -3,13 +3,15 @@
 
 #include "FPAbilitySystemData.h"
 
+#include "AbilitySystemGlobals.h"
 #include "FPGameplayTags.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "AbilitySystem/Abilities/FPGameplayAbility.h"
+#include "System/FPAssetManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAbilitySystemData)
 
-void UFPAbilitySystemData::GiveDataToAbilitySystem(UFPAbilitySystemComponent* ASC, FFPAbilitySystemData_GrantedHandles* OutGrantedHandles) const
+void UFPAbilitySystemData::GiveDataToAbilitySystem(UFPAbilitySystemComponent* ASC) const
 {
 	check(ASC);
 
@@ -27,10 +29,7 @@ void UFPAbilitySystemData::GiveDataToAbilitySystem(UFPAbilitySystemComponent* AS
 			AbilitySpec.DynamicAbilityTags.AddTag(AbilityData.InputTag);
 			const FGameplayAbilitySpecHandle SpecHandle = ASC->GiveAbility(AbilitySpec);
 			
-			if (OutGrantedHandles)
-			{
-				OutGrantedHandles->AddAbilitySpecHandle(SpecHandle);
-			}
+			ASC->GetGrantedHandles().AddAbilitySpecHandle(SpecHandle);
 		}
 	}
 
@@ -42,15 +41,34 @@ void UFPAbilitySystemData::GiveDataToAbilitySystem(UFPAbilitySystemComponent* AS
 			const UGameplayEffect* Effect = EffectData.EffectClass->GetDefaultObject<UGameplayEffect>();
 			FActiveGameplayEffectHandle EffectHandle = ASC->ApplyGameplayEffectToSelf(Effect, EffectData.EffectLevel, ASC->MakeEffectContext());
 			
-			if (OutGrantedHandles)
-			{
-				OutGrantedHandles->AddEffectHandle(EffectHandle);
-			}			
+			ASC->GetGrantedHandles().AddEffectHandle(EffectHandle);
 		}
 	}
 }
 
-void UFPAbilitySystemData::RemoveDataFromAbilitySystem(UFPAbilitySystemComponent* ASC, FFPAbilitySystemData_GrantedHandles* OutGrantedHandles) const
+void UFPAbilitySystemData::GiveDataToAbilitySystem(const AActor* Actor, const FName& DataId)
+{
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
+	{
+		if (UFPAbilitySystemComponent* ASC = Cast<UFPAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor)))
+		{
+			AbilitySystemData->GiveDataToAbilitySystem(ASC);
+		}
+	}
+}
+
+void UFPAbilitySystemData::GiveDataToAbilitySystem(const AActor* Actor, const FGameplayTag& DataTag)
+{
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
+	{
+		if (UFPAbilitySystemComponent* ASC = Cast<UFPAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor)))
+		{
+			AbilitySystemData->GiveDataToAbilitySystem(ASC);
+		}
+	}
+}
+
+void UFPAbilitySystemData::RemoveDataFromAbilitySystem(UFPAbilitySystemComponent* ASC) const
 {
 	check(ASC);
 
@@ -76,11 +94,8 @@ void UFPAbilitySystemData::RemoveDataFromAbilitySystem(UFPAbilitySystemComponent
 		for (const FGameplayAbilitySpecHandle& Handle : SpecHandles)
 		{
 			ASC->ClearAbility(Handle);
-
-			if (OutGrantedHandles)
-			{
-				OutGrantedHandles->RemoveAbilitySpecHandle(Handle);
-			}
+			
+			ASC->GetGrantedHandles().RemoveAbilitySpecHandle(Handle);
 		}
 	}
 
@@ -99,10 +114,29 @@ void UFPAbilitySystemData::RemoveDataFromAbilitySystem(UFPAbilitySystemComponent
 		{
 			ASC->RemoveActiveGameplayEffect(Handle);
 
-			if (OutGrantedHandles)
-			{
-				OutGrantedHandles->RemoveEffectHandle(Handle);
-			}
+			ASC->GetGrantedHandles().RemoveEffectHandle(Handle);
+		}
+	}
+}
+
+void UFPAbilitySystemData::RemoveDataFromAbilitySystem(const AActor* Actor, const FName& DataId)
+{
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
+	{
+		if (UFPAbilitySystemComponent* ASC = Cast<UFPAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor)))
+		{
+			AbilitySystemData->RemoveDataFromAbilitySystem(ASC);
+		}
+	}
+}
+
+void UFPAbilitySystemData::RemoveDataFromAbilitySystem(const AActor* Actor, const FGameplayTag& DataTag)
+{
+	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
+	{
+		if (UFPAbilitySystemComponent* ASC = Cast<UFPAbilitySystemComponent>(UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(Actor)))
+		{
+			AbilitySystemData->RemoveDataFromAbilitySystem(ASC);
 		}
 	}
 }

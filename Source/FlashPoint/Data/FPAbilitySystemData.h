@@ -91,11 +91,9 @@ public:
 		
 protected:
 	// 부여된 Ability Spec Handle
-	UPROPERTY()
 	TArray<FGameplayAbilitySpecHandle> GrantedAbilitySpecHandles;
 
 	// 적용된 Effect Handle
-	UPROPERTY()
 	TArray<FActiveGameplayEffectHandle> GrantedEffectHandles;
 };
 
@@ -109,14 +107,28 @@ class FLASHPOINT_API UFPAbilitySystemData : public UDataAsset
 
 public:
 	// ASC에 AbilitiesToGrant 어빌리티를 부여하고 EffectsToGrant 이펙트를 적용한다.
-	// OutGrantedHandles에 Ability, Effect Handle을 저장한다.
 	// Server Only
-	void GiveDataToAbilitySystem(UFPAbilitySystemComponent* ASC, FFPAbilitySystemData_GrantedHandles* OutGrantedHandles) const;
+	void GiveDataToAbilitySystem(UFPAbilitySystemComponent* ASC) const;
+
+	// Actor에 DataId로 등록된 Ability System Data를 설정한다.
+	// Server Only
+	static void GiveDataToAbilitySystem(const AActor* Actor, const FName& DataId);
+
+	// Actor에 DataTag로 등록된 Ability System Data를 설정한다.
+	// Server Only
+	static void GiveDataToAbilitySystem(const AActor* Actor, const FGameplayTag& DataTag);
 
 	// ASC에서 부여된 AbilitiesToGrant 어빌리티와 EffectsToGrant 이펙트를 제거한다.
-	// OutGrantedHandles에서 Ability, Effect Handle을 제거한다.
 	// Server Only
-	void RemoveDataFromAbilitySystem(UFPAbilitySystemComponent* ASC, FFPAbilitySystemData_GrantedHandles* OutGrantedHandles) const;
+	void RemoveDataFromAbilitySystem(UFPAbilitySystemComponent* ASC) const;
+
+	// Actor에 DataId로 등록된 Ability System Data를 제거한다.
+	// Server Only
+	static void RemoveDataFromAbilitySystem(const AActor* Actor, const FName& DataId);
+
+	// Actor에 DataTag로 등록된 Ability System Data를 제거한다.
+	// Server Only
+	static void RemoveDataFromAbilitySystem(const AActor* Actor, const FGameplayTag& DataTag);
 
 	// 부여할 어빌리티
 	UPROPERTY(EditDefaultsOnly)

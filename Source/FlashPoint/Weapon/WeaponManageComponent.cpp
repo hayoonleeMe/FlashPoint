@@ -4,7 +4,7 @@
 #include "WeaponManageComponent.h"
 
 #include "FPGameplayTags.h"
-#include "Character/FPCharacter.h"
+#include "Data/FPAbilitySystemData.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
 #include "Weapon/Weapon_Base.h"
@@ -178,10 +178,7 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
 
 		// Give Data to Owner ASC
-		if (AFPCharacter* OwningCharacter = Cast<AFPCharacter>(OwningPawn))
-		{
-			OwningCharacter->ApplyAbilitySystemData(EquippedWeapon->GetWeaponTypeTag());
-		}
+		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, EquippedWeapon->GetWeaponTypeTag());
 
 		// 장착한 무기의 탄창에 있는 총알 수로 업데이트
 		AmmoTagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, EquippedWeapon->GetMagCapacity());
@@ -216,10 +213,7 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
 
 		// Give Data to Owner ASC
-		if (AFPCharacter* OwningCharacter = Cast<AFPCharacter>(OwningPawn))
-		{
-			OwningCharacter->ApplyAbilitySystemData(EquippedWeapon->GetWeaponTypeTag());
-		}
+		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, EquippedWeapon->GetWeaponTypeTag());
 
 		// 장착한 무기의 탄창에 있는 총알 수로 업데이트
 		AmmoTagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, EquippedWeapon->GetServerRemainAmmo());
@@ -241,10 +235,7 @@ void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 		EquippedWeapon->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 		
 		// Remove Data from Owner ASC
-		if (AFPCharacter* OwningCharacter = GetOwner<AFPCharacter>())
-		{
-			OwningCharacter->RemoveAbilitySystemData(EquippedWeapon->GetWeaponTypeTag());
-		}
+		UFPAbilitySystemData::RemoveDataFromAbilitySystem(GetOwner(), EquippedWeapon->GetWeaponTypeTag());
 
 		if (bDestroy)
 		{
