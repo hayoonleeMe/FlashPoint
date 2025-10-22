@@ -4,9 +4,12 @@
 #include "WeaponManageComponent.h"
 
 #include "FPGameplayTags.h"
+#include "FPLogChannels.h"
 #include "Data/FPAbilitySystemData.h"
+#include "Data/FPRecoilData.h"
 #include "GameFramework/Character.h"
 #include "Net/UnrealNetwork.h"
+#include "System/FPAssetManager.h"
 #include "Weapon/Weapon_Base.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(WeaponManageComponent) 
@@ -25,6 +28,7 @@ UWeaponManageComponent::UWeaponManageComponent()
 	bAutoActivate = true;
 	SetIsReplicatedByDefault(true);
 	bWantsInitializeComponent = true;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	NumSlots = 3;
 	ActiveSlotIndex = 0;
@@ -47,6 +51,15 @@ void UWeaponManageComponent::InitializeComponent()
 	if (HasAuthority())
 	{
 		WeaponSlots.AddDefaulted(NumSlots);
+	}
+
+	// Cache PC
+	if (UWorld* World = GetWorld())
+	{
+		if (UGameInstance* GameInstance = World->GetGameInstance())
+		{
+			PlayerController = GameInstance->GetFirstLocalPlayerController(World);
+		}
 	}
 }
 
@@ -267,13 +280,31 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 		UnEquippedWeapon->OnUnEquipped();
 	}
 	
+	// 장착 무기 변경 시 반동 데이터 초기화
+	ClearRecoil();
+
+	// UnEquip에 따른 WeaponOffset 초기화
+	AimSpreadWeaponOffset = 0.f;
+	
 	if (IsValid(EquippedWeapon))
 	{
 		// 클라이언트에서 장착된 무기 처리
 		EquippedWeapon->OnEquipped();
+
+		// Equip에 따라 RecoilData 캐싱 및 WeaponOffset 설정
+		CurrentRecoilData = UFPAssetManager::GetAssetByTag<UFPRecoilData>(UFPRecoilData::GetRecoilDataTagByWeaponType(EquippedWeapon->GetWeaponTypeTag()));
+		if (CurrentRecoilData)
+		{
+			AimSpreadWeaponOffset = CurrentRecoilData->AimSpreadWeaponOffset;
+		}
+		else
+		{
+			UE_LOG(LogFP, Warning, TEXT("[%hs] No RecoilData found for equipped weapon."), __FUNCTION__);
+		}
 	}
 
 	OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
+	UpdateCurrentAimSpread();
 }
 
 void UWeaponManageComponent::OnRep_WeaponEquipStateUpdateCounter()
@@ -288,4 +319,92 @@ void UWeaponManageComponent::OnAmmoTagStackChanged(const FGameplayTag& Tag, int3
 	{
 		Delegate->Broadcast(Tag, StackCount);
 	}
+}
+
+void UWeaponManageComponent::ApplyRecoil()
+{
+	if (!CurrentRecoilData || !CurrentRecoilData->VerticalRecoilCurve || !CurrentRecoilData->HorizontalRecoilCurve)
+	{
+		return;
+	}
+
+	// ShotCount 누적
+	++RecoilShotCount;
+
+	const float RecoilPitch = CurrentRecoilData->VerticalRecoilCurve->GetFloatValue(RecoilShotCount);
+	// 좌우 반동은 무작위 방향 적용
+	const float RecoilYaw = CurrentRecoilData->HorizontalRecoilCurve->GetFloatValue(RecoilShotCount) * (FMath::RandBool() ? 1.f : -1.f);
+	TargetRecoilOffset += FVector2D(RecoilPitch, RecoilYaw);
+	bShouldApplyRecoil = true;
+
+	AimSpreadRecoilOffset = FMath::Min(AimSpreadRecoilOffset + CurrentRecoilData->AimSpreadIncrease, CurrentRecoilData->MaxAimSpread);
+	UpdateCurrentAimSpread();
+	bShouldApplyRecovery = false;
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().SetTimer(RecoveryTimer, FTimerDelegate::CreateUObject(this, &ThisClass::StartRecovery), CurrentRecoilData->RecoveryDelay, false);;
+	}
+}
+
+void UWeaponManageComponent::ClearRecoil()
+{
+	RecoilShotCount = 0;
+	CurrentRecoilOffset = TargetRecoilOffset = FVector2D(0.f);
+	bShouldApplyRecoil = bShouldApplyRecovery = false;
+	CurrentRecoilData = nullptr;
+
+	AimSpreadRecoilOffset = 0.f;
+	UpdateCurrentAimSpread();
+}
+
+void UWeaponManageComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (!CurrentRecoilData)
+	{
+		return;
+	}
+	
+	if (bShouldApplyRecoil && PlayerController)
+	{
+		FVector2D NewRecoilOffset = FMath::Vector2DInterpTo(CurrentRecoilOffset, TargetRecoilOffset, DeltaTime, CurrentRecoilData->RecoilInterpSpeed);
+		const FVector2D DeltaRecoilOffset = NewRecoilOffset - CurrentRecoilOffset;
+		CurrentRecoilOffset = NewRecoilOffset;
+	
+		if (!DeltaRecoilOffset.IsNearlyZero())
+		{
+			PlayerController->AddPitchInput(-DeltaRecoilOffset.X);
+			PlayerController->AddYawInput(DeltaRecoilOffset.Y);
+		}
+		else
+		{
+			bShouldApplyRecoil = false;
+		}
+	}
+
+	if (bShouldApplyRecovery)
+	{
+		AimSpreadRecoilOffset = FMath::FInterpTo(AimSpreadRecoilOffset, 0.f, DeltaTime, CurrentRecoilData->AimSpreadRecoverySpeed);
+		if (FMath::IsNearlyZero(CurrentAimSpread))
+		{
+			AimSpreadRecoilOffset = 0.f;
+			bShouldApplyRecovery = false;
+		}
+		UpdateCurrentAimSpread();
+	}
+}
+
+void UWeaponManageComponent::StartRecovery()
+{
+	RecoilShotCount = 0;
+	CurrentRecoilOffset = TargetRecoilOffset = FVector2D(0.f);
+	bShouldApplyRecovery = true;
+}
+
+void UWeaponManageComponent::UpdateCurrentAimSpread()
+{
+	CurrentAimSpread = AimSpreadWeaponOffset + AimSpreadRecoilOffset;
+	OnAimSpreadChangedDelegate.Broadcast(CurrentAimSpread);
 }

@@ -8,6 +8,7 @@
 #include "System/GameplayTagStackContainer.h"
 #include "WeaponManageComponent.generated.h"
 
+class UFPRecoilData;
 class AWeapon_Base;
 
 // 장착 중인 무기가 변경될 때를 알리는 델레게이트
@@ -19,6 +20,9 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnWeaponEquipStateChangedDelegate, int32/*
 
 // AmmoTagStacks가 변경될 때 브로드캐스트하는 델레게이트
 DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAmmoTagStackChangedDelegate, const FGameplayTag&/*Tag*/, int32/*StackCount*/);
+
+// AimSpread가 변경될 때 브로드캐스트하는 델레게이트
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnAimSpreadChangedDelegate, float/*AimSpread*/);
 
 /**
  * 무기를 관리하는 액터 컴포넌트
@@ -130,4 +134,62 @@ private:
 
 	// AmmoTagStack 변경이 발생하면 호출되는 Callback
 	void OnAmmoTagStackChanged(const FGameplayTag& Tag, int32 StackCount);
+
+	// ============================================================================
+	// Recoil & Aim Spread
+	// ============================================================================
+	
+public:
+	// 현재 장착한 무기의 반동을 적용한다.
+	void ApplyRecoil();
+
+	// 반동 데이터를 초기화한다.
+	void ClearRecoil();
+
+	// Update Recoil & Aim Spread
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	float GetCurrentAimSpread() const { return CurrentAimSpread; }
+
+	FOnAimSpreadChangedDelegate OnAimSpreadChangedDelegate;
+
+private:
+	UPROPERTY()
+	TObjectPtr<APlayerController> PlayerController;
+
+	// 현재 장착한 무기의 RecoilData
+	UPROPERTY()
+	TObjectPtr<UFPRecoilData> CurrentRecoilData;
+
+	// 누적된 발사 횟수
+	// Curve로부터 반동 강도를 선택할 때 사용된다.
+	uint32 RecoilShotCount = 0;
+
+	// 현재 적용된 반동
+	FVector2D CurrentRecoilOffset = FVector2D::ZeroVector;
+
+	// 적용할 반동
+	FVector2D TargetRecoilOffset = FVector2D::ZeroVector;
+
+	// TickComponent()에서 Recoil & Aim Spread를 적용할 것인지 여부
+	bool bShouldApplyRecoil = false;
+	
+	// Recoil & Aim Spread을 회복한다.
+	void StartRecovery();
+	FTimerHandle RecoveryTimer;
+
+	// TickComponent()에서 Recoil & Aim Spread를 회복할 것인지 여부
+	bool bShouldApplyRecovery = false;
+
+	// Aim이 퍼지는 정도 (총기 정확도, 크로스헤어에 영향을 미침)
+	float CurrentAimSpread = 0.f;
+
+	// 무기 장착 시 기본으로 Aim Spread에 끼치는 영향
+	float AimSpreadWeaponOffset = 0.f;
+
+	// 반동에 의해 Aim Spread에 끼치는 영향
+	float AimSpreadRecoilOffset = 0.f;
+
+	// CurrentAimSpread 값을 업데이트하고, 변경을 브로드캐스트한다.
+	void UpdateCurrentAimSpread();
 };
