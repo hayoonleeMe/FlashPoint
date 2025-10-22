@@ -11,6 +11,8 @@
 #include "Components/NamedSlot.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/WidgetSwitcher.h"
+#include "Crosshair/Crosshair.h"
 #include "Game/BaseGameState.h"
 #include "GameFramework/PlayerState.h"
 #include "Player/BasePlayerController.h"
@@ -55,6 +57,10 @@ void UPlayerHUD::NativeOnInitialized()
 			// 무기 장착 상태에 따라 HUD 업데이트
 			WeaponManageComponent->OnWeaponEquipStateChangedDelegate.AddUObject(this, &ThisClass::OnWeaponEquipStateChanged);
 			OnWeaponEquipStateChanged(0, nullptr);
+
+			// Handle AimSpread Update
+			WeaponManageComponent->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::OnEquippedWeaponChanged);
+			WeaponManageComponent->OnAimSpreadChangedDelegate.AddUObject(this, &ThisClass::OnAimSpreadChanged);
 		}
 	}
 }
@@ -152,5 +158,39 @@ void UPlayerHUD::OnWeaponEquipStateChanged(int32 ActiveSlotIndex, AWeapon_Base* 
 		{
 			WeaponSlotImages[Index]->SetColorAndOpacity(FLinearColor::Gray);
 		}
+	}
+}
+
+void UPlayerHUD::OnEquippedWeaponChanged(AWeapon_Base* EquippedWeapon)
+{
+	// 장착한 무기에 맞는 Crosshair Widget 표시
+	FGameplayTag WeaponTypeTag = FPGameplayTags::Weapon::Type::Unarmed;
+	if (EquippedWeapon)
+	{
+		WeaponTypeTag = EquippedWeapon->GetWeaponTypeTag();
+	}
+	
+	if (WeaponTypeTag.MatchesTagExact(FPGameplayTags::Weapon::Type::Unarmed) || WeaponTypeTag.MatchesTagExact(FPGameplayTags::Weapon::Type::SniperRifle))
+	{
+		WidgetSwitcher_Crosshair->SetActiveWidget(Crosshair_Simple);
+		CachedCrosshairWidget = Crosshair_Simple;
+	}
+	else if (WeaponTypeTag.MatchesTagExact(FPGameplayTags::Weapon::Type::Shotgun))
+	{
+		WidgetSwitcher_Crosshair->SetActiveWidget(Crosshair_Shotgun);
+		CachedCrosshairWidget = Crosshair_Shotgun;
+	}
+	else
+	{
+		WidgetSwitcher_Crosshair->SetActiveWidget(Crosshair_Default);
+		CachedCrosshairWidget = Crosshair_Default;
+	}
+}
+
+void UPlayerHUD::OnAimSpreadChanged(float AimSpread)
+{
+	if (CachedCrosshairWidget.IsValid())
+	{
+		CachedCrosshairWidget->UpdateCrosshair(AimSpread);
 	}
 }

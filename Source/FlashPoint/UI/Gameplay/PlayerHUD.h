@@ -7,6 +7,8 @@
 #include "Data/MatchTypes.h"
 #include "PlayerHUD.generated.h"
 
+class UCrosshair;
+class UWidgetSwitcher;
 class UMatchTimer;
 class UMiniScoreboard;
 class AWeapon_Base;
@@ -90,4 +92,26 @@ private:
 
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UMatchTimer> MatchTimer;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UWidgetSwitcher> WidgetSwitcher_Crosshair;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UCrosshair> Crosshair_Default;
+	
+	UPROPERTY(meta=(BindWidget))
+    TObjectPtr<UCrosshair> Crosshair_Shotgun;
+
+	UPROPERTY(meta=(BindWidget))
+	TObjectPtr<UCrosshair> Crosshair_Simple;
+
+	// 현재 WidgetSwitcher_Crosshair에서 활성화된 위젯
+	UPROPERTY()
+	TWeakObjectPtr<UCrosshair> CachedCrosshairWidget;
+
+	// 장착 중인 무기가 변경될 때 호출되는 Callback
+	void OnEquippedWeaponChanged(AWeapon_Base* EquippedWeapon);
+
+	// AimSpread가 변경될 때 호출되는 Callback
+	void OnAimSpreadChanged(float AimSpread);
 };
