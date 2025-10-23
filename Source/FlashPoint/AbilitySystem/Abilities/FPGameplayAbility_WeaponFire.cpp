@@ -28,7 +28,9 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::Sprint);
 
 	AmmoCostTag = FPGameplayTags::Weapon::Data::Ammo;
-	ScatterDistribution = 1.f;
+
+	SpreadCalcDistance = 1500.f;
+	SpreadDistribution = 1.f;
 }
 
 bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -168,6 +170,7 @@ void UFPGameplayAbility_WeaponFire::Fire()
 		if (IsLocallyControlled())
 		{
 			StartTargeting();
+			ApplyRecoil();
 		}
 
 		if (CharacterFireMontage)
@@ -271,9 +274,9 @@ void UFPGameplayAbility_WeaponFire::PerformLocalTrace(TArray<FHitResult>& OutHit
 	const FVector TraceStart = GetWeaponTargetingSourceLocation();
 	const FVector TargetLoc = GetTargetLocation();
 	
-	// Scatter가 적용된 Trace End
+	// Spread가 적용된 Trace End
 	TArray<FVector> TraceEnds;
-	GenerateTraceEndsWithScatterInCartridge(TraceStart, TargetLoc, TraceEnds);
+	GenerateTraceEndsWithSpreadInCartridge(TraceStart, TargetLoc, TraceEnds);
 	
 	// Trace 수행
 	WeaponTrace(TraceStart, TraceEnds, OutHitResults);
@@ -328,32 +331,36 @@ FVector UFPGameplayAbility_WeaponFire::GetWeaponTargetingSourceLocation() const
 	return Weapon->GetWeaponTargetingSourceLocation();
 }
 
-void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithScatterInCartridge(const FVector& TraceStart, const FVector& TargetLoc, TArray<FVector>& OutTraceEnds) const
+void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithSpreadInCartridge(const FVector& TraceStart, const FVector& TargetLoc, TArray<FVector>& OutTraceEnds) const
 {
+	const UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetAvatarActorFromActorInfo());
+	if (!WeaponManageComponent)
+	{
+		return;
+	}
+	
 	AWeapon_Base* Weapon = GetEquippedWeapon();
 	check(Weapon);
 	
 	const int32 BulletsPerCartridge = Weapon->GetBulletsPerCartridge();
-
-	// Scatter 적용 X
-	if (!bUseScatter)
-	{
-		for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
-		{
-			OutTraceEnds.Add(TargetLoc);
-		}
-		return;
-	}
-	
+	const float TotalSpreadAmount = WeaponManageComponent->GetCurrentAimSpread();
 	const float MaxDamageRange = Weapon->GetMaxDamageRange();
 	const FVector TargetDir = (TargetLoc - TraceStart).GetSafeNormal();
-	const FVector BaseScatteredLoc = TraceStart + TargetDir * ScatterOffset;
+	const FVector BaseSpreadCalcLoc = TraceStart + TargetDir * SpreadCalcDistance;
 
 	for (int32 Index = 0; Index < BulletsPerCartridge; ++Index)
 	{
-		const FVector RandVec = UKismetMathLibrary::RandomUnitVector() * FMath::Pow(FMath::FRand(), ScatterDistribution) * MaxScatterAmount;
-		const FVector ScatteredLoc = BaseScatteredLoc + RandVec;
-		const FVector WeaponAimDir = (ScatteredLoc - TraceStart).GetSafeNormal();
+		FVector WeaponAimDir = TargetDir;
+		if (TotalSpreadAmount > 0.f)
+		{
+			FVector RandVec = UKismetMathLibrary::RandomUnitVector() * TotalSpreadAmount;
+			if (SpreadDistribution > 1.f)
+			{
+				RandVec *= FMath::Pow(FMath::FRand(), SpreadDistribution);
+			}
+			const FVector SpreadLoc = BaseSpreadCalcLoc + RandVec;
+			WeaponAimDir = (SpreadLoc - TraceStart).GetSafeNormal();
+		}
 		const FVector TraceEnd = TraceStart + WeaponAimDir * MaxDamageRange;
 		OutTraceEnds.Add(TraceEnd);
 	}
@@ -480,5 +487,13 @@ void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(FGameplayAbilityTargetDa
 				}
 			}
 		}
+	}
+}
+
+void UFPGameplayAbility_WeaponFire::ApplyRecoil() const
+{
+	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetAvatarActorFromActorInfo()))
+	{
+		WeaponManageComponent->ApplyRecoil();
 	}
 }

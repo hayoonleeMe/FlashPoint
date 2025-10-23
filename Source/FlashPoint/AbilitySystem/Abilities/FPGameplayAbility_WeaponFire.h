@@ -58,21 +58,14 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float BulletTraceRadius;
 
+	// 총알의 분산(Spread) 방향을 계산하는 데 사용되는 가상의 지점까지의 거리
 	UPROPERTY(EditDefaultsOnly)
-	uint8 bUseScatter : 1;	
-
-	// 총알이 최대로 퍼질 수 있는 정도
-	UPROPERTY(EditDefaultsOnly, meta=(EditCondition="bUseScatter"))
-	float MaxScatterAmount;
-
-	// Scatter를 적용할 위치까지의 거리
-	UPROPERTY(EditDefaultsOnly, meta=(EditCondition="bUseScatter"))
-	float ScatterOffset;
+	float SpreadCalcDistance;
 
 	// 총알이 퍼지는 정도를 제어하는 값
 	// 값이 클수록 총알이 중앙으로 집중된다.
-	UPROPERTY(EditDefaultsOnly, meta=(EditCondition="bUseScatter"))
-	float ScatterDistribution;
+	UPROPERTY(EditDefaultsOnly, meta=(ClampMin="1.0"))
+	float SpreadDistribution;
 
 	// Character의 Weapon Fire Anim Montage
 	UPROPERTY(EditDefaultsOnly)
@@ -102,8 +95,8 @@ private:
 	// Weapon의 Targeting Source Location을 반환한다. (보통 총구)
 	FVector GetWeaponTargetingSourceLocation() const;
 
-	// 하나의 탄약에 포함된 총알 수만큼, Scatter를 적용한 Trace End 배열을 생성한다.
-	void GenerateTraceEndsWithScatterInCartridge(const FVector& TraceStart, const FVector& TargetLoc, TArray<FVector>& OutTraceEnds) const;
+	// 하나의 탄약에 포함된 총알 수만큼, Spread를 적용한 Trace End 배열을 생성한다.
+	void GenerateTraceEndsWithSpreadInCartridge(const FVector& TraceStart, const FVector& TargetLoc, TArray<FVector>& OutTraceEnds) const;
 
 	// 모든 TraceEnds를 향하는 LineTrace를 수행한 결과를 OutHitResults에 저장한다.
 	void WeaponTrace(const FVector& TraceStart, const TArray<FVector>& TraceEnds, TArray<FHitResult>& OutHitResults) const;
@@ -115,4 +108,7 @@ private:
 
 	// TargetActors들에게 Damage Effect를 적용한다.
 	void ApplyDamageToTarget(FGameplayAbilityTargetDataHandle& InData) const;
+
+	// 반동을 적용한다.
+	void ApplyRecoil() const;
 };

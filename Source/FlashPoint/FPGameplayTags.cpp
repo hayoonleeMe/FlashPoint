@@ -13,6 +13,15 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Warehouse_TDM, "Asset.Level.Warehouse_TDM");
 			UE_DEFINE_GAMEPLAY_TAG(Warehouse_FFA, "Asset.Level.Warehouse_FFA");
 		}
+
+		namespace RecoilData
+		{
+			UE_DEFINE_GAMEPLAY_TAG(Pistol, "Asset.RecoilData.Pistol");
+			UE_DEFINE_GAMEPLAY_TAG(Rifle, "Asset.RecoilData.Rifle");
+			UE_DEFINE_GAMEPLAY_TAG(Shotgun, "Asset.RecoilData.Shotgun");
+			UE_DEFINE_GAMEPLAY_TAG(SMG, "Asset.RecoilData.SMG");
+			UE_DEFINE_GAMEPLAY_TAG(SniperRifle, "Asset.RecoilData.SniperRifle");
+		}
 	}
 	
 	namespace Input
