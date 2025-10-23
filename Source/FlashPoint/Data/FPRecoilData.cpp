@@ -7,16 +7,20 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPRecoilData)
 
-TMap<FGameplayTag, FGameplayTag> UFPRecoilData::WeaponTypeToRecoilDataTagMap =
+const TMap<FGameplayTag, FGameplayTag>& UFPRecoilData::GetWeaponTypeToRecoilDataTagMap()
 {
-	{ FPGameplayTags::Weapon::Type::Pistol, FPGameplayTags::Asset::RecoilData::Pistol },
-	{ FPGameplayTags::Weapon::Type::Rifle, FPGameplayTags::Asset::RecoilData::Rifle },
-	{ FPGameplayTags::Weapon::Type::Shotgun, FPGameplayTags::Asset::RecoilData::Shotgun },
-	{ FPGameplayTags::Weapon::Type::SMG, FPGameplayTags::Asset::RecoilData::SMG },
-	{ FPGameplayTags::Weapon::Type::SniperRifle, FPGameplayTags::Asset::RecoilData::SniperRifle }
-};
+	static TMap<FGameplayTag, FGameplayTag> WeaponTypeToRecoilDataTagMap =
+	{
+		{ FPGameplayTags::Weapon::Type::Pistol, FPGameplayTags::Asset::RecoilData::Pistol },
+		{ FPGameplayTags::Weapon::Type::Rifle, FPGameplayTags::Asset::RecoilData::Rifle },
+		{ FPGameplayTags::Weapon::Type::Shotgun, FPGameplayTags::Asset::RecoilData::Shotgun },
+		{ FPGameplayTags::Weapon::Type::SMG, FPGameplayTags::Asset::RecoilData::SMG },
+		{ FPGameplayTags::Weapon::Type::SniperRifle, FPGameplayTags::Asset::RecoilData::SniperRifle }
+	};
+	return WeaponTypeToRecoilDataTagMap;
+}
 
 FGameplayTag UFPRecoilData::GetRecoilDataTagByWeaponType(const FGameplayTag& WeaponTypeTag)
 {
-	return WeaponTypeToRecoilDataTagMap.FindRef(WeaponTypeTag);
+	return GetWeaponTypeToRecoilDataTagMap().FindRef(WeaponTypeTag);
 }

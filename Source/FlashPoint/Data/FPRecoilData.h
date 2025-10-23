@@ -18,8 +18,8 @@ class FLASHPOINT_API UFPRecoilData : public UDataAsset
 {
 	GENERATED_BODY()
 
-	// Key: Weapon.Type, Value: Asset.RecoilData
-	static TMap<FGameplayTag, FGameplayTag> WeaponTypeToRecoilDataTagMap;
+	// Key: Weapon.Type Tag, Value: Asset.RecoilData Tag로 이루어진 Map을 반환한다.
+	static const TMap<FGameplayTag, FGameplayTag>& GetWeaponTypeToRecoilDataTagMap();
 	
 public:
 	// WeaponTypeTag에 해당하는 RecoilData Tag를 반환한다.
