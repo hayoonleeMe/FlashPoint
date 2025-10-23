@@ -11,6 +11,24 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAbilitySystemData)
 
+const TMap<FGameplayTag, FGameplayTag>& UFPAbilitySystemData::GetWeaponTypeToAbilitySystemDataTagMap()
+{
+	static TMap<FGameplayTag, FGameplayTag> WeaponTypeToAbilitySystemDataTagMap =
+	{
+		{ FPGameplayTags::Weapon::Type::Pistol, FPGameplayTags::Asset::AbilitySystemData::Pistol },
+		{ FPGameplayTags::Weapon::Type::Rifle, FPGameplayTags::Asset::AbilitySystemData::Rifle },
+		{ FPGameplayTags::Weapon::Type::Shotgun, FPGameplayTags::Asset::AbilitySystemData::Shotgun },
+		{ FPGameplayTags::Weapon::Type::SMG, FPGameplayTags::Asset::AbilitySystemData::SMG },
+		{ FPGameplayTags::Weapon::Type::SniperRifle, FPGameplayTags::Asset::AbilitySystemData::SniperRifle }	
+	};
+	return WeaponTypeToAbilitySystemDataTagMap;
+}
+
+FGameplayTag UFPAbilitySystemData::GetAbilitySystemDataTagByWeaponType(const FGameplayTag& WeaponTypeTag)
+{
+	return GetWeaponTypeToAbilitySystemDataTagMap().FindRef(WeaponTypeTag);
+}
+
 void UFPAbilitySystemData::GiveDataToAbilitySystem(UFPAbilitySystemComponent* ASC) const
 {
 	check(ASC);

@@ -105,7 +105,13 @@ class FLASHPOINT_API UFPAbilitySystemData : public UDataAsset
 {
 	GENERATED_BODY()
 
+	// Key: Weapon.Type Tag, Value: Asset.AbilitySystemData Tag로 이루어진 Map을 반환한다.
+	static const TMap<FGameplayTag, FGameplayTag>& GetWeaponTypeToAbilitySystemDataTagMap();
+
 public:
+	// WeaponTypeTag에 해당하는 AbilitySystemData Tag를 반환한다.
+	static FGameplayTag GetAbilitySystemDataTagByWeaponType(const FGameplayTag& WeaponTypeTag);
+	
 	// ASC에 AbilitiesToGrant 어빌리티를 부여하고 EffectsToGrant 이펙트를 적용한다.
 	// Server Only
 	void GiveDataToAbilitySystem(UFPAbilitySystemComponent* ASC) const;

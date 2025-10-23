@@ -208,7 +208,7 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
 
 		// Give Data to Owner ASC
-		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, EquippedWeapon->GetWeaponTypeTag());
+		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, UFPAbilitySystemData::GetAbilitySystemDataTagByWeaponType(EquippedWeapon->GetWeaponTypeTag()));
 
 		// 장착한 무기의 탄창에 있는 총알 수로 업데이트
 		AmmoTagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, EquippedWeapon->GetMagCapacity());
@@ -243,7 +243,7 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
 
 		// Give Data to Owner ASC
-		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, EquippedWeapon->GetWeaponTypeTag());
+		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, UFPAbilitySystemData::GetAbilitySystemDataTagByWeaponType(EquippedWeapon->GetWeaponTypeTag()));
 
 		// 장착한 무기의 탄창에 있는 총알 수로 업데이트
 		AmmoTagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, EquippedWeapon->GetServerRemainAmmo());
@@ -265,7 +265,7 @@ void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 		EquippedWeapon->DetachFromActor(FDetachmentTransformRules::KeepRelativeTransform);
 		
 		// Remove Data from Owner ASC
-		UFPAbilitySystemData::RemoveDataFromAbilitySystem(GetOwner(), EquippedWeapon->GetWeaponTypeTag());
+		UFPAbilitySystemData::RemoveDataFromAbilitySystem(GetOwner(), UFPAbilitySystemData::GetAbilitySystemDataTagByWeaponType(EquippedWeapon->GetWeaponTypeTag()));
 
 		if (bDestroy)
 		{

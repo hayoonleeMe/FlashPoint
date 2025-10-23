@@ -22,6 +22,16 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(SMG, "Asset.RecoilData.SMG");
 			UE_DEFINE_GAMEPLAY_TAG(SniperRifle, "Asset.RecoilData.SniperRifle");
 		}
+
+		namespace AbilitySystemData
+		{
+			UE_DEFINE_GAMEPLAY_TAG(Default, "Asset.AbilitySystemData.Default");
+			UE_DEFINE_GAMEPLAY_TAG(Pistol, "Asset.AbilitySystemData.Pistol");
+			UE_DEFINE_GAMEPLAY_TAG(Rifle, "Asset.AbilitySystemData.Rifle");
+			UE_DEFINE_GAMEPLAY_TAG(Shotgun, "Asset.AbilitySystemData.Shotgun");
+			UE_DEFINE_GAMEPLAY_TAG(SMG, "Asset.AbilitySystemData.SMG");
+			UE_DEFINE_GAMEPLAY_TAG(SniperRifle, "Asset.AbilitySystemData.SniperRifle");
+		}
 	}
 	
 	namespace Input
