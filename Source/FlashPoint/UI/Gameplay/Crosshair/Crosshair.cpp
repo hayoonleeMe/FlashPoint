@@ -10,3 +10,13 @@ UCrosshair::UCrosshair(const FObjectInitializer& ObjectInitializer)
 {
 	CrosshairSpreadScale = 0.5f;
 }
+
+void UCrosshair::UpdateCrosshair(float AimSpread)
+{
+	AimSpread *= CrosshairSpreadScale;
+	if (CurrentAimSpread != AimSpread)
+	{
+		CurrentAimSpread = AimSpread;
+		UpdateCrosshair_Internal();
+	}
+}

@@ -14,8 +14,8 @@ class FLASHPOINT_API UShotgunCrosshair : public UCrosshair
 {
 	GENERATED_BODY()
 	
-public:
-	virtual void UpdateCrosshair(float AimSpread) override;
+protected:
+	virtual void UpdateCrosshair_Internal() override;
 
 private:
 	UPROPERTY(meta=(BindWidget))

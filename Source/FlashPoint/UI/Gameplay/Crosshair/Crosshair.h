@@ -18,7 +18,8 @@ class FLASHPOINT_API UCrosshair : public UUserWidget
 
 public:
 	UCrosshair(const FObjectInitializer& ObjectInitializer);
-	virtual void UpdateCrosshair(float AimSpread) { }
+	
+	void UpdateCrosshair(float AimSpread);
 
 protected:
 	// Crosshair의 벌어지는 정도를 결정하는 AimSpread 값에 곱해질 값
@@ -27,4 +28,10 @@ protected:
 	
 	UPROPERTY(meta=(BindWidget))
 	TObjectPtr<UImage> Image_Center;
+
+	// 현재 적용 중인 AimSpread
+	float CurrentAimSpread = -1.f;
+
+	// 실제 위젯 업데이트
+	virtual void UpdateCrosshair_Internal() { }
 };

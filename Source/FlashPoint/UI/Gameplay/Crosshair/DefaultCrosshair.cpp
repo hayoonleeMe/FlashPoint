@@ -6,24 +6,22 @@
 #include "Components/Image.h"
 #include "Components/OverlaySlot.h"
 
-void UDefaultCrosshair::UpdateCrosshair(float AimSpread)
+void UDefaultCrosshair::UpdateCrosshair_Internal()
 {
-	AimSpread *= CrosshairSpreadScale;
-	
 	if (UOverlaySlot* TopSlot = Cast<UOverlaySlot>(Image_Top->Slot))
 	{
-		TopSlot->SetPadding({ 0.f, -AimSpread, 0.f, 0.f });
+		TopSlot->SetPadding({ 0.f, -CurrentAimSpread, 0.f, 0.f });
 	}
 	if (UOverlaySlot* BottomSlot = Cast<UOverlaySlot>(Image_Bottom->Slot))
 	{
-		BottomSlot->SetPadding({ 0.f, 0.f, 0.f, -AimSpread });
+		BottomSlot->SetPadding({ 0.f, 0.f, 0.f, -CurrentAimSpread });
 	}
 	if (UOverlaySlot* LeftSlot = Cast<UOverlaySlot>(Image_Left->Slot))
 	{
-		LeftSlot->SetPadding({ -AimSpread, 0.f, 0.f, 0.f });
+		LeftSlot->SetPadding({ -CurrentAimSpread, 0.f, 0.f, 0.f });
 	}
 	if (UOverlaySlot* RightSlot = Cast<UOverlaySlot>(Image_Right->Slot))
 	{
-		RightSlot->SetPadding({ 0.f, 0.f, -AimSpread, 0.f });
+		RightSlot->SetPadding({ 0.f, 0.f, -CurrentAimSpread, 0.f });
 	}
 }
