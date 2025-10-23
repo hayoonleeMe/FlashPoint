@@ -185,17 +185,7 @@ void AFPCharacter::InitAbilitySystem()
 
 	if (HasAuthority())
 	{
-		ApplyAbilitySystemData(TEXT("ASD_Default"));
-	}
-}
-
-void AFPCharacter::ApplyAbilitySystemData(const FName& DataId)
-{
-	check(HasAuthority());
-
-	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
-	{
-		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent);
+		ApplyAbilitySystemData(FPGameplayTags::Asset::AbilitySystemData::Default);
 	}
 }
 
@@ -206,16 +196,6 @@ void AFPCharacter::ApplyAbilitySystemData(const FGameplayTag& DataTag)
 	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
 	{
 		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent);
-	}
-}
-
-void AFPCharacter::RemoveAbilitySystemData(const FName& DataId)
-{
-	check(HasAuthority());
-	
-	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetById<UFPAbilitySystemData>(DataId))
-	{
-		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent);
 	}
 }
 

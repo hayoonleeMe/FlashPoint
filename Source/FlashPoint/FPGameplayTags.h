@@ -24,6 +24,16 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag SMG;
 			extern FNativeGameplayTag SniperRifle;
 		}
+
+		namespace AbilitySystemData
+		{
+			extern FNativeGameplayTag Default;
+			extern FNativeGameplayTag Pistol;
+			extern FNativeGameplayTag Rifle;
+			extern FNativeGameplayTag Shotgun;
+			extern FNativeGameplayTag SMG;
+			extern FNativeGameplayTag SniperRifle;
+		}
 	}
 	
 	namespace Input
