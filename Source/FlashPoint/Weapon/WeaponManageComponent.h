@@ -8,6 +8,8 @@
 #include "System/GameplayTagStackContainer.h"
 #include "WeaponManageComponent.generated.h"
 
+class UAbilitySystemComponent;
+class UCharacterMovementComponent;
 class UFPRecoilData;
 class AWeapon_Base;
 
@@ -155,7 +157,13 @@ public:
 
 private:
 	UPROPERTY()
-	TObjectPtr<APlayerController> PlayerController;
+	TObjectPtr<ACharacter> OwnerCharacter;
+
+	UPROPERTY()
+	TObjectPtr<UCharacterMovementComponent> OwnerCharacterMoveComponent;
+
+	UPROPERTY()
+	TObjectPtr<UAbilitySystemComponent> OwnerAbilitySystemComponent;
 
 	// 현재 장착한 무기의 RecoilData
 	UPROPERTY()
@@ -189,6 +197,33 @@ private:
 
 	// 반동에 의해 Aim Spread에 끼치는 영향
 	float AimSpreadRecoilOffset = 0.f;
+
+	// 모든 움직임에 의해 Aim Spread에 끼치는 영향
+	float AimSpreadMovementOffset = 0.f;
+
+	// 움직임에 의해 AimSpread를 업데이트하는 Interpolation의 Speed 
+	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
+	float AimSpreadMovementInterpSpeed;
+	
+	// 움직일 때 Aim Spread에 끼치는 영향
+	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
+	float AimSpreadMovingOffset;
+
+	// 공중에 있을 때 Aim Spread에 끼치는 영향
+	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
+	float AimSpreadFallingOffset;
+
+	// Crouch 상태에서 Aim Spread에 끼치는 영향
+	// Aim Spread를 감소시킨다.
+	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
+	float AimSpreadCrouchingOffset;
+
+	// Sprint 상태에서 Aim Spread에 끼치는 영향
+	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
+	float AimSpreadSprintingOffset;
+
+	// 캐릭터의 움직임 상태에 따라 Aim Spread 오프셋을 계산한다.
+	float CalculateAimSpreadMovementOffset() const;
 
 	// CurrentAimSpread 값을 업데이트하고, 변경을 브로드캐스트한다.
 	void UpdateCurrentAimSpread();

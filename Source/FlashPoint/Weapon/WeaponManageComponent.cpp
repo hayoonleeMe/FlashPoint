@@ -3,12 +3,17 @@
 
 #include "WeaponManageComponent.h"
 
+#include "AbilitySystemComponent.h"
+#include "AbilitySystemGlobals.h"
 #include "FPGameplayTags.h"
 #include "FPLogChannels.h"
 #include "Data/FPAbilitySystemData.h"
 #include "Data/FPRecoilData.h"
 #include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
+#include "Player/BasePlayerController.h"
 #include "System/FPAssetManager.h"
 #include "Weapon/Weapon_Base.h"
 
@@ -32,6 +37,12 @@ UWeaponManageComponent::UWeaponManageComponent()
 
 	NumSlots = 3;
 	ActiveSlotIndex = 0;
+
+	AimSpreadMovementInterpSpeed = 4.f;
+	AimSpreadMovingOffset = 15.f;
+	AimSpreadFallingOffset = 20.f;
+	AimSpreadCrouchingOffset = -10.f;
+	AimSpreadSprintingOffset = 25.f;
 }
 
 void UWeaponManageComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -51,15 +62,6 @@ void UWeaponManageComponent::InitializeComponent()
 	if (HasAuthority())
 	{
 		WeaponSlots.AddDefaulted(NumSlots);
-	}
-
-	// Cache PC
-	if (UWorld* World = GetWorld())
-	{
-		if (UGameInstance* GameInstance = World->GetGameInstance())
-		{
-			PlayerController = GameInstance->GetFirstLocalPlayerController(World);
-		}
 	}
 }
 
@@ -150,6 +152,21 @@ void UWeaponManageComponent::ServerUnEquipWeapon_Implementation()
 void UWeaponManageComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// caching (only local)
+	ACharacter* Character = GetOwner<ACharacter>();
+	if (Character && Character->IsLocallyControlled())
+	{
+		OwnerCharacter = Character;
+		OwnerCharacterMoveComponent = OwnerCharacter->GetCharacterMovement();
+		if (ABasePlayerController* BasePC = Character->GetController<ABasePlayerController>())
+		{
+			BasePC->OnPlayerStateReplicatedDelegate.AddLambda([this](APlayerState* PS)
+			{
+				OwnerAbilitySystemComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PS);
+			});
+		}
+	}
 
 	// Bind Callback
 	AmmoTagStacks.OnTagStackChangedDelegate.AddUObject(this, &ThisClass::OnAmmoTagStackChanged);
@@ -299,7 +316,7 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 		}
 		else
 		{
-			UE_LOG(LogFP, Warning, TEXT("[%hs] No RecoilData found for equipped weapon."), __FUNCTION__);
+			UE_LOG(LogFP, Error, TEXT("[%hs] No RecoilData found for equipped weapon."), __FUNCTION__);
 		}
 	}
 
@@ -367,7 +384,7 @@ void UWeaponManageComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 		return;
 	}
 	
-	if (bShouldApplyRecoil && PlayerController)
+	if (bShouldApplyRecoil && OwnerCharacter)
 	{
 		FVector2D NewRecoilOffset = FMath::Vector2DInterpTo(CurrentRecoilOffset, TargetRecoilOffset, DeltaTime, CurrentRecoilData->RecoilInterpSpeed);
 		const FVector2D DeltaRecoilOffset = NewRecoilOffset - CurrentRecoilOffset;
@@ -375,8 +392,8 @@ void UWeaponManageComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	
 		if (!DeltaRecoilOffset.IsNearlyZero())
 		{
-			PlayerController->AddPitchInput(-DeltaRecoilOffset.X);
-			PlayerController->AddYawInput(DeltaRecoilOffset.Y);
+			OwnerCharacter->AddControllerPitchInput(-DeltaRecoilOffset.X);
+			OwnerCharacter->AddControllerYawInput(DeltaRecoilOffset.Y);
 		}
 		else
 		{
@@ -392,8 +409,10 @@ void UWeaponManageComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 			AimSpreadRecoilOffset = 0.f;
 			bShouldApplyRecovery = false;
 		}
-		UpdateCurrentAimSpread();
 	}
+
+	AimSpreadMovementOffset = FMath::FInterpTo(AimSpreadMovementOffset, CalculateAimSpreadMovementOffset(), DeltaTime, AimSpreadMovementInterpSpeed);
+	UpdateCurrentAimSpread();
 }
 
 void UWeaponManageComponent::StartRecovery()
@@ -403,8 +422,40 @@ void UWeaponManageComponent::StartRecovery()
 	bShouldApplyRecovery = true;
 }
 
+float UWeaponManageComponent::CalculateAimSpreadMovementOffset() const
+{
+	float MovementOffset = 0.f;
+	if (OwnerCharacter && OwnerCharacterMoveComponent)
+	{
+		// Moving
+		if (OwnerCharacterMoveComponent->Velocity.SizeSquared2D() > KINDA_SMALL_NUMBER)
+		{
+			MovementOffset += AimSpreadMovingOffset;
+		}
+
+		// In Air
+		if (OwnerCharacterMoveComponent->IsFalling())
+		{
+			MovementOffset += AimSpreadFallingOffset;
+		}
+
+		// Crouching
+		if (OwnerCharacter->bIsCrouched)
+		{
+			MovementOffset += AimSpreadCrouchingOffset;
+		}
+
+		// Sprinting
+		if (OwnerAbilitySystemComponent && OwnerAbilitySystemComponent->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsSprinting))
+		{
+			MovementOffset += AimSpreadSprintingOffset;
+		}
+	}
+	return MovementOffset;
+}
+
 void UWeaponManageComponent::UpdateCurrentAimSpread()
 {
-	CurrentAimSpread = AimSpreadWeaponOffset + AimSpreadRecoilOffset;
+	CurrentAimSpread = AimSpreadWeaponOffset + AimSpreadRecoilOffset + AimSpreadMovementOffset;
 	OnAimSpreadChangedDelegate.Broadcast(CurrentAimSpread);
 }
