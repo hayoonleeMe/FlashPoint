@@ -136,7 +136,7 @@ UFPAttributeSet* AFPCharacter::GetFPAttributeSet() const
 
 bool AFPCharacter::IsMovingFromInput() const
 {
-	return GetVelocity().Size2D() > 0.f && GetCharacterMovement()->GetCurrentAcceleration() != FVector::ZeroVector;
+	return GetVelocity().SizeSquared2D() > 0.f && GetCharacterMovement()->GetCurrentAcceleration() != FVector::ZeroVector;
 }
 
 bool AFPCharacter::CanJumpInternal_Implementation() const
