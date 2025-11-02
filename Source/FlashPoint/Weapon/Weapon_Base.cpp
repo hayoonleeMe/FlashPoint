@@ -36,7 +36,9 @@ AWeapon_Base::AWeapon_Base()
 		UpdateFireBlockTag(false);
 	});
 
-	LeftHandAttachSocketName = TEXT("LeftHandSocket");
+	TPSLeftHandSocketName = TEXT("TPS_LeftHandSocket");
+	FPSLeftHandSocketName = TEXT("FPS_LeftHandSocket");
+	SprintLeftHandSocketName = TEXT("Sprint_LeftHandSocket");
 }
 
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
@@ -44,9 +46,12 @@ FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
 	return WeaponMeshComponent->GetSocketLocation(TEXT("MuzzleFlash"));
 }
 
-FTransform AWeapon_Base::GetLeftHandAttachTransform() const
+FTransform AWeapon_Base::GetLeftHandSocketTransform(bool bIsFPS, bool bIsSprinting) const
 {
-	return WeaponMeshComponent->GetSocketTransform(LeftHandAttachSocketName);
+	const FName& SocketName = bIsSprinting ? SprintLeftHandSocketName : (bIsFPS ? FPSLeftHandSocketName : TPSLeftHandSocketName);
+	return WeaponMeshComponent->GetSocketTransform(SocketName);
+}
+
 }
 
 void AWeapon_Base::OnEquipped()

@@ -19,11 +19,21 @@ struct FWeaponEquipInfo
 {
 	GENERATED_BODY()
 
+	FWeaponEquipInfo()
+	{
+		AttachSocketName = TEXT("weapon_r");
+		AttachTransform = FTransform(FRotator(0.f, -90.f, 0.f));
+	}
+
 	UPROPERTY(EditDefaultsOnly)
 	FName AttachSocketName;
 	
 	UPROPERTY(EditDefaultsOnly)
 	FTransform AttachTransform;
+
+	// FPS View일 때 오른손 위치에 적용할 Offset
+	UPROPERTY(EditDefaultsOnly)
+	FVector RightHandFPSOffset;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAnimMontage> EquipMontage;
@@ -66,7 +76,8 @@ public:
 	FVector GetWeaponTargetingSourceLocation() const;
 
 	// LeftHandAttachSocketName에 해당하는 소켓의 Transform을 반환한다.
-	FTransform GetLeftHandAttachTransform() const;
+	FTransform GetLeftHandSocketTransform(bool bIsFPS, bool bIsSprinting) const;
+
 
 	// 무기가 장착된 후 호출된다.
 	virtual void OnEquipped();
@@ -158,7 +169,13 @@ protected:
 	float HeadShotMultiplier;
 
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	FName LeftHandAttachSocketName;
+	FName TPSLeftHandSocketName;
+
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FName FPSLeftHandSocketName;
+
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FName SprintLeftHandSocketName;
 
 	// 현재 탄창에 남은 총알 수
 	// 서버에서만 유효하다.

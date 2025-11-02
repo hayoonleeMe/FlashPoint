@@ -34,7 +34,6 @@ class FLASHPOINT_API UFPAnimInstance : public UAnimInstance
 public:
 	UFPAnimInstance();
 	virtual void NativeInitializeAnimation() override;
-	virtual void NativePostEvaluateAnimation() override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
@@ -93,9 +92,9 @@ protected:
 	uint8 bHasEquippedWeapon : 1;
 
 	UPROPERTY()
-	TWeakObjectPtr<AWeapon_Base> EquippedWeaponWeakPtr;
+	TObjectPtr<AWeapon_Base> EquippedWeapon;
 
-	void UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon);
+	void UpdateHasEquippedWeapon(AWeapon_Base* InEquippedWeapon);
 
 	// 캐릭터 최하단에서 땅까지 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -149,16 +148,24 @@ protected:
 
 	void UpdateBlendWeight(float DeltaSeconds);
 
-	// 왼손을 무기에 부착할 Transform (Only Translation)
-	// Character Mesh의 hand_r 기준
+	// 왼손을 무기에 부착할 위치
+	// Character Mesh의 weapon_r bone 기준
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FTransform LeftHandModifyTransform;
+	FVector LeftHandAttachLocation;
 
-	// 왼손을 무기에 부착할지를 결정하는 Alpha
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float LeftHandModifyAlpha;
+	FName DisableLeftHandIKCurveName;
 
-	void UpdateLeftHandModifyTransform();
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float LeftHandIKAlpha;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FName DisableRightHandIKCurveName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RightHandIKAlpha;
+
+	void UpdateSkeletalControlData();
 
 	// TurnInPlace가 Blend Out 상태인지 여부
 	// Idle State 일 때 false로 설정되고, 그 외에는 true이다.
@@ -204,4 +211,41 @@ protected:
 	// Idle State일 때 호출된다. (Idle에서 Blending Out 될 때 제외)
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
 	void ProcessTurnYawCurve();
+
+	// ============================================================================
+	// FPS
+	// ============================================================================
+
+	UFUNCTION(BlueprintPure, meta=(BlueprintThreadSafe))
+	bool IsFPS() const;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float FPSPitch;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector RightHandFPSOffset;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Spine01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Spine02;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Spine03;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Spine04;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Spine05;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Neck01;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Neck02;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float Alpha_Head;
 };
