@@ -51,6 +51,7 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag Scoreboard;
 			extern FNativeGameplayTag Sprint;
 			extern FNativeGameplayTag Reload;
+			extern FNativeGameplayTag ChangeView;
 
 			namespace QuickSlot
 			{
@@ -87,6 +88,7 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag IsSprinting;
 		extern FNativeGameplayTag IsFiring;
 		extern FNativeGameplayTag IsMoving;
+		extern FNativeGameplayTag FPS;
 	}
 
 	namespace Weapon

@@ -54,6 +54,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GameplayTag_IsFiring;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_FPS;
+
 	TMap<FGameplayTag, bool*> TagToPropertyMap;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

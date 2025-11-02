@@ -49,6 +49,7 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Scoreboard, "Input.Gameplay.Scoreboard");
 			UE_DEFINE_GAMEPLAY_TAG(Sprint, "Input.Gameplay.Sprint");
 			UE_DEFINE_GAMEPLAY_TAG(Reload, "Input.Gameplay.Reload");
+			UE_DEFINE_GAMEPLAY_TAG(ChangeView, "Input.Gameplay.ChangeView");
 
 			namespace QuickSlot
 			{
@@ -85,6 +86,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(IsSprinting, "CharacterState.IsSprinting");
 		UE_DEFINE_GAMEPLAY_TAG(IsFiring, "CharacterState.IsFiring");
 		UE_DEFINE_GAMEPLAY_TAG(IsMoving, "CharacterState.IsMoving");
+		UE_DEFINE_GAMEPLAY_TAG(FPS, "CharacterState.FPS");
 	}
 
 	namespace Weapon

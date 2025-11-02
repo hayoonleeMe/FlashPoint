@@ -41,6 +41,7 @@ void UFPAnimInstance::NativeInitializeAnimation()
 	// GameplayTag Property
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsSprinting, &GameplayTag_IsSprinting);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFiring, &GameplayTag_IsFiring);
+	TagToPropertyMap.Add(FPGameplayTags::CharacterState::FPS, &GameplayTag_FPS);
 
 	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwningActor()))
 	{
@@ -58,8 +59,10 @@ void UFPAnimInstance::RegisterGameplayTagWithProperty(UAbilitySystemComponent* A
 	check(ASC);
 
 	FOnGameplayEffectTagCountChanged::FDelegate Delegate = FOnGameplayEffectTagCountChanged::FDelegate::CreateUObject(this, &ThisClass::GameplayTagEventCallback);
-	ASC->RegisterAndCallGameplayTagEvent(FPGameplayTags::CharacterState::IsSprinting, Delegate);
-	ASC->RegisterAndCallGameplayTagEvent(FPGameplayTags::CharacterState::IsFiring, Delegate);
+	for (const auto& Pair: TagToPropertyMap)
+	{
+		ASC->RegisterAndCallGameplayTagEvent(Pair.Key, Delegate);
+	}
 }
 
 void UFPAnimInstance::GameplayTagEventCallback(const FGameplayTag Tag, int32 NewCount)
