@@ -81,6 +81,9 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UCameraComponent> CameraComponent;
 
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCameraComponent> FPSCameraComponent;
+
 	// 실제로 Spring Arm Component의 Z Location을 설정하는 데 사용
 	float CurrentCameraHeight = 0.f;
 

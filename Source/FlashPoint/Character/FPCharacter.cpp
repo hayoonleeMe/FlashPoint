@@ -66,6 +66,11 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
 	CameraComponent->SetupAttachment(SpringArmComponent);
 
+	FPSCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FPS Camera Component"));
+	FPSCameraComponent->SetupAttachment(GetMesh(), TEXT("FPSCamera"));
+	FPSCameraComponent->bUsePawnControlRotation = true;
+	FPSCameraComponent->bAutoActivate = false;
+
 	WeaponManageComponent = CreateDefaultSubobject<UWeaponManageComponent>(TEXT("Weapon Manage Component"));
 }
 
@@ -142,6 +147,23 @@ bool AFPCharacter::CanJumpInternal_Implementation() const
 
 void AFPCharacter::ChangeView() const
 {
+	if (AbilitySystemComponent)
+	{
+		if (AbilitySystemComponent->HasMatchingGameplayTag(FPGameplayTags::CharacterState::FPS))
+		{
+			// to TPS
+			AbilitySystemComponent->RemoveLooseGameplayTag(FPGameplayTags::CharacterState::FPS);
+			FPSCameraComponent->Deactivate();
+			CameraComponent->Activate();
+		}
+		else
+		{
+			// to FPS
+			AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::FPS);
+			CameraComponent->Deactivate();
+			FPSCameraComponent->Activate();
+		}
+	}
 }
 
 void AFPCharacter::SetCharacterMesh()
