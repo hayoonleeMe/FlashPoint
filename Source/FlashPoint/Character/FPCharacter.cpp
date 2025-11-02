@@ -140,6 +140,10 @@ bool AFPCharacter::CanJumpInternal_Implementation() const
 	return JumpIsAllowedInternal();
 }
 
+void AFPCharacter::ChangeView() const
+{
+}
+
 void AFPCharacter::SetCharacterMesh()
 {
 	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));

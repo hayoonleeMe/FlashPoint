@@ -8,6 +8,7 @@
 #include "FPGameplayTags.h"
 #include "FPPlayerState.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "Character/FPCharacter.h"
 #include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
 #include "Game/FPGameState.h"
@@ -77,6 +78,7 @@ void AFPPlayerController::SetupInputComponent()
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::QuickSlot::Slot1, ETriggerEvent::Triggered, this, &ThisClass::Input_QuickSlot1);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::QuickSlot::Slot2, ETriggerEvent::Triggered, this, &ThisClass::Input_QuickSlot2);
 	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::QuickSlot::Slot3, ETriggerEvent::Triggered, this, &ThisClass::Input_QuickSlot3);
+	FPInputComponent->BindNativeAction(InputData, FPGameplayTags::Input::Gameplay::ChangeView, ETriggerEvent::Triggered, this, &ThisClass::Input_ChangeView);
 
 	// Bind Ability Inputs
 	FPInputComponent->BindAbilityActions(InputData, this, &ThisClass::Input_AbilityInputTagPressed, &ThisClass::Input_AbilityInputTagReleased);
@@ -149,6 +151,14 @@ void AFPPlayerController::Input_QuickSlot3()
 	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetPawn()))
 	{
 		WeaponManageComponent->ServerEquipWeaponAtSlot(3);
+	}
+}
+
+void AFPPlayerController::Input_ChangeView()
+{
+	if (AFPCharacter* FPCharacter = Cast<AFPCharacter>(GetCharacter()))
+	{
+		FPCharacter->ChangeView();
 	}
 }
 

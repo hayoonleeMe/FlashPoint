@@ -37,6 +37,9 @@ public:
 
 	// Crouch 체크 무시하도록 오버라이드
 	virtual bool CanJumpInternal_Implementation() const override;
+
+	// 시점을 변경한다.
+	void ChangeView() const;
 	
 protected:
 	// 캐릭터 메시를 설정한다.
