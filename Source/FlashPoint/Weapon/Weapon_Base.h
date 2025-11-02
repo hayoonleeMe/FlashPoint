@@ -19,11 +19,7 @@ struct FWeaponEquipInfo
 {
 	GENERATED_BODY()
 
-	FWeaponEquipInfo()
-	{
-		AttachSocketName = TEXT("weapon_r");
-		AttachTransform = FTransform(FRotator(0.f, -90.f, 0.f));
-	}
+	FWeaponEquipInfo();
 
 	UPROPERTY(EditDefaultsOnly)
 	FName AttachSocketName;

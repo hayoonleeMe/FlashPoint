@@ -17,6 +17,13 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Weapon_Base) 
 
+FWeaponEquipInfo::FWeaponEquipInfo()
+{
+	AttachSocketName = TEXT("weapon_r");
+	AttachTransform = FTransform(FRotator(0.f, -90.f, 0.f));
+	RightHandFPSOffset = FVector::ZeroVector;
+}
+
 AWeapon_Base::AWeapon_Base()
 {
 	SpawnCollisionHandlingMethod = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
