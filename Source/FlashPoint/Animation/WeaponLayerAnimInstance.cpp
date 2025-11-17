@@ -77,6 +77,7 @@ UWeaponLayerAnimInstance::UWeaponLayerAnimInstance()
 	/* Skeletal Control */
 	DisableLeftHandIKCurveName = TEXT("DisableLeftHandIK");
 	DisableRightHandIKCurveName = TEXT("DisableRightHandIK");
+	LeftHandAttachTransformInterpSpeed = 15.f;
 
 	/* FPS */
 	Alpha_Spine03 = 0.1f;
@@ -171,7 +172,12 @@ void UWeaponLayerAnimInstance::CalculateLeftHandAttachTransform(float DeltaSecon
 	if (LeftHandIKAlpha > 0.f && MainAnimInstance->EquippedWeapon)
 	{
 		const FTransform LeftHandSocketTransform = MainAnimInstance->EquippedWeapon->GetLeftHandSocketTransform(MainAnimInstance->GameplayTag_FPS, MainAnimInstance->GameplayTag_IsSprinting && MainAnimInstance->bIsOnGround);
-		GetSkelMeshComponent()->TransformToBoneSpace(TEXT("weapon_r"), LeftHandSocketTransform.GetLocation(), LeftHandSocketTransform.Rotator(), LeftHandAttachLocation, LeftHandAttachRotation);
+		FVector NewLocation;
+		FRotator NewRotation;
+		GetSkelMeshComponent()->TransformToBoneSpace(TEXT("weapon_r"), LeftHandSocketTransform.GetLocation(), LeftHandSocketTransform.Rotator(), NewLocation, NewRotation);
+
+		LeftHandAttachLocation = FMath::VInterpTo(LeftHandAttachLocation, NewLocation, DeltaSeconds, LeftHandAttachTransformInterpSpeed);
+		LeftHandAttachRotation = FMath::RInterpTo(LeftHandAttachRotation, NewRotation, DeltaSeconds, LeftHandAttachTransformInterpSpeed);
 	}
 }
 

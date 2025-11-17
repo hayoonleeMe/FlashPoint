@@ -118,6 +118,9 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Skeletal Control")
 	FRotator LeftHandAttachRotation;
 
+	UPROPERTY(EditAnywhere, Category="Skeletal Control")
+	float LeftHandAttachTransformInterpSpeed;
+
     void CalculateLeftHandAttachTransform(float DeltaSeconds);
 
 	// ============================================================================
