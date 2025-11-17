@@ -47,6 +47,7 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->SetCrouchedHalfHeight(65.f);
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Spawner, ECR_Overlap);
+	GetCapsuleComponent()->SetCapsuleRadius(48.f);
 
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 270.f, 0.f));
