@@ -3,6 +3,8 @@
 
 #include "WeaponWallTraceComponent.h"
 
+#include "AbilitySystemBlueprintLibrary.h"
+#include "FPGameplayTags.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -138,6 +140,15 @@ void UWeaponWallTraceComponent::SetIsWeaponWallBlocked(bool bInIsWeaponWallBlock
 	{
 		bIsWeaponWallBlocked = bInIsWeaponWallBlocked;
 		ServerSetIsWeaponWallBlocked(bIsWeaponWallBlocked);
+
+		if (bIsWeaponWallBlocked)
+		{
+			UAbilitySystemBlueprintLibrary::AddLooseGameplayTags(GetOwner(), FGameplayTagContainer(FPGameplayTags::Weapon::NoFire));
+		}
+		else
+		{
+			UAbilitySystemBlueprintLibrary::RemoveLooseGameplayTags(GetOwner(), FGameplayTagContainer(FPGameplayTags::Weapon::NoFire));
+		}
 	}
 }
 

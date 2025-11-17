@@ -164,6 +164,13 @@ void UFPGameplayAbility_WeaponFire::ApplyCost(const FGameplayAbilitySpecHandle H
 
 void UFPGameplayAbility_WeaponFire::Fire()
 {
+	// 발사 중 NoFire 태그가 추가되면 발사 종료
+	if (GetAbilitySystemComponentFromActorInfo_Checked()->HasMatchingGameplayTag(FPGameplayTags::Weapon::NoFire))
+	{
+		K2_EndAbility();
+		return;
+	}
+	
 	// Check ammo
 	if (CommitAbility(CurrentSpecHandle, CurrentActorInfo, CurrentActivationInfo))
 	{
