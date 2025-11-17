@@ -23,6 +23,8 @@ class FLASHPOINT_API AFPPlayerController : public ABasePlayerController
 	GENERATED_BODY()
 
 public:
+	AFPPlayerController();
+	
 	virtual void SetUIInputMode() override;
 	virtual void SetGameplayInputMode() override;
 	

@@ -8,6 +8,7 @@
 #include "FPGameplayTags.h"
 #include "FPPlayerState.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "Camera/FPPlayerCameraManager.h"
 #include "Character/FPCharacter.h"
 #include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
@@ -22,6 +23,11 @@
 #include "Weapon/WeaponManageComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
+
+AFPPlayerController::AFPPlayerController()
+{
+	PlayerCameraManagerClass = AFPPlayerCameraManager::StaticClass();
+}
 
 void AFPPlayerController::SetUIInputMode()
 {
