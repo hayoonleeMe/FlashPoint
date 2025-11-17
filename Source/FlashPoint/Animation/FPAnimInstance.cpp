@@ -21,33 +21,25 @@ const FVector2D UFPAnimInstance::LandRecoveryAlphaOutRange = { 0.f, 1.f };
 UFPAnimInstance::UFPAnimInstance()
 {
 	JumpDistanceCurveName = TEXT("GroundDistance");
-	DisableLeftHandIKCurveName = TEXT("DisableLeftHandIK");
-	DisableRightHandIKCurveName = TEXT("DisableRightHandIK");
+	RemoteAimPitchInterpSpeed = 15.f;
 	CardinalDirectionDeadZone = 10.f;
 	RootYawOffsetAngleClamp = { -120.f, 100.f };
 	RootYawOffsetAngleCrouchClamp = { -90.f, 80.f };
 	TurnYawWeightCurveName = TEXT("TurnYawWeight");
 	RemainingTurnYawCurveName = TEXT("RemainingTurnYaw");
-
-	/* FPS */
-	Alpha_Spine01 = 0.15f;
-	Alpha_Spine02 = 0.1f;
-	Alpha_Spine03 = 0.1f;
-	Alpha_Spine04 = 0.1f;
-	Alpha_Spine05 = 0.1f;
-	Alpha_Neck01 = 0.15f;
-	Alpha_Neck02 = 0.2f;
-	Alpha_Head = 0.1f;
 }
 
 void UFPAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	if (UWeaponManageComponent* WeaponManageComp = GetOwningActor() ? GetOwningActor()->FindComponentByClass<UWeaponManageComponent>() : nullptr)
+	if (AActor* OwningActor = GetOwningActor())
 	{
-		// bHasEquippedWeapon 업데이트를 위한 델레게이트 등록
-		WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateHasEquippedWeapon);		
+		if (UWeaponManageComponent* WeaponManageComp = OwningActor->FindComponentByClass<UWeaponManageComponent>())
+		{
+			// bHasEquippedWeapon 업데이트를 위한 델레게이트 등록
+			WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateHasEquippedWeapon);		
+		}
 	}
 
 	// GameplayTag Property
@@ -115,11 +107,10 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			bIsCrouching = Character->bIsCrouched;
 
 			UpdateJumpData(DeltaSeconds, MoveComponent);
-			UpdateAimingData(Character);
+			UpdateAimingData(DeltaSeconds, Character);
 			UpdateCurrentDirection();
 			UpdateBlendWeight(DeltaSeconds);
 			UpdateRootYawOffset(DeltaSeconds);
-			UpdateSkeletalControlData();
 
 			if (bIsFirstUpdate)
 			{
@@ -161,10 +152,17 @@ void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UFPCharacterMovem
 	GroundDistance = MoveComponent->GetGroundDistance();
 }
 
-void UFPAnimInstance::UpdateAimingData(const ACharacter* Character)
+void UFPAnimInstance::UpdateAimingData(float DeltaSeconds, const ACharacter* Character)
 {
-	AimPitch = UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch);
-	FPSPitch = -AimPitch;
+	if (Character->IsLocallyControlled())
+	{
+		AimPitch = UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch);
+	}
+	else
+	{
+		// SimulatedProxy에선 Character->GetBaseAimRotation().Pitch의 간극이 크므로(APawn::RemoteViewPitch를 사용하기 때문), Interpolate
+		AimPitch = FMath::FInterpTo(AimPitch, UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch), DeltaSeconds, RemoteAimPitchInterpSpeed);
+	}
 }
 
 void UFPAnimInstance::UpdateCurrentDirection()
@@ -210,66 +208,8 @@ void UFPAnimInstance::UpdateCurrentDirection()
 
 void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds)
 {
-	// Update UpperBodyAdditiveWeight
 	const bool bAdditive = IsAnyMontagePlaying() && bIsOnGround;
 	UpperBodyAdditiveWeight = bAdditive ? 1.f : FMath::FInterpTo(UpperBodyAdditiveWeight, 0.f, DeltaSeconds, 6.f);
-	
-	// Update HipFireUpperBodyBlendWeight
-	if (bHasEquippedWeapon)
-	{
-		const bool bHipFire = GameplayTag_IsFiring || (bIsOnGround && !GameplayTag_IsSprinting);
-		HipFireUpperBodyBlendWeight = FMath::FInterpTo(HipFireUpperBodyBlendWeight, bHipFire ? 1.f : 0.f, DeltaSeconds, bHipFire ? 20.f : 3.f);
-	}
-	else
-	{
-		HipFireUpperBodyBlendWeight = 0.f;
-	}
-}
-
-void UFPAnimInstance::UpdateSkeletalControlData()
-{
-	// Calc Hand IK Alpha
-	if (bHasEquippedWeapon)
-	{
-		const float DisableLeftHandIK = GetCurveValue(DisableLeftHandIKCurveName);
-		if (FMath::IsNearlyZero(DisableLeftHandIK, 1E-06))
-		{
-			LeftHandIKAlpha = FMath::FInterpTo(LeftHandIKAlpha, 1.f, GetDeltaSeconds(), 10.f);
-		}
-		else
-		{
-			LeftHandIKAlpha = 0.f;
-		}
-
-		const float DisableRightHandIK = GetCurveValue(DisableRightHandIKCurveName);
-		if (DisableRightHandIK > 0.f)
-		{
-			RightHandIKAlpha = 0.f;
-		}
-		else
-		{
-			RightHandIKAlpha = FMath::FInterpTo(RightHandIKAlpha, 1.f, GetDeltaSeconds(), 8.f);
-		}
-	}
-	else
-	{
-		LeftHandIKAlpha = 0.f;
-		RightHandIKAlpha = 0.f;
-	}
-
-	// Calc Left Hand Attach Location
-	if (LeftHandIKAlpha > 0.f)
-	{
-		if (EquippedWeapon)
-		{
-			if (const ACharacter* Character = Cast<ACharacter>(GetOwningActor()))
-			{
-				const FTransform LeftHandSocketTransform = EquippedWeapon->GetLeftHandSocketTransform(GameplayTag_FPS, GameplayTag_IsSprinting && bIsOnGround);
-				FRotator Temp;
-				Character->GetMesh()->TransformToBoneSpace(TEXT("weapon_r"), LeftHandSocketTransform.GetLocation(), LeftHandSocketTransform.Rotator(), LeftHandAttachLocation, Temp);
-			}
-		}
-	}
 }
 
 void UFPAnimInstance::SetRootYawOffset(float InValue)

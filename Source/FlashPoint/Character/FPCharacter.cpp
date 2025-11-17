@@ -8,6 +8,7 @@
 #include "FPGameplayTags.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Component/WeaponWallTraceComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Data/FPAssetData.h"
 #include "Data/FPCosmeticData.h"
@@ -72,6 +73,8 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	FPSCameraComponent->bAutoActivate = false;
 
 	WeaponManageComponent = CreateDefaultSubobject<UWeaponManageComponent>(TEXT("Weapon Manage Component"));
+	
+	WeaponWallTraceComponent = CreateDefaultSubobject<UWeaponWallTraceComponent>(TEXT("Weapon Wall Trace Component"));
 }
 
 void AFPCharacter::Tick(float DeltaSeconds)

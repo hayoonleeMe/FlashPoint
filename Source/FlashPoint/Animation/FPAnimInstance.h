@@ -31,6 +31,8 @@ class FLASHPOINT_API UFPAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
+	friend class UWeaponLayerAnimInstance;
+
 public:
 	UFPAnimInstance();
 	virtual void NativeInitializeAnimation() override;
@@ -124,7 +126,11 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AimPitch;
 
-	void UpdateAimingData(const ACharacter* Character);
+	// SimulatedProxy에서 AimPitch를 계산할 때 적용할 Interpolation Speed
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RemoteAimPitchInterpSpeed;
+
+	void UpdateAimingData(float DeltaSeconds, const ACharacter* Character);
 
 	// 캐릭터가 이동할 방향
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -140,32 +146,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float UpperBodyAdditiveWeight;
 
-	// Upper Body에 Hip Fire를 적용할지 여부를 결정하는 Blend Weight
-	// 1이면 Upper Body가 총을 치켜드는 Hip Fire Pose 재생, 0이면 Base Pose 재생
-	// 추가로, 1이면 Idle Aim Offset, 0이면 Relaxed Aim Offset 재생
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float HipFireUpperBodyBlendWeight;
-
 	void UpdateBlendWeight(float DeltaSeconds);
-
-	// 왼손을 무기에 부착할 위치
-	// Character Mesh의 weapon_r bone 기준
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FVector LeftHandAttachLocation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName DisableLeftHandIKCurveName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float LeftHandIKAlpha;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FName DisableRightHandIKCurveName;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float RightHandIKAlpha;
-
-	void UpdateSkeletalControlData();
 
 	// TurnInPlace가 Blend Out 상태인지 여부
 	// Idle State 일 때 false로 설정되고, 그 외에는 true이다.
@@ -220,32 +201,5 @@ protected:
 	bool IsFPS() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float FPSPitch;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	FVector RightHandFPSOffset;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Spine01;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Spine02;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Spine03;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Spine04;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Spine05;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Neck01;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Neck02;
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float Alpha_Head;
 };

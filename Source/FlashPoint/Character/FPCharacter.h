@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "FPCharacter.generated.h"
 
+class UWeaponWallTraceComponent;
 class UWeaponManageComponent;
 class UCameraComponent;
 class USpringArmComponent;
@@ -94,6 +95,9 @@ protected:
 	// Weapon
 	// ============================================================================
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	// TODO : BlueprintReadOnly For Test
+	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UWeaponManageComponent> WeaponManageComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UWeaponWallTraceComponent> WeaponWallTraceComponent;
 };

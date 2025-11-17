@@ -43,6 +43,7 @@ AWeapon_Base::AWeapon_Base()
 		UpdateFireBlockTag(false);
 	});
 
+	WallTraceLength = 90.f;
 	TPSLeftHandSocketName = TEXT("TPS_LeftHandSocket");
 	FPSLeftHandSocketName = TEXT("FPS_LeftHandSocket");
 	SprintLeftHandSocketName = TEXT("Sprint_LeftHandSocket");

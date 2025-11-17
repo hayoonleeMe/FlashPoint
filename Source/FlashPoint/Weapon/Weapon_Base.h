@@ -74,6 +74,7 @@ public:
 	// LeftHandAttachSocketName에 해당하는 소켓의 Transform을 반환한다.
 	FTransform GetLeftHandSocketTransform(bool bIsFPS, bool bIsSprinting) const;
 
+	float GetWallTraceLength() const { return WallTraceLength; }
 
 	// 무기가 장착된 후 호출된다.
 	virtual void OnEquipped();
@@ -184,4 +185,8 @@ protected:
 	// HUD에 표시할 Icon
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	TObjectPtr<UTexture2D> DisplayIcon;
+
+	// 무기를 Block 할지 판단하기 위한 Wall Trace Length
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	float WallTraceLength;
 };
