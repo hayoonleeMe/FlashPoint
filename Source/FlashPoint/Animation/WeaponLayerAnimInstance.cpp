@@ -4,6 +4,7 @@
 #include "WeaponLayerAnimInstance.h"
 
 #include "FPAnimInstance.h"
+#include "Animation/AnimInstanceProxy.h"
 #include "Component/WeaponWallTraceComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon/Weapon_Base.h"
@@ -78,6 +79,10 @@ UWeaponLayerAnimInstance::UWeaponLayerAnimInstance()
 	DisableLeftHandIKCurveName = TEXT("DisableLeftHandIK");
 	DisableRightHandIKCurveName = TEXT("DisableRightHandIK");
 	LeftHandAttachTransformInterpSpeed = 15.f;
+	LeftHandAttachNormalJoint = FVector(0.f, -50.f, 0.f);
+	LeftHandAttachWeaponBlockUpJoint = FVector(-15.f, 0.f, 0.f);
+	LeftHandAttachWeaponBlockDownJoint = FVector(-100.f, 50.f, 0.f);
+	LeftHandAttachJointInterpSpeed = 15.f;
 
 	/* FPS */
 	Alpha_Spine03 = 0.1f;
@@ -90,6 +95,8 @@ UWeaponLayerAnimInstance::UWeaponLayerAnimInstance()
 	/* Weapon Block */
 	WeaponBlockAlphaInRange = { 1.f, 0.5f };
 	WeaponBlockAlphaInterpSpeed = 10.f;
+	// RightHandWeaponBlockLocationOffset = FVector(0.f, 0.f, -10.f);
+	// RightHandWeaponBlockRotationOffset = FRotator(0.f, -80.f, 40.f);
 }
 
 void UWeaponLayerAnimInstance::NativeInitializeAnimation()
@@ -115,9 +122,19 @@ void UWeaponLayerAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSecond
 	{
 		UpdateBlendWeight(DeltaSeconds);
 		UpdateAimingData();
-		UpdateSkeletalControlData(DeltaSeconds);
 		UpdateWeaponBlockData(DeltaSeconds);
+		UpdateSkeletalControlData(DeltaSeconds);
 	}
+}
+
+void UWeaponLayerAnimInstance::RetrieveWeaponReloadData(bool& bOutIsReloading, float& OutWeaponBlockAlpha, bool& bOutUseWeaponUp) const
+{
+	if (MainAnimInstance)
+	{
+		bOutIsReloading = MainAnimInstance->GameplayTag_IsReloading;
+	}
+	OutWeaponBlockAlpha = WeaponBlockAlpha;
+	bOutUseWeaponUp = bUseWeaponUp;
 }
 
 void UWeaponLayerAnimInstance::UpdateBlendWeight(float DeltaSeconds)
@@ -141,7 +158,7 @@ void UWeaponLayerAnimInstance::UpdateSkeletalControlData(float DeltaSeconds)
 		const float DisableLeftHandIK = GetCurveValue(DisableLeftHandIKCurveName);
 		if (FMath::IsNearlyZero(DisableLeftHandIK, 1E-06))
 		{
-			LeftHandIKAlpha = FMath::FInterpTo(LeftHandIKAlpha, 1.f, GetDeltaSeconds(), 10.f);
+			LeftHandIKAlpha = FMath::FInterpTo(LeftHandIKAlpha, 1.f, DeltaSeconds, 15.f);
 		}
 		else
 		{
@@ -155,7 +172,7 @@ void UWeaponLayerAnimInstance::UpdateSkeletalControlData(float DeltaSeconds)
 		}
 		else
 		{
-			RightHandIKAlpha = FMath::FInterpTo(RightHandIKAlpha, 1.f, GetDeltaSeconds(), 8.f);
+			RightHandIKAlpha = FMath::FInterpTo(RightHandIKAlpha, 1.f, DeltaSeconds, 8.f);
 		}
 	}
 	else
@@ -179,6 +196,25 @@ void UWeaponLayerAnimInstance::CalculateLeftHandAttachTransform(float DeltaSecon
 		LeftHandAttachLocation = FMath::VInterpTo(LeftHandAttachLocation, NewLocation, DeltaSeconds, LeftHandAttachTransformInterpSpeed);
 		LeftHandAttachRotation = FMath::RInterpTo(LeftHandAttachRotation, NewRotation, DeltaSeconds, LeftHandAttachTransformInterpSpeed);
 	}
+	
+	if (MainAnimInstance->GameplayTag_IsReloading && MainAnimInstance->EquippedWeapon)
+	{
+		const FTransform WeaponMagTransform = MainAnimInstance->EquippedWeapon->GetMagBoneTransform();
+		GetSkelMeshComponent()->TransformToBoneSpace(TEXT("weapon_r"), WeaponMagTransform.GetLocation(), WeaponMagTransform.Rotator(), LeftHandAttachLocation, LeftHandAttachRotation);
+		
+		if (GetWorld() && GetWorld()->IsGameWorld() && TryGetPawnOwner() && TryGetPawnOwner()->IsLocallyControlled() && AnimInstanceProxy)
+		{
+			float CurveValue = GetCurveValue(TEXT("GrabMagazine"));
+			AnimInstanceProxy->AnimDrawDebugOnScreenMessage(FString::Printf(TEXT("GrabMagazine %f"), CurveValue), FColor::Red);
+			AnimInstanceProxy->AnimDrawDebugSphere(WeaponMagTransform.GetLocation(), 4.f, 4, FColor::Red);
+			AnimInstanceProxy->AnimDrawDebugSphere(LeftHandAttachLocation, 4.f, 4, FColor::Blue);
+		}
+	}
+
+	//const FVector& JointTarget = bIsWeaponWallBlocked ? (bUseWeaponUp ? LeftHandAttachWeaponBlockUpJoint : LeftHandAttachWeaponBlockDownJoint) : LeftHandAttachNormalJoint;
+	//const FVector& JointTarget = bIsWeaponWallBlocked ? LeftHandAttachWeaponBlockDownJoint : LeftHandAttachNormalJoint;
+	const FVector& JointTarget = bIsWeaponWallBlocked ? LeftHandAttachWeaponBlockUpJoint : LeftHandAttachNormalJoint;
+	LeftHandAttachJointTargetLocation = FMath::VInterpTo(LeftHandAttachJointTargetLocation, JointTarget, DeltaSeconds, LeftHandAttachJointInterpSpeed);
 }
 
 void UWeaponLayerAnimInstance::UpdateAimingData()
@@ -224,6 +260,13 @@ void UWeaponLayerAnimInstance::UpdateWeaponBlockData(float DeltaSeconds)
 				const float NearRatio = DistanceToWall / (MainAnimInstance->EquippedWeapon->GetWallTraceLength() + 20.f);
 				// 벽까지 거리에 따라 Weapon Block 적용
 				TargetAlpha = FMath::GetMappedRangeValueClamped(WeaponBlockAlphaInRange, { 0.f, 1.f }, NearRatio);
+
+				// if (AnimInstanceProxy)
+				// {
+				// 	AnimInstanceProxy->AnimDrawDebugSphere(WallLoc, 4.f, 4, FColor::Blue, false, -1.f, 3);
+				// 	AnimInstanceProxy->AnimDrawDebugLine(PawnLoc, PawnLoc + ForwardVector * 20.f, FColor::Blue, false, -1.f, 3);
+				// 	AnimInstanceProxy->AnimDrawDebugOnScreenMessage(FString::Printf(TEXT("ForwardYaw %f, DistanceToWall %f"), ForwardYaw, DistanceToWall), FColor::Red);
+				// }
 			}
 			else
 			{
@@ -232,14 +275,59 @@ void UWeaponLayerAnimInstance::UpdateWeaponBlockData(float DeltaSeconds)
 			}
 		}
 		WeaponBlockAlpha = FMath::FInterpTo(WeaponBlockAlpha, TargetAlpha, DeltaSeconds, WeaponBlockAlphaInterpSpeed);
-	
-		// Calc RightHandWeaponBlockOffset
-		const FVector TargetOffset = SelectOffsetParams().CalculateRightHandOffset(bIsWeaponWallBlocked, WeaponBlockAlpha, MainAnimInstance->AimPitch);
-		RightHandWeaponBlockOffset = FMath::VInterpTo(RightHandWeaponBlockOffset, TargetOffset, DeltaSeconds, WeaponBlockAlphaInterpSpeed);
+
+		const float AlphaDelta = TargetAlpha - WeaponBlockRotationAlpha;
+		
+		if (AlphaDelta > 0.f)
+		{
+			if (AlphaDelta > 0.2f)
+			{
+				WeaponBlockRotationAlpha = TargetAlpha;
+			}
+			else
+			{
+				WeaponBlockRotationAlpha = FMath::FInterpTo(WeaponBlockRotationAlpha, TargetAlpha, DeltaSeconds, WeaponBlockAlphaInterpSpeed);
+			}
+		}
+		else
+		{
+			WeaponBlockRotationAlpha = FMath::FInterpTo(WeaponBlockRotationAlpha, TargetAlpha, DeltaSeconds, WeaponBlockAlphaInterpSpeed);
+			// if (TargetAlpha < 0.05f && WeaponBlockRotationAlpha > 0.5f)
+			// {
+			// 	//WeaponBlockRotationAlpha = TargetAlpha;
+			// 	WeaponBlockRotationAlpha = FMath::FInterpTo(WeaponBlockRotationAlpha, TargetAlpha, DeltaSeconds, 3.f);
+			// }
+			// else
+			// {
+			// 	WeaponBlockRotationAlpha = FMath::FInterpTo(WeaponBlockRotationAlpha, TargetAlpha, DeltaSeconds, WeaponBlockAlphaInterpSpeed);
+			// }
+		}
+
+		const bool bIsLookingSky = MainAnimInstance->AimPitch > 45.f;
+
+		// Calc RightHandWeaponBlockLocationOffset
+		//const FVector TargetLocationOffset = SelectOffsetParams().CalculateRightHandOffset(bIsWeaponWallBlocked, WeaponBlockAlpha, MainAnimInstance->AimPitch);
+		//const FVector TargetLocationOffset = bUseWeaponUp ? FVector(0.f, 10.f, 15.f) : FVector(0.f, 0.f, -10.f);
+		const FVector TargetLocationOffset = FVector(0.f, 10.f, 15.f);
+		//RightHandWeaponBlockLocationOffset = FMath::VInterpTo(RightHandWeaponBlockLocationOffset, TargetLocationOffset, DeltaSeconds, WeaponBlockAlphaInterpSpeed);
+		RightHandWeaponBlockLocationOffset = TargetLocationOffset;
+		//RightHandWeaponBlockLocationOffset = Pawn->GetActorLocation() + Pawn->GetActorForwardVector() * 20.f + Pawn->GetActorRightVector() * 20.f + FVector(0.f, 0.f, 30.f);
+
+		//const FRotator TargetRotationOffset = bUseWeaponUp ? FRotator(-5.f, -80.f, 0.f) : FRotator(0.f, -80.f, 40.f);
+		const FRotator TargetRotationOffset = FRotator(-5.f, -80.f, 0.f);
+		//RightHandWeaponBlockRotationOffset = FMath::RInterpTo(RightHandWeaponBlockRotationOffset, TargetRotationOffset, DeltaSeconds, WeaponBlockAlphaInterpSpeed);
+		RightHandWeaponBlockRotationOffset = TargetRotationOffset;
 	}
 	else
 	{
 		bIsWeaponWallBlocked = false;
 		WeaponBlockAlpha = 0.f;
+	}
+
+	if (AnimInstanceProxy)
+	{
+		
+		//AnimInstanceProxy->AnimDrawDebugOnScreenMessage(FString::Printf(TEXT("bIsWeaponWallBlocked %d, WeaponBlockAlpha %f, WeaponBlockRotationAlpha %f"), bIsWeaponWallBlocked, WeaponBlockAlpha, WeaponBlockRotationAlpha), FColor::Red);
+		//AnimInstanceProxy->AnimDrawDebugOnScreenMessage(FString::Printf(TEXT("MainAnimInstance->AimYaw %f"), MainAnimInstance->AimYaw), FColor::Red);
 	}
 }

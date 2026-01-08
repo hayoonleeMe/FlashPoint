@@ -8,6 +8,8 @@
 
 class AWeapon_Base;
 
+DECLARE_MULTICAST_DELEGATE_TwoParams(FWeaponWallBlockDataChangedDelegate, bool/*bIsWeaponWallBlocked*/, bool/*bUseWeaponUp*/);
+
 /**
  * 벽 등의 장애물에 의해 무기를 내리거나 올리는 액터 컴포넌트
  */
@@ -22,6 +24,9 @@ public:
 
 	// Weapon Block 데이터들을 반환한다.
 	void RetrieveWeaponWallBlockData(bool& bOutIsWeaponWallBlocked, bool& bOutUseWeaponUp, FVector& OutLocalWallHitLocation) const;
+	void RetrieveWeaponWallBlockData(bool& bOutIsWeaponWallBlocked, bool& bOutUseWeaponUp) const;
+
+	FWeaponWallBlockDataChangedDelegate WeaponWallBlockDataChangedDelegate;
 	
 protected:
 	virtual void BeginPlay() override;

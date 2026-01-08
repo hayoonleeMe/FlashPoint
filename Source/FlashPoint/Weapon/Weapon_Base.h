@@ -52,6 +52,9 @@ class FLASHPOINT_API AWeapon_Base : public AActor
 public:
 	AWeapon_Base();
 
+	USkeletalMeshComponent* GetWeaponMesh() const { return WeaponMeshComponent; }
+	UStaticMeshComponent* GetWeaponMagazineMesh() const { return MagazineMeshComponent; }
+	
 	const FWeaponEquipInfo& GetEquipInfo() const { return EquipInfo; }
 	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
 
@@ -73,6 +76,8 @@ public:
 
 	// LeftHandAttachSocketName에 해당하는 소켓의 Transform을 반환한다.
 	FTransform GetLeftHandSocketTransform(bool bIsFPS, bool bIsSprinting) const;
+	
+	FTransform GetMagBoneTransform() const;
 
 	float GetWallTraceLength() const { return WallTraceLength; }
 
@@ -92,6 +97,9 @@ public:
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UStaticMeshComponent> MagazineMeshComponent;
 
 	UAbilitySystemComponent* GetOwnerASC() const;
 

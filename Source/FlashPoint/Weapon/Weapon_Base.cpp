@@ -11,6 +11,7 @@
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "Animation/Weapon/WeaponAnimInstance.h"
 #include "Data/FPCosmeticData.h"
 #include "GameFramework/Character.h"
 #include "System/FPAssetManager.h"
@@ -33,6 +34,11 @@ AWeapon_Base::AWeapon_Base()
 	SetRootComponent(WeaponMeshComponent);
 	WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMeshComponent->SetHiddenInGame(true);
+
+	MagazineMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Magazine Mesh Component"));
+	MagazineMeshComponent->SetupAttachment(WeaponMeshComponent);
+	MagazineMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	MagazineMeshComponent->SetHiddenInGame(true);
 
 	BulletsPerCartridge = 1;
 	HeadShotMultiplier = 1.f;
@@ -60,12 +66,22 @@ FTransform AWeapon_Base::GetLeftHandSocketTransform(bool bIsFPS, bool bIsSprinti
 	return WeaponMeshComponent->GetSocketTransform(SocketName);
 }
 
+FTransform AWeapon_Base::GetMagBoneTransform() const
+{
+	return WeaponMeshComponent->GetBoneTransform(TEXT("b_gun_mag"));
 }
 
 void AWeapon_Base::OnEquipped()
 {
+	// Character Anim
 	LinkWeaponAnimLayer(false);
 	PlayOwningCharacterMontage(EquipInfo.EquipMontage);
+
+	// Weapon Anim
+	if (UWeaponAnimInstance* WeaponAnimInstance = Cast<UWeaponAnimInstance>(WeaponMeshComponent->GetAnimInstance()))
+	{
+		WeaponAnimInstance->OnWeaponEquipped(GetOwner());
+	}
 
 	// 총기 발사 관리
 	BindMontageEndedDelegate(EquipInfo.EquipMontage);
@@ -73,6 +89,7 @@ void AWeapon_Base::OnEquipped()
 
 	GetWorldTimerManager().SetTimer(ShowWeaponTimerHandle, FTimerDelegate::CreateLambda([this]()
 	{
+		WeaponMeshComponent->Activate();
 		WeaponMeshComponent->SetHiddenInGame(false);
 	}), 0.2f, false);
 }
@@ -92,6 +109,7 @@ void AWeapon_Base::OnUnEquipped()
 	BindMontageEndedDelegate(EquipInfo.UnEquipMontage);
 	UpdateFireBlockTag(true);
 
+	WeaponMeshComponent->Deactivate();
 	WeaponMeshComponent->SetHiddenInGame(true);
 }
 

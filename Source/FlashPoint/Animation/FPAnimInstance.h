@@ -40,6 +40,8 @@ public:
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
 	
+	float GetAimYaw() const { return AimYaw; }
+	
 protected:
 	// GameplayTag에 해당하는 프로퍼티 값을 업데이트하도록 등록
 	void RegisterGameplayTagWithProperty(UAbilitySystemComponent* ASC);
@@ -57,6 +59,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GameplayTag_FPS;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsReloading;
 
 	TMap<FGameplayTag, bool*> TagToPropertyMap;
 	

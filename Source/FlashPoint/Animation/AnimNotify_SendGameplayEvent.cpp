@@ -25,3 +25,13 @@ void UAnimNotify_SendGameplayEvent::Notify(USkeletalMeshComponent* MeshComp, UAn
 	}
 }
 
+FString UAnimNotify_SendGameplayEvent::GetNotifyName_Implementation() const
+{
+	if (EventTag.IsValid())
+	{
+		return EventTag.ToString();
+	}
+	
+	return Super::GetNotifyName_Implementation();
+}
+

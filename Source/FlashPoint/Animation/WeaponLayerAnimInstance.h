@@ -68,6 +68,8 @@ public:
 	virtual void NativeInitializeAnimation() override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
+	void RetrieveWeaponReloadData(bool& bOutIsReloading, float& OutWeaponBlockAlpha, bool& bOutUseWeaponUp) const;
+
 protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFPAnimInstance> MainAnimInstance;
@@ -123,6 +125,21 @@ protected:
 
     void CalculateLeftHandAttachTransform(float DeltaSeconds);
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Skeletal Control")
+	FVector LeftHandAttachJointTargetLocation;
+
+	UPROPERTY(EditAnywhere, Category="Skeletal Control")
+	FVector LeftHandAttachNormalJoint;
+
+	UPROPERTY(EditAnywhere, Category="Skeletal Control")
+	FVector LeftHandAttachWeaponBlockUpJoint;
+	
+	UPROPERTY(EditAnywhere, Category="Skeletal Control")
+	FVector LeftHandAttachWeaponBlockDownJoint;
+
+	UPROPERTY(EditAnywhere, Category="Skeletal Control")
+	float LeftHandAttachJointInterpSpeed;
+
 	// ============================================================================
 	// FPS
 	// ============================================================================
@@ -173,9 +190,17 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon Block")
 	float WeaponBlockAlpha;
 
-	// Weapon Block을 수행할 때 오른손에 적용할 Offset
+	// Weapon Block Anim을 블렌드할 Alpha
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon Block")
-	FVector RightHandWeaponBlockOffset;
+	float WeaponBlockRotationAlpha;
+
+	// Weapon Block을 수행할 때 오른손에 적용할 Location
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon Block")
+	FVector RightHandWeaponBlockLocationOffset;
+
+	// Weapon Block을 수행할 때 오른손에 적용할 Rotation Offset
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Weapon Block")
+	FRotator RightHandWeaponBlockRotationOffset;
 
 	// TPS 시점에서 Weapon Block Up 상태일 때의 Offset Params
 	UPROPERTY(EditAnywhere, Category="Weapon Block")

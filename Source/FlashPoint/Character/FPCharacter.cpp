@@ -106,6 +106,15 @@ void AFPCharacter::Tick(float DeltaSeconds)
 	CurrentCameraHeight = FMath::FInterpTo(CurrentCameraHeight, TargetCameraHeight, DeltaSeconds, 7.f);
 	const FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
 	SpringArmComponent->SetRelativeLocation(FVector(CameraLocation.X, CameraLocation.Y, CurrentCameraHeight));
+
+
+
+	// TODO : Debug
+	if (AbilitySystemComponent)
+	{
+		const int32 Count = AbilitySystemComponent->GetTagCount(FPGameplayTags::Weapon::NoFire);
+		//UE_LOG(LogTemp, Warning, TEXT("%hs, Count %d"), __FUNCTION__, Count);
+	}
 }
 
 void AFPCharacter::PossessedBy(AController* NewController)
@@ -113,6 +122,8 @@ void AFPCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	InitAbilitySystem();
+	// TODO : ListenServer or Standalone으로 PIE 실행하기 위한 Debug 코드
+	SetCharacterMesh();
 }
 
 void AFPCharacter::OnRep_PlayerState()

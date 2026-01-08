@@ -87,6 +87,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(IsFiring, "CharacterState.IsFiring");
 		UE_DEFINE_GAMEPLAY_TAG(IsMoving, "CharacterState.IsMoving");
 		UE_DEFINE_GAMEPLAY_TAG(FPS, "CharacterState.FPS");
+		UE_DEFINE_GAMEPLAY_TAG(IsReloading, "CharacterState.IsReloading");
 	}
 
 	namespace Weapon
@@ -119,5 +120,7 @@ namespace FPGameplayTags
 	namespace GameplayEvent
 	{
 		UE_DEFINE_GAMEPLAY_TAG(ReloadFinished, "GameplayEvent.ReloadFinished");
+		UE_DEFINE_GAMEPLAY_TAG(ReloadMagazineOut, "GameplayEvent.ReloadMagazineOut");
+		UE_DEFINE_GAMEPLAY_TAG(ReloadMagazineIn, "GameplayEvent.ReloadMagazineIn");
 	}
 }

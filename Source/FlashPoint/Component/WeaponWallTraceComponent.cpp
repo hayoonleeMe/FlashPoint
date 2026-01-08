@@ -5,6 +5,8 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "FPGameplayTags.h"
+#include "Animation/FPAnimInstance.h"
+#include "GameFramework/Character.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Net/UnrealNetwork.h"
@@ -42,6 +44,12 @@ void UWeaponWallTraceComponent::RetrieveWeaponWallBlockData(bool& bOutIsWeaponWa
 	bOutIsWeaponWallBlocked = bIsWeaponWallBlocked;
 	bOutUseWeaponUp = bUseWeaponUp;
 	OutLocalWallHitLocation = LocalWallHitLocation;
+}
+
+void UWeaponWallTraceComponent::RetrieveWeaponWallBlockData(bool& bOutIsWeaponWallBlocked, bool& bOutUseWeaponUp) const
+{
+	bOutIsWeaponWallBlocked = bIsWeaponWallBlocked;
+	bOutUseWeaponUp = bUseWeaponUp;
 }
 
 void UWeaponWallTraceComponent::BeginPlay()
@@ -82,6 +90,13 @@ void UWeaponWallTraceComponent::TickComponent(float DeltaTime, ELevelTick TickTy
 
 void UWeaponWallTraceComponent::LocalWallTrace(const APawn* Pawn)
 {
+	float AimYaw = 0.f;
+	UFPAnimInstance* AnimInstance = Cast<UFPAnimInstance>(Cast<ACharacter>(Pawn)->GetMesh()->GetAnimInstance());
+	if (AnimInstance)
+	{
+		AimYaw = AnimInstance->GetAimYaw();
+	}
+	
 	const FVector PawnLoc = Pawn->GetActorLocation();
 	const float AimPitch = UKismetMathLibrary::NormalizeAxis(Pawn->GetBaseAimRotation().Pitch);
 
@@ -91,10 +106,13 @@ void UWeaponWallTraceComponent::LocalWallTrace(const APawn* Pawn)
 	// 시점이 위, 아래인 경우 Length 보정
 	const float WallTraceLength = EquippedWeapon->GetWallTraceLength() * FMath::GetMappedRangeValueClamped({ 0.f, 90.f }, WallTraceLengthMultiplierOutRange, FMath::Abs(AimPitch));
 	// 시점을 따라 Trace
-	const FVector End = Start + Pawn->GetControlRotation().Vector() * WallTraceLength;
+	const float ForwardYaw = UKismetMathLibrary::NormalizeAxis(Pawn->GetControlRotation().Yaw) - AimYaw;
+	const FVector ForwardVector = FRotator(0.f, ForwardYaw, 0.f).Vector();
+	//const FVector End = Start + Pawn->GetControlRotation().Vector() * WallTraceLength;
+	const FVector End = Start + ForwardVector * WallTraceLength;
 
 	FHitResult HitResult;
-	const bool bNewIsWeaponWallBlocked = UKismetSystemLibrary::SphereTraceSingleForObjects(Pawn, Start, End, WallTraceRadius, WallTraceObjectTypes, false, {}, EDrawDebugTrace::None, HitResult, true);
+	const bool bNewIsWeaponWallBlocked = UKismetSystemLibrary::SphereTraceSingleForObjects(Pawn, Start, End, WallTraceRadius, WallTraceObjectTypes, false, {}, EDrawDebugTrace::ForOneFrame, HitResult, true);
 
 	const bool bNewUseWeaponUp = AimPitch > WeaponUpPitchThreshold;
 
@@ -105,28 +123,60 @@ void UWeaponWallTraceComponent::LocalWallTrace(const APawn* Pawn)
 	}
 	else
 	{
-		if (bUseWeaponUp != bNewUseWeaponUp)
+		if (bIsWeaponWallBlocked != bNewIsWeaponWallBlocked)
 		{
-			// Weapon Block 방향이 바뀔 경우 총이 반대로 이동하기 위한 공간이 필요하므로 이를 체크하는 Trace 수행
-			// 실제 Sweep을 수행하는 대신 간소화해 총구 전방에서 Wall Trace 끝 지점을 향한 Trace 수행
-			const float SpaceTraceForwardOffset = UKismetMathLibrary::MapRangeClamped(FMath::Abs(AimPitch), 0.f, 90.f, 0.f, EquippedWeapon->GetWallTraceLength() * 0.5f);
-			const FVector SpaceTraceStart = EquippedWeapon->GetWeaponTargetingSourceLocation() + Pawn->GetActorForwardVector() * SpaceTraceForwardOffset;
-			const FVector SpaceTraceEnd = bNewIsWeaponWallBlocked ? HitResult.ImpactPoint : HitResult.TraceEnd;
-			FHitResult SpaceTraceHitResult;
-			const bool bSpaceTraceHit = UKismetSystemLibrary::SphereTraceSingleForObjects(Pawn, SpaceTraceStart, SpaceTraceEnd, WallTraceRadius, WallTraceObjectTypes, false, {}, EDrawDebugTrace::None, SpaceTraceHitResult, true);
-			if (!bSpaceTraceHit)
+			if (AimPitch > 20.f)
+			{
+				// Weapon Block 빠져나갈 때 총이 지나갈 공간이 필요하므로 이를 체크하는 Trace 수행
+				// 실제 Sweep을 수행하는 대신 간소화해 총구 전방에서 Wall Trace 끝 지점을 향한 Trace 수행
+				const float SpaceTraceForwardOffset = UKismetMathLibrary::MapRangeClamped(FMath::Abs(AimPitch), 0.f, 90.f, 0.f, EquippedWeapon->GetWallTraceLength() * 0.5f);
+				const FVector SpaceTraceStart = EquippedWeapon->GetWeaponTargetingSourceLocation() + Pawn->GetActorForwardVector() * SpaceTraceForwardOffset;
+				const FVector SpaceTraceEnd = bNewIsWeaponWallBlocked ? HitResult.ImpactPoint : HitResult.TraceEnd;
+				FHitResult SpaceTraceHitResult;
+				const bool bSpaceTraceHit = UKismetSystemLibrary::SphereTraceSingleForObjects(Pawn, SpaceTraceStart, SpaceTraceEnd, WallTraceRadius, WallTraceObjectTypes, false, {}, EDrawDebugTrace::None, SpaceTraceHitResult, true);
+				if (!bSpaceTraceHit)
+				{
+					SetIsWeaponWallBlocked(bNewIsWeaponWallBlocked);
+					SetUseWeaponUp(bNewUseWeaponUp);
+				}
+			}
+			else
 			{
 				SetIsWeaponWallBlocked(bNewIsWeaponWallBlocked);
 				SetUseWeaponUp(bNewUseWeaponUp);
 			}
 		}
-		else if (bIsWeaponWallBlocked != bNewIsWeaponWallBlocked)
-		{
-			// Weapon Block 방향이 바뀌지 않고 Block 여부만 바뀔 경우 바로 변경 적용
-			SetIsWeaponWallBlocked(bNewIsWeaponWallBlocked);
-			SetUseWeaponUp(bNewUseWeaponUp);
-		}
 	}
+
+	// if (!bIsWeaponWallBlocked)
+	// {
+	// 	SetIsWeaponWallBlocked(bNewIsWeaponWallBlocked);
+	// 	SetUseWeaponUp(bNewUseWeaponUp);
+	// }
+	// else
+	// {
+	// 	if (bUseWeaponUp != bNewUseWeaponUp)
+	// 	{
+	// 		// Weapon Block 방향이 바뀔 경우 총이 반대로 이동하기 위한 공간이 필요하므로 이를 체크하는 Trace 수행
+	// 		// 실제 Sweep을 수행하는 대신 간소화해 총구 전방에서 Wall Trace 끝 지점을 향한 Trace 수행
+	// 		const float SpaceTraceForwardOffset = UKismetMathLibrary::MapRangeClamped(FMath::Abs(AimPitch), 0.f, 90.f, 0.f, EquippedWeapon->GetWallTraceLength() * 0.5f);
+	// 		const FVector SpaceTraceStart = EquippedWeapon->GetWeaponTargetingSourceLocation() + Pawn->GetActorForwardVector() * SpaceTraceForwardOffset;
+	// 		const FVector SpaceTraceEnd = bNewIsWeaponWallBlocked ? HitResult.ImpactPoint : HitResult.TraceEnd;
+	// 		FHitResult SpaceTraceHitResult;
+	// 		const bool bSpaceTraceHit = UKismetSystemLibrary::SphereTraceSingleForObjects(Pawn, SpaceTraceStart, SpaceTraceEnd, WallTraceRadius, WallTraceObjectTypes, false, {}, EDrawDebugTrace::None, SpaceTraceHitResult, true);
+	// 		if (!bSpaceTraceHit)
+	// 		{
+	// 			SetIsWeaponWallBlocked(bNewIsWeaponWallBlocked);
+	// 			SetUseWeaponUp(bNewUseWeaponUp);
+	// 		}
+	// 	}
+	// 	else if (bIsWeaponWallBlocked != bNewIsWeaponWallBlocked)
+	// 	{
+	// 		// Weapon Block 방향이 바뀌지 않고 Block 여부만 바뀔 경우 바로 변경 적용
+	// 		SetIsWeaponWallBlocked(bNewIsWeaponWallBlocked);
+	// 		SetUseWeaponUp(bNewUseWeaponUp);
+	// 	}
+	// }
 
 	if (bIsWeaponWallBlocked && bNewIsWeaponWallBlocked)
 	{
@@ -140,6 +190,8 @@ void UWeaponWallTraceComponent::SetIsWeaponWallBlocked(bool bInIsWeaponWallBlock
 	{
 		bIsWeaponWallBlocked = bInIsWeaponWallBlocked;
 		ServerSetIsWeaponWallBlocked(bIsWeaponWallBlocked);
+
+		WeaponWallBlockDataChangedDelegate.Broadcast(bIsWeaponWallBlocked, bUseWeaponUp);
 
 		if (bIsWeaponWallBlocked)
 		{
@@ -163,6 +215,8 @@ void UWeaponWallTraceComponent::SetUseWeaponUp(bool bInUseWeaponUp)
 	{
 		bUseWeaponUp = bInUseWeaponUp;
 		ServerSetUseWeaponUp(bUseWeaponUp);
+
+		WeaponWallBlockDataChangedDelegate.Broadcast(bIsWeaponWallBlocked, bUseWeaponUp);
 	}
 }
 

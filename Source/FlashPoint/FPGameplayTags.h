@@ -89,6 +89,7 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag IsFiring;
 		extern FNativeGameplayTag IsMoving;
 		extern FNativeGameplayTag FPS;
+		extern FNativeGameplayTag IsReloading;
 	}
 
 	namespace Weapon
@@ -121,5 +122,7 @@ namespace FPGameplayTags
 	namespace GameplayEvent
 	{
 		extern FNativeGameplayTag ReloadFinished;
+		extern FNativeGameplayTag ReloadMagazineOut;
+		extern FNativeGameplayTag ReloadMagazineIn;
 	}
 }

@@ -46,6 +46,7 @@ void UFPAnimInstance::NativeInitializeAnimation()
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsSprinting, &GameplayTag_IsSprinting);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFiring, &GameplayTag_IsFiring);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::FPS, &GameplayTag_FPS);
+	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsReloading, &GameplayTag_IsReloading);
 
 	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwningActor()))
 	{
@@ -115,6 +116,11 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			if (bIsFirstUpdate)
 			{
 				bIsFirstUpdate = false;
+			}
+
+			if (GetWorld() && GetWorld()->IsGameWorld())
+			{
+				//UE_LOG(LogTemp, Warning, TEXT("%hs, WorldRotation.Yaw %f, AimYaw %f, AimPitch %f"), __FUNCTION__, WorldRotation.Yaw, AimYaw, AimPitch);
 			}
 		}
 	}

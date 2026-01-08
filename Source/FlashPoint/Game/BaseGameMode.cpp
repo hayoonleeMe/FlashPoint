@@ -43,6 +43,9 @@ FString ABaseGameMode::InitNewPlayer(APlayerController* NewPlayerController, con
 	// 해당 서버로 접속할 때 사용한 URL의 옵션 데이터를 가져온다.
 	const FString PlayerSessionId = UGameplayStatics::ParseOption(Options, TEXT("PlayerSessionId"));
 	const FString Username = UGameplayStatics::ParseOption(Options, TEXT("Username"));
+	//TODO : For test
+	static int32 DebugCounter = 0;
+	const_cast<FString&>(Username) = FString::Printf(TEXT("Username%d"), DebugCounter++);
 	
 	if (ABasePlayerState* BasePS = NewPlayerController->GetPlayerState<ABasePlayerState>())
 	{
@@ -171,6 +174,13 @@ void ABaseGameMode::BeginPlay()
 		OnlineServiceSubsystem->InitGameLift();
 	}
 
+	// TODO : for test
+	MatchInfo.MatchMode = EMatchMode::FreeForAll;
+	MatchInfo.GoalKillCount = 1000;
+	if (ABaseGameState* BaseGS = GetGameState<ABaseGameState>())
+	{
+		BaseGS->SetMatchInfo(MatchInfo);
+	}
 }
 
 void ABaseGameMode::CacheMatchInfo() const

@@ -18,6 +18,8 @@ class FLASHPOINT_API UAnimNotify_SendGameplayEvent : public UAnimNotify
 public:
 	virtual void Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference) override;
 
+	virtual FString GetNotifyName_Implementation() const override;
+
 	UPROPERTY(EditAnywhere, Category=AnimNotify)
 	FGameplayTag EventTag;
 };
