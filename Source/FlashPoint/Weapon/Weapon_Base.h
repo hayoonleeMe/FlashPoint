@@ -101,16 +101,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Equip")
 	FWeaponEquipInfo EquipInfo;
 
-	void LinkWeaponAnimLayer(bool bUseDefault) const;
-	void PlayOwningCharacterMontage(UAnimMontage* MontageToPlay);
-
-	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
-	void BindMontageEndedDelegate(UAnimMontage* Montage);
-	FOnMontageEnded OnMontageEndedDelegate;
-
-	// 발사를 막는 태그를 업데이트한다.
-	void UpdateFireBlockTag(bool bBlockFire) const;
-
 	// 일정 시간 뒤 무기를 다시 표시할 때 사용
 	FTimerHandle ShowWeaponTimerHandle;
 

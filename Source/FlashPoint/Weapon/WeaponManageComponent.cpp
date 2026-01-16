@@ -4,16 +4,14 @@
 #include "WeaponManageComponent.h"
 
 #include "AbilitySystemComponent.h"
-#include "AbilitySystemGlobals.h"
 #include "FPGameplayTags.h"
 #include "FPLogChannels.h"
 #include "Data/FPAbilitySystemData.h"
+#include "Data/FPCosmeticData.h"
 #include "Data/FPRecoilData.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/PlayerState.h"
 #include "Net/UnrealNetwork.h"
-#include "Player/BasePlayerController.h"
 #include "System/FPAssetManager.h"
 #include "Weapon/Weapon_Base.h"
 
@@ -43,6 +41,12 @@ UWeaponManageComponent::UWeaponManageComponent()
 	AimSpreadFallingOffset = 20.f;
 	AimSpreadCrouchingOffset = -10.f;
 	AimSpreadSprintingOffset = 25.f;
+	
+	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
+	OnMontageEndedDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted)
+	{
+		UpdateFireBlockTag(false);
+	});
 }
 
 void UWeaponManageComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -63,6 +67,11 @@ void UWeaponManageComponent::InitializeComponent()
 	{
 		WeaponSlots.AddDefaulted(NumSlots);
 	}
+}
+
+void UWeaponManageComponent::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)
+{
+	OwnerASC = ASC;
 }
 
 int32 UWeaponManageComponent::GetReserveAmmoStackCount(const AActor* Actor)
@@ -108,6 +117,12 @@ void UWeaponManageComponent::ServerEquipWeaponAtSlot_Implementation(int32 SlotNu
 		return;
 	}
 
+	// Armed -> Unarmed
+	if (EquippedWeapon && !WeaponSlots[SlotNumber - 1])
+	{
+		HandleWeaponEquip(EquippedWeapon, false);
+	}
+	
 	// 현재 무기 장착 중이면 장착 해제
 	UnEquipWeapon(false);
 
@@ -142,6 +157,12 @@ void UWeaponManageComponent::EquipNewWeapon(const TSubclassOf<AWeapon_Base>& Wea
 
 void UWeaponManageComponent::ServerUnEquipWeapon_Implementation()
 {
+	// Armed -> Unarmed
+	if (EquippedWeapon)
+	{
+		HandleWeaponEquip(EquippedWeapon, false);
+	}
+	
 	UnEquipWeapon(true);
 
 	// Equip State 변경을 알림
@@ -153,20 +174,18 @@ void UWeaponManageComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	// caching (only local)
-	ACharacter* Character = GetOwner<ACharacter>();
-	if (Character && Character->IsLocallyControlled())
+	// caching
+	if (ACharacter* Character = GetOwner<ACharacter>())
 	{
 		OwnerCharacter = Character;
+		OwnerCharacterMesh = OwnerCharacter->GetMesh();
 		OwnerCharacterMoveComponent = OwnerCharacter->GetCharacterMovement();
-		if (ABasePlayerController* BasePC = Character->GetController<ABasePlayerController>())
-		{
-			BasePC->OnPlayerStateReplicatedDelegate.AddLambda([this](APlayerState* PS)
-			{
-				OwnerAbilitySystemComponent = UAbilitySystemGlobals::GetAbilitySystemComponentFromActor(PS);
-			});
-		}
 	}
+	
+	// 초기 Anim Layer 설정
+	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));
+	check(CosmeticData);
+	HandleWeaponEquip(nullptr);
 
 	// Bind Callback
 	AmmoTagStacks.OnTagStackChangedDelegate.AddUObject(this, &ThisClass::OnAmmoTagStackChanged);
@@ -216,6 +235,7 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		// Reserve Ammo를 HUD에 업데이트하기 위해 동일한 값으로 설정
 		AmmoTagStacks.AddTagStack(EquippedWeapon->GetWeaponTypeTag(), AmmoTagStacks.GetStackCount(EquippedWeapon->GetWeaponTypeTag()));
 		
+		HandleWeaponEquip(EquippedWeapon, true);
 		EquippedWeapon->OnEquipped();
 
 		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
@@ -251,6 +271,7 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 		// Reserve Ammo를 HUD에 업데이트하기 위해 동일한 값으로 설정
 		AmmoTagStacks.AddTagStack(EquippedWeapon->GetWeaponTypeTag(), AmmoTagStacks.GetStackCount(EquippedWeapon->GetWeaponTypeTag()));
 		
+		HandleWeaponEquip(EquippedWeapon, true);
 		EquippedWeapon->OnEquipped();
 
 		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
@@ -293,6 +314,13 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 {
 	if (IsValid(UnEquippedWeapon))
 	{
+		if (!EquippedWeapon)
+		{
+			// 새롭게 장착한 무기가 없고 장착 해제만 했을 때만 Unarmed로 업데이트
+			// 새로 장착할 무기가 있다면, 새 무기로 덮어씌어지므로 여기선 무시
+			HandleWeaponEquip(UnEquippedWeapon, false);
+		}
+		
 		// 클라이언트에서 장착 해제된 무기 처리
 		UnEquippedWeapon->OnUnEquipped();
 	}
@@ -305,6 +333,8 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 	
 	if (IsValid(EquippedWeapon))
 	{
+		HandleWeaponEquip(EquippedWeapon, true);
+		
 		// 클라이언트에서 장착된 무기 처리
 		EquippedWeapon->OnEquipped();
 
@@ -327,6 +357,82 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 void UWeaponManageComponent::OnRep_WeaponEquipStateUpdateCounter()
 {
 	OnWeaponEquipStateChangedDelegate.Broadcast(ActiveSlotIndex, EquippedWeapon);
+}
+
+void UWeaponManageComponent::HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEquip)
+{
+	if (!OwnerCharacter || !OwnerCharacterMesh)
+	{
+		return;
+	}
+
+	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));
+	check(CosmeticData);
+	
+	TSubclassOf<UAnimInstance> WeaponAnimLayerClass = nullptr;
+	UAnimMontage* WeaponEquipMontage = nullptr;
+	if (Weapon)
+	{
+		const FWeaponEquipInfo& WeaponEquipInfo = Weapon->GetEquipInfo();
+		WeaponAnimLayerClass = bIsEquip ? CosmeticData->SelectAnimLayer(WeaponEquipInfo.CosmeticTags) : CosmeticData->GetDefaultAnimLayer();
+		WeaponEquipMontage = bIsEquip ? WeaponEquipInfo.EquipMontage : WeaponEquipInfo.UnEquipMontage;
+	}
+	else
+	{
+		WeaponAnimLayerClass = CosmeticData->GetDefaultAnimLayer();
+	}
+
+	if (!WeaponAnimLayerClass)
+	{
+		return;
+	}
+	
+	if (CurrentWeaponAnimLayerClass)
+	{
+		// 기존에 장착한 무기의 Anim Layer 제거
+		OwnerCharacterMesh->UnlinkAnimClassLayers(CurrentWeaponAnimLayerClass);
+	}
+	
+	// 새로 장착한 무기의 Anim Layer로 업데이트
+	CurrentWeaponAnimLayerClass = WeaponAnimLayerClass;
+	OwnerCharacterMesh->LinkAnimClassLayers(CurrentWeaponAnimLayerClass);
+	
+	// 몽타주 재생
+	if (WeaponEquipMontage)
+	{
+		OwnerCharacter->PlayAnimMontage(WeaponEquipMontage);
+		
+		// 장착 중 무기 발사를 막고, 몽타주가 종료되면 다시 허용하도록
+		BindMontageEndedDelegate(WeaponEquipMontage);
+		UpdateFireBlockTag(true);
+	}
+}
+
+void UWeaponManageComponent::BindMontageEndedDelegate(UAnimMontage* Montage)
+{
+	if (OwnerCharacterMesh)
+	{
+		if (UAnimInstance* AnimInstance = OwnerCharacterMesh->GetAnimInstance())
+		{
+			// Weak Lambda to call UpdateFireBlockTag(false)
+			AnimInstance->Montage_SetEndDelegate(OnMontageEndedDelegate, Montage);
+		}
+	}
+}
+
+void UWeaponManageComponent::UpdateFireBlockTag(bool bBlockFire) const
+{
+	if (OwnerASC)
+	{
+		if (bBlockFire)
+		{
+			OwnerASC->AddLooseGameplayTag(FPGameplayTags::Weapon::NoFire);
+		}
+		else
+		{
+			OwnerASC->RemoveLooseGameplayTag(FPGameplayTags::Weapon::NoFire);
+		}
+	}
 }
 
 void UWeaponManageComponent::OnAmmoTagStackChanged(const FGameplayTag& Tag, int32 StackCount)
@@ -446,7 +552,7 @@ float UWeaponManageComponent::CalculateAimSpreadMovementOffset() const
 		}
 
 		// Sprinting
-		if (OwnerAbilitySystemComponent && OwnerAbilitySystemComponent->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsSprinting))
+		if (OwnerASC && OwnerASC->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsSprinting))
 		{
 			MovementOffset += AimSpreadSprintingOffset;
 		}

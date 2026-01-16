@@ -27,6 +27,11 @@ void UFPAbilitySystemComponent::InitAbilityActorInfo(AActor* InOwnerActor, AActo
 		{
 			FPAnimInstance->InitializeWithAbilitySystem(this);
 		}
+		
+		if (UWeaponManageComponent* WeaponManageComponent = InAvatarActor->FindComponentByClass<UWeaponManageComponent>())
+		{
+			WeaponManageComponent->InitializeWithAbilitySystem(this);
+		}
 	}
 }
 
