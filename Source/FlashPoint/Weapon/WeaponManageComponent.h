@@ -40,6 +40,8 @@ public:
 	UWeaponManageComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void InitializeComponent() override;
+	
+	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
 
 	AWeapon_Base* GetEquippedWeapon() const { return EquippedWeapon; }
 
@@ -115,6 +117,17 @@ private:
 
 	UFUNCTION()
 	void OnRep_WeaponEquipStateUpdateCounter();
+	
+	// 캐릭터에 적용할 무기 장착 로직을 처리한다.
+	// WeaponAnimLayer를 연결하고 WeaponEquipMontage를 재생한다.
+	void HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEquip = false);
+	
+	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
+	void BindMontageEndedDelegate(UAnimMontage* Montage);
+	FOnMontageEnded OnMontageEndedDelegate;
+
+	// 발사를 막는 태그를 업데이트한다.
+	void UpdateFireBlockTag(bool bBlockFire) const;
 
 	// ============================================================================
 	// Tag Stacks
@@ -158,12 +171,19 @@ public:
 private:
 	UPROPERTY()
 	TObjectPtr<ACharacter> OwnerCharacter;
+	
+	UPROPERTY()
+	TObjectPtr<USkeletalMeshComponent> OwnerCharacterMesh;
 
 	UPROPERTY()
 	TObjectPtr<UCharacterMovementComponent> OwnerCharacterMoveComponent;
 
+	// 서버와 클라에서 InitializeWithAbilitySystem()에 의해 캐싱된다.
 	UPROPERTY()
-	TObjectPtr<UAbilitySystemComponent> OwnerAbilitySystemComponent;
+	TObjectPtr<UAbilitySystemComponent> OwnerASC;
+	
+	UPROPERTY()
+	TSubclassOf<UAnimInstance> CurrentWeaponAnimLayerClass;
 
 	// 현재 장착한 무기의 RecoilData
 	UPROPERTY()

@@ -166,12 +166,6 @@ void AFPCharacter::SetCharacterMesh()
 			}
 		}
 	}
-	
-	// Anim Layer
-	if (UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance())
-	{
-		AnimInstance->LinkAnimClassLayers(CosmeticData->GetDefaultAnimLayer());
-	}
 }
 
 void AFPCharacter::InitAbilitySystem()
