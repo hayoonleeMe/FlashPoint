@@ -32,8 +32,8 @@ public:
 	UFPAbilitySystemComponent* GetFPAbilitySystemComponent() const;
 	UFPAttributeSet* GetFPAttributeSet() const;
 
-	// 입력을 통해 캐릭터가 움직이는지 반환
-	bool IsMovingFromInput() const;
+	// 입력을 통해 캐릭터가 전방으로 움직이는지 반환
+	bool IsMovingForwardFromInput() const;
 
 	// Crouch 체크 무시하도록 오버라이드
 	virtual bool CanJumpInternal_Implementation() const override;
@@ -42,8 +42,8 @@ protected:
 	// 캐릭터 메시를 설정한다.
 	void SetCharacterMesh();
 
-	// 이전 프레임에서 캐릭터가 입력에 의해 움직였는지
-	bool bWasMovingFromInput = false;
+	// 이전 프레임에서 캐릭터가 입력에 의해 전방으로 움직였는지
+	bool bWasMovingForwardFromInput = false;
 
 	// ============================================================================
 	// Ability System
