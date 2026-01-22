@@ -11,6 +11,8 @@
 UFPCharacterMovementComponent::UFPCharacterMovementComponent()
 {
 	GroundTraceDistance = 100000.f;
+	
+	SprintSpeedMultiplier = 1.5f;
 }
 
 bool UFPCharacterMovementComponent::CanAttemptJump() const
@@ -55,4 +57,97 @@ float UFPCharacterMovementComponent::GetGroundDistance() const
 	}
 	
 	return GroundDistance;
+}
+
+void UFPCharacterMovementComponent::FFPSavedMove::Clear()
+{
+	Super::Clear();
+	
+	bWantsToSprint = false;
+}
+
+void UFPCharacterMovementComponent::FFPSavedMove::SetMoveFor(ACharacter* C, float InDeltaTime, FVector const& NewAccel,
+	class FNetworkPredictionData_Client_Character& ClientData)
+{
+	Super::SetMoveFor(C, InDeltaTime, NewAccel, ClientData);
+	
+	if (UFPCharacterMovementComponent* CharacterMovement = C->GetCharacterMovement<UFPCharacterMovementComponent>())
+	{
+		bWantsToSprint = CharacterMovement->bWantsToSprint;
+	}
+}
+
+bool UFPCharacterMovementComponent::FFPSavedMove::CanCombineWith(const FSavedMovePtr& NewMovePtr, ACharacter* InCharacter, float MaxDelta) const
+{
+	const FFPSavedMove* NewMove = static_cast<FFPSavedMove*>(NewMovePtr.Get());
+	
+	if (bWantsToSprint != NewMove->bWantsToSprint)
+	{
+		return false;
+	}
+	
+	return Super::CanCombineWith(NewMovePtr, InCharacter, MaxDelta);
+}
+
+uint8 UFPCharacterMovementComponent::FFPSavedMove::GetCompressedFlags() const
+{
+	uint8 Result = Super::GetCompressedFlags(); 
+	
+	if (bWantsToSprint)
+	{
+		Result |= FLAG_Custom_0;
+	}
+	
+	return Result;
+}
+
+UFPCharacterMovementComponent::FFPNetworkPredictionData_Client::FFPNetworkPredictionData_Client(const UCharacterMovementComponent& ClientMovement)
+	: Super(ClientMovement)
+{
+}
+
+FSavedMovePtr UFPCharacterMovementComponent::FFPNetworkPredictionData_Client::AllocateNewMove()
+{
+	return FSavedMovePtr(new FFPSavedMove());
+}
+
+void UFPCharacterMovementComponent::StartSprint()
+{
+	bWantsToSprint = true;
+}
+
+void UFPCharacterMovementComponent::StopSprint()
+{
+	bWantsToSprint = false;
+}
+
+float UFPCharacterMovementComponent::GetMaxSpeed() const
+{
+	float MaxSpeed = Super::GetMaxSpeed();
+	
+	if (bWantsToSprint)
+	{
+		MaxSpeed *= SprintSpeedMultiplier;
+	}
+	
+	return MaxSpeed;
+}
+
+FNetworkPredictionData_Client* UFPCharacterMovementComponent::GetPredictionData_Client() const
+{
+	if (!ClientPredictionData)
+	{
+		UFPCharacterMovementComponent* MutableThis = const_cast<UFPCharacterMovementComponent*>(this);
+		MutableThis->ClientPredictionData = new FFPNetworkPredictionData_Client(*this);
+	}
+	return ClientPredictionData;
+}
+
+void UFPCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
+{
+	Super::UpdateFromCompressedFlags(Flags);
+	
+	// FSavedMove_Client에 압축되어 저장된 입력 Flag를 Character Movement Component로 가져온다.
+	// 이를 통해 이동 속도를 결정할 상태를 업데이트한다.
+	bWantsToSprint = (Flags & FSavedMove_Character::FLAG_Custom_0) != 0;
 }
