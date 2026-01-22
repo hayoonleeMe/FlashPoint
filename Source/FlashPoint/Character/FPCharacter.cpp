@@ -73,23 +73,23 @@ void AFPCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	const bool bIsMovingFromInput = IsMovingFromInput();
-	if (AbilitySystemComponent && bIsMovingFromInput != bWasMovingFromInput)
+	const bool bIsMovingForwardFromInput = IsMovingForwardFromInput();
+	if (AbilitySystemComponent && bIsMovingForwardFromInput != bWasMovingForwardFromInput)
 	{
-		// 캐릭터 움직임 여부에 따라 IsMoving 태그 업데이트
-		if (bIsMovingFromInput)
+		// 캐릭터 움직임 여부에 따라 IsMovingForwardFromInput 태그 업데이트
+		if (bIsMovingForwardFromInput)
 		{
-			AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsMoving);
+			AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsMovingForwardFromInput);
 		}
 		else
 		{
-			AbilitySystemComponent->RemoveLooseGameplayTag(FPGameplayTags::CharacterState::IsMoving);
+			AbilitySystemComponent->RemoveLooseGameplayTag(FPGameplayTags::CharacterState::IsMovingForwardFromInput);
 		}
+		bWasMovingForwardFromInput = bIsMovingForwardFromInput;
 	}
-	bWasMovingFromInput = bIsMovingFromInput;
 
 	TargetCameraHeight = BaseEyeHeight * 2.f;
-	if (bIsCrouched && bWasMovingFromInput)
+	if (bIsCrouched && GetVelocity().SizeSquared2D() > 0.f)
 	{
 		// Crouch + Walk 하면 캐릭터가 살짝 일어나서 걸으므로 카메라 위치도 높여준다.
 		TargetCameraHeight += 20.f;
@@ -129,9 +129,10 @@ UFPAttributeSet* AFPCharacter::GetFPAttributeSet() const
 	return AttributeSet;
 }
 
-bool AFPCharacter::IsMovingFromInput() const
+bool AFPCharacter::IsMovingForwardFromInput() const
 {
-	return GetVelocity().Size2D() > 0.f && GetCharacterMovement()->GetCurrentAcceleration() != FVector::ZeroVector;
+	const FVector Acceleration = GetCharacterMovement()->GetCurrentAcceleration().GetSafeNormal();
+	return FVector::DotProduct(Acceleration, GetActorForwardVector()) > 0.5f;
 }
 
 bool AFPCharacter::CanJumpInternal_Implementation() const
