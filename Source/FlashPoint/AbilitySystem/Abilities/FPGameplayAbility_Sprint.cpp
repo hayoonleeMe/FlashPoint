@@ -62,9 +62,12 @@ void UFPGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle
 		WaitTagRemoved->ReadyForActivation();
 	}
 	
-	if (UFPCharacterMovementComponent* CharacterMovement = Cast<UFPCharacterMovementComponent>(ActorInfo->MovementComponent.Get()))
+	if (IsLocallyControlled())
 	{
-		CharacterMovement->StartSprint();
+		if (UFPCharacterMovementComponent* CharacterMovement = Cast<UFPCharacterMovementComponent>(ActorInfo->MovementComponent.Get()))
+		{
+			CharacterMovement->StartSprint();
+		}
 	}
 }
 
