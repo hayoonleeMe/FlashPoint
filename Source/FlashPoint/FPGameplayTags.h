@@ -34,6 +34,9 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag SMG;
 			extern FNativeGameplayTag SniperRifle;
 		}
+		
+		extern FNativeGameplayTag InputData;		
+		extern FNativeGameplayTag CosmeticData;		
 	}
 	
 	namespace Input

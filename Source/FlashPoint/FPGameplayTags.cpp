@@ -32,6 +32,9 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(SMG, "Asset.AbilitySystemData.SMG");
 			UE_DEFINE_GAMEPLAY_TAG(SniperRifle, "Asset.AbilitySystemData.SniperRifle");
 		}
+		
+		UE_DEFINE_GAMEPLAY_TAG(InputData, "Asset.InputData");
+		UE_DEFINE_GAMEPLAY_TAG(CosmeticData, "Asset.CosmeticData");
 	}
 	
 	namespace Input

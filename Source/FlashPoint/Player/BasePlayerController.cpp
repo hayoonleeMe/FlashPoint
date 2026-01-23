@@ -38,7 +38,7 @@ void ABasePlayerController::SetUIInputMode()
 	SetShowMouseCursor(true);
 
 	// UI Input
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
 	check(InputData);
 
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
@@ -71,7 +71,7 @@ void ABasePlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
 	check(InputData);
 
 	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);

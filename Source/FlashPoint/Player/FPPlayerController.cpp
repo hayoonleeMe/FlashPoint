@@ -26,7 +26,7 @@ void AFPPlayerController::SetUIInputMode()
 {
 	Super::SetUIInputMode();
 
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
 	check(InputData);
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
@@ -45,7 +45,7 @@ void AFPPlayerController::SetGameplayInputMode()
 {
 	Super::SetGameplayInputMode();
 
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
 	check(InputData);
 	
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
@@ -64,7 +64,7 @@ void AFPPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	const UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
 	check(InputData);
 
 	UFPInputComponent* FPInputComponent = CastChecked<UFPInputComponent>(InputComponent);
