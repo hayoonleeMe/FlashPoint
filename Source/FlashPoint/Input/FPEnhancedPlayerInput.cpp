@@ -4,6 +4,7 @@
 #include "FPEnhancedPlayerInput.h"
 
 #include "EnhancedActionKeyMapping.h"
+#include "FPGameplayTags.h"
 #include "Data/FPInputData.h"
 #include "System/FPAssetManager.h"
 
@@ -14,7 +15,7 @@ void UFPEnhancedPlayerInput::FlushPressedInput(const FGameplayTag& InputTag)
 	UWorld* World = GetWorld();
 	check(World);
 	
-	UFPInputData* InputData = UFPAssetManager::GetAssetById<UFPInputData>(TEXT("InputData"));
+	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
 	check(InputData);
 
 	const UInputAction* InputAction = InputData->FindAbilityInputActionForInputTag(InputTag);

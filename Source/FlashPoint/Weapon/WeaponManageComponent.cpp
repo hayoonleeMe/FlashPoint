@@ -183,7 +183,7 @@ void UWeaponManageComponent::BeginPlay()
 	}
 	
 	// 초기 Anim Layer 설정
-	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));
+	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetByTag<UFPCosmeticData>(FPGameplayTags::Asset::CosmeticData);
 	check(CosmeticData);
 	HandleWeaponEquip(nullptr);
 
@@ -366,7 +366,7 @@ void UWeaponManageComponent::HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEqu
 		return;
 	}
 
-	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));
+	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetByTag<UFPCosmeticData>(FPGameplayTags::Asset::CosmeticData);
 	check(CosmeticData);
 	
 	TSubclassOf<UAnimInstance> WeaponAnimLayerClass = nullptr;

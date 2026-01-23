@@ -143,7 +143,7 @@ bool AFPCharacter::CanJumpInternal_Implementation() const
 
 void AFPCharacter::SetCharacterMesh()
 {
-	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetById<UFPCosmeticData>(TEXT("CosmeticData"));
+	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetByTag<UFPCosmeticData>(FPGameplayTags::Asset::CosmeticData);
 	check(CosmeticData);
 
 	// Initialize Player Skeletal Mesh Component
