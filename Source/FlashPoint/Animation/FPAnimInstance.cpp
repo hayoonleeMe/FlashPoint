@@ -88,7 +88,7 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			
 			Velocity = MoveComponent->Velocity;
 			GroundSpeed = Velocity.Size2D();
-			DirectionAngle = UKismetAnimationLibrary::CalculateDirection(Velocity, WorldRotation);
+			DirectionAngle = UKismetAnimationLibrary::CalculateDirection(MoveComponent->GetCurrentAcceleration(), WorldRotation);
 			
 			bShouldMove = GroundSpeed > 0.f && MoveComponent->GetCurrentAcceleration() != FVector::ZeroVector;
 			bIsOnGround = MoveComponent->IsMovingOnGround();
@@ -156,7 +156,7 @@ void UFPAnimInstance::UpdateCurrentDirection()
 	float BwdDeadZone = CardinalDirectionDeadZone;
 
 	// Was Moving
-	if (Velocity.Size2D() > 0.f)
+	if (GroundSpeed > 0.f)
 	{
 		// 앞 또는 뒤로 이동 중이면 진행 방향을 벗어나기 힘들도록 DeadZone을 키움
 		switch (CurrentDirection)
