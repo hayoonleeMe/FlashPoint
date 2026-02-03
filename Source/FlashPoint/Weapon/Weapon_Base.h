@@ -80,6 +80,8 @@ public:
 
 	// 로컬에서 캐릭터가 장착 중인 무기의 Weapon Fire Effects를 트리거
 	void TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& ImpactPoints, const TArray<FVector_NetQuantize>& EndPoints);
+
+	FVector GetFirstPersonRightHandOffset() const;
 	
 protected:
 	UPROPERTY(VisibleAnywhere)
@@ -149,6 +151,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	FName LeftHandAttachSocketName;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FVector FirstPersonRightHandOffset;
 
 	// 현재 탄창에 남은 총알 수
 	// 서버에서만 유효하다.

@@ -224,11 +224,17 @@ void AFPCharacter::ToggleCamera() const
 		// FPS -> TPS
 		FirstPersonCameraComponent->Deactivate();
 		ThirdPersonCameraComponent->Activate();
+		
+		// local only
+		AbilitySystemComponent->RemoveLooseGameplayTag(FPGameplayTags::CharacterState::IsFirstPerson);
 	}
 	else
 	{
 		// TPS -> FPS
 		ThirdPersonCameraComponent->Deactivate();
 		FirstPersonCameraComponent->Activate();
+		
+		// local only
+		AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsFirstPerson);
 	}
 }

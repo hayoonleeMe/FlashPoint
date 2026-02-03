@@ -90,6 +90,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(IsSprinting, "CharacterState.IsSprinting");
 		UE_DEFINE_GAMEPLAY_TAG(IsFiring, "CharacterState.IsFiring");
 		UE_DEFINE_GAMEPLAY_TAG(IsMovingForwardFromInput, "CharacterState.IsMovingForwardFromInput");
+		UE_DEFINE_GAMEPLAY_TAG(IsFirstPerson, "CharacterState.IsFirstPerson");
 	}
 
 	namespace Weapon

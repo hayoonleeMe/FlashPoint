@@ -44,6 +44,7 @@ void UFPAnimInstance::NativeInitializeAnimation()
 	// GameplayTag Property
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsSprinting, &GameplayTag_IsSprinting);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFiring, &GameplayTag_IsFiring);
+	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFirstPerson, &GameplayTag_IsFirstPerson);
 
 	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwningActor()))
 	{
@@ -128,6 +129,9 @@ void UFPAnimInstance::UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon)
 		// Caching Relative Left Hand Attach Transform
 		const FTransform WeaponAttachWorld = EquippedWeapon->GetLeftHandAttachTransform();
 		SKM->TransformToBoneSpace(TEXT("weapon_r"), WeaponAttachWorld.GetLocation(), WeaponAttachWorld.Rotator(), LeftHandAttachLocation, LeftHandAttachRotation);
+		
+		// Caching First Person Right Hand Offset
+		FirstPersonRightHandOffset = EquippedWeapon->GetFirstPersonRightHandOffset();
 	}
 }
 
@@ -163,6 +167,8 @@ void UFPAnimInstance::UpdateAimingData(float DeltaSeconds, const ACharacter* Cha
 		// SimulatedProxy에선 Character->GetBaseAimRotation().Pitch의 간극이 크므로(APawn::RemoteViewPitch를 사용하기 때문), Interpolate
 		AimPitch = FMath::FInterpTo(AimPitch, UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch), DeltaSeconds, RemoteAimPitchInterpSpeed);
 	}
+	
+	FirstPersonPitch = -AimPitch;
 }
 
 void UFPAnimInstance::UpdateCurrentDirection()

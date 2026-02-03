@@ -95,6 +95,11 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 	}
 }
 
+FVector AWeapon_Base::GetFirstPersonRightHandOffset() const
+{
+	return FirstPersonRightHandOffset;
+}
+
 float AWeapon_Base::GetDamageByDistance(float Distance) const
 {
 	if (DamageFallOffCurve)

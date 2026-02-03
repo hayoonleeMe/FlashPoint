@@ -52,6 +52,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GameplayTag_IsFiring;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsFirstPerson;
 
 	TMap<FGameplayTag, bool*> TagToPropertyMap;
 	
@@ -121,6 +124,12 @@ protected:
 	// SimulatedProxy에서 AimPitch를 계산할 때 적용할 Interpolation Speed
 	UPROPERTY(EditAnywhere)
 	float RemoteAimPitchInterpSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float FirstPersonPitch;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector FirstPersonRightHandOffset;
 
 	void UpdateAimingData(float DeltaSeconds, const ACharacter* Character);
 
