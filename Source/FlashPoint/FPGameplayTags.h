@@ -54,6 +54,7 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag Scoreboard;
 			extern FNativeGameplayTag Sprint;
 			extern FNativeGameplayTag Reload;
+			extern FNativeGameplayTag ToggleCamera;
 
 			namespace QuickSlot
 			{
@@ -78,6 +79,7 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag Crouch;
 		extern FNativeGameplayTag Reload;
 		extern FNativeGameplayTag DryFire;
+		extern FNativeGameplayTag ToggleCamera;
 
 		namespace Fail
 		{

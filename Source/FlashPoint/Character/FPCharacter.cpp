@@ -92,15 +92,19 @@ void AFPCharacter::Tick(float DeltaSeconds)
 		bWasMovingForwardFromInput = bIsMovingForwardFromInput;
 	}
 
-	TargetCameraHeight = BaseEyeHeight * 2.f;
-	if (bIsCrouched && GetVelocity().SizeSquared2D() > 0.f)
+	// 3인칭 카메라 높이 보간
+	if (ThirdPersonCameraComponent->IsActive())
 	{
-		// Crouch + Walk 하면 캐릭터가 살짝 일어나서 걸으므로 카메라 위치도 높여준다.
-		TargetCameraHeight += 20.f;
+		TargetCameraHeight = BaseEyeHeight * 2.f;
+        if (bIsCrouched && GetVelocity().SizeSquared2D() > 0.f)
+        {
+        	// Crouch + Walk 하면 캐릭터가 살짝 일어나서 걸으므로 카메라 위치도 높여준다.
+        	TargetCameraHeight += 20.f;
+        }
+        CurrentCameraHeight = FMath::FInterpTo(CurrentCameraHeight, TargetCameraHeight, DeltaSeconds, 7.f);
+        const FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
+        SpringArmComponent->SetRelativeLocation(FVector(CameraLocation.X, CameraLocation.Y, CurrentCameraHeight));	
 	}
-	CurrentCameraHeight = FMath::FInterpTo(CurrentCameraHeight, TargetCameraHeight, DeltaSeconds, 7.f);
-	const FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
-	SpringArmComponent->SetRelativeLocation(FVector(CameraLocation.X, CameraLocation.Y, CurrentCameraHeight));
 }
 
 void AFPCharacter::PossessedBy(AController* NewController)
@@ -205,5 +209,26 @@ void AFPCharacter::RemoveAbilitySystemData(const FGameplayTag& DataTag)
 	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
 	{
 		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent);
+	}
+}
+
+void AFPCharacter::ToggleCamera() const
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+	
+	if (FirstPersonCameraComponent->IsActive())
+	{
+		// FPS -> TPS
+		FirstPersonCameraComponent->Deactivate();
+		ThirdPersonCameraComponent->Activate();
+	}
+	else
+	{
+		// TPS -> FPS
+		ThirdPersonCameraComponent->Deactivate();
+		FirstPersonCameraComponent->Activate();
 	}
 }

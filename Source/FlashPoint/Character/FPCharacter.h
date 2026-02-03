@@ -90,6 +90,9 @@ protected:
 	TObjectPtr<UCameraComponent> FirstPersonCameraComponent;
 	
 public:
+	// 카메라를 전환한다. (1인칭 - 3인칭)
+	void ToggleCamera() const;
+	
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 	// ============================================================================

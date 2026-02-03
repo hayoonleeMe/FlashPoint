@@ -52,6 +52,7 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Scoreboard, "Input.Gameplay.Scoreboard");
 			UE_DEFINE_GAMEPLAY_TAG(Sprint, "Input.Gameplay.Sprint");
 			UE_DEFINE_GAMEPLAY_TAG(Reload, "Input.Gameplay.Reload");
+			UE_DEFINE_GAMEPLAY_TAG(ToggleCamera, "Input.Gameplay.ToggleCamera");
 
 			namespace QuickSlot
 			{
@@ -76,6 +77,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(Crouch, "Ability.Crouch");
 		UE_DEFINE_GAMEPLAY_TAG(Reload, "Ability.Reload");
 		UE_DEFINE_GAMEPLAY_TAG(DryFire, "Ability.DryFire");
+		UE_DEFINE_GAMEPLAY_TAG(ToggleCamera, "Ability.ToggleCamera");
 
 		namespace Fail
 		{
