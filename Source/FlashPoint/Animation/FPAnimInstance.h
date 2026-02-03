@@ -34,7 +34,6 @@ class FLASHPOINT_API UFPAnimInstance : public UAnimInstance
 public:
 	UFPAnimInstance();
 	virtual void NativeInitializeAnimation() override;
-	virtual void NativePostEvaluateAnimation() override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
@@ -143,16 +142,27 @@ protected:
 
 	void UpdateBlendWeight(float DeltaSeconds, const AWeapon_Base* EquippedWeapon);
 
-	// 왼손을 무기에 부착할 Transform (Only Translation)
-	// Character Mesh의 hand_r 기준
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FTransform LeftHandModifyTransform;
-
 	// 왼손을 무기에 부착할지를 결정하는 Alpha
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float LeftHandModifyAlpha;
+	float LeftHandAttachAlpha;
+	
+	UPROPERTY(EditAnywhere)
+	FName DisableLeftHandIKCurveName;
 
-	void UpdateLeftHandModifyTransform();
+	// 왼손을 무기에 부착할 위치
+	// Character Mesh의 weapon_r bone 기준
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector LeftHandAttachLocation;
+
+	// 왼손을 무기에 부착할 회전값
+	// Character Mesh의 weapon_r bone 기준
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRotator LeftHandAttachRotation;
+
+	UPROPERTY(EditAnywhere)
+	float LeftHandAttachDataInterpSpeed;
+
+	void UpdateLeftHandAttachData(float DeltaSeconds, const AWeapon_Base* EquippedWeapon);
 
 	// TurnInPlace가 Blend Out 상태인지 여부
 	// Idle State 일 때 false로 설정되고, 그 외에는 true이다.

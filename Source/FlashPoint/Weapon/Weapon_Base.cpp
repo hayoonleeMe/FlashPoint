@@ -25,7 +25,7 @@ AWeapon_Base::AWeapon_Base()
 	BulletsPerCartridge = 1;
 	HeadShotMultiplier = 1.f;
 
-	LeftHandAttachSocketName = TEXT("LeftHandSocket");
+	LeftHandAttachSocketName = TEXT("LeftHandAttach");
 }
 
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
