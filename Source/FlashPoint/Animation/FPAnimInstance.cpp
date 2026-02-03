@@ -60,8 +60,10 @@ void UFPAnimInstance::RegisterGameplayTagWithProperty(UAbilitySystemComponent* A
 	check(ASC);
 
 	FOnGameplayEffectTagCountChanged::FDelegate Delegate = FOnGameplayEffectTagCountChanged::FDelegate::CreateUObject(this, &ThisClass::GameplayTagEventCallback);
-	ASC->RegisterAndCallGameplayTagEvent(FPGameplayTags::CharacterState::IsSprinting, Delegate);
-	ASC->RegisterAndCallGameplayTagEvent(FPGameplayTags::CharacterState::IsFiring, Delegate);
+	for (const auto& Pair: TagToPropertyMap)
+	{
+		ASC->RegisterAndCallGameplayTagEvent(Pair.Key, Delegate);
+	}
 }
 
 void UFPAnimInstance::GameplayTagEventCallback(const FGameplayTag Tag, int32 NewCount)
