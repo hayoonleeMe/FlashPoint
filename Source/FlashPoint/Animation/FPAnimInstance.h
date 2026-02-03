@@ -117,8 +117,12 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AimPitch;
+	
+	// SimulatedProxy에서 AimPitch를 계산할 때 적용할 Interpolation Speed
+	UPROPERTY(EditAnywhere)
+	float RemoteAimPitchInterpSpeed;
 
-	void UpdateAimingData(const ACharacter* Character);
+	void UpdateAimingData(float DeltaSeconds, const ACharacter* Character);
 
 	// 캐릭터가 이동할 방향
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)

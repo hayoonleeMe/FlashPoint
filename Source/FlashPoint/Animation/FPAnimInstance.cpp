@@ -21,6 +21,7 @@ const FVector2D UFPAnimInstance::LandRecoveryAlphaOutRange = { 0.f, 1.f };
 UFPAnimInstance::UFPAnimInstance()
 {
 	JumpDistanceCurveName = TEXT("GroundDistance");
+	RemoteAimPitchInterpSpeed = 15.f;
 	CardinalDirectionDeadZone = 10.f;
 	DisableLeftHandIKCurveName = TEXT("DisableLeftHandIK");
 	LeftHandAttachDataInterpSpeed = 15.f;
@@ -102,7 +103,7 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			const AWeapon_Base* EquippedWeapon = EquippedWeaponWeakPtr.Get();
 
 			UpdateJumpData(DeltaSeconds, MoveComponent);
-			UpdateAimingData(Character);
+			UpdateAimingData(DeltaSeconds, Character);
 			UpdateCurrentDirection();
 			UpdateBlendWeight(DeltaSeconds, EquippedWeapon);
 			UpdateLeftHandAttachData(DeltaSeconds, EquippedWeapon);
@@ -151,9 +152,17 @@ void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UFPCharacterMovem
 	GroundDistance = MoveComponent->GetGroundDistance();
 }
 
-void UFPAnimInstance::UpdateAimingData(const ACharacter* Character)
+void UFPAnimInstance::UpdateAimingData(float DeltaSeconds, const ACharacter* Character)
 {
-	AimPitch = UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch);
+	if (Character->IsLocallyControlled())
+	{
+		AimPitch = UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch);
+	}
+	else
+	{
+		// SimulatedProxy에선 Character->GetBaseAimRotation().Pitch의 간극이 크므로(APawn::RemoteViewPitch를 사용하기 때문), Interpolate
+		AimPitch = FMath::FInterpTo(AimPitch, UKismetMathLibrary::NormalizeAxis(Character->GetBaseAimRotation().Pitch), DeltaSeconds, RemoteAimPitchInterpSpeed);
+	}
 }
 
 void UFPAnimInstance::UpdateCurrentDirection()
