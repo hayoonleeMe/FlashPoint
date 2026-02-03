@@ -86,13 +86,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	uint8 bIsJumping : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	uint8 bHasEquippedWeapon : 1;
-
 	UPROPERTY()
 	TWeakObjectPtr<AWeapon_Base> EquippedWeaponWeakPtr;
 
-	void UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon);
+	void UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon);
 
 	// 캐릭터 최하단에서 땅까지 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -144,7 +141,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float HipFireUpperBodyBlendWeight;
 
-	void UpdateBlendWeight(float DeltaSeconds);
+	void UpdateBlendWeight(float DeltaSeconds, const AWeapon_Base* EquippedWeapon);
 
 	// 왼손을 무기에 부착할 Transform (Only Translation)
 	// Character Mesh의 hand_r 기준

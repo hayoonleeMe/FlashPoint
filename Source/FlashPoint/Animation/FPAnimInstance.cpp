@@ -35,7 +35,7 @@ void UFPAnimInstance::NativeInitializeAnimation()
 	if (UWeaponManageComponent* WeaponManageComp = GetOwningActor() ? GetOwningActor()->FindComponentByClass<UWeaponManageComponent>() : nullptr)
 	{
 		// bHasEquippedWeapon 업데이트를 위한 델레게이트 등록
-		WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateHasEquippedWeapon);		
+		WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateEquippedWeapon);		
 	}
 
 	// GameplayTag Property
@@ -93,11 +93,14 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			bShouldMove = GroundSpeed > 0.f && MoveComponent->GetCurrentAcceleration() != FVector::ZeroVector;
 			bIsOnGround = MoveComponent->IsMovingOnGround();
 			bIsCrouching = Character->bIsCrouched;
+			
+			// Weak Ptr를 각 프레임마다 한번만 Dereference하도록 캐싱 후 사용
+			const AWeapon_Base* EquippedWeapon = EquippedWeaponWeakPtr.Get();
 
 			UpdateJumpData(DeltaSeconds, MoveComponent);
 			UpdateAimingData(Character);
 			UpdateCurrentDirection();
-			UpdateBlendWeight(DeltaSeconds);
+			UpdateBlendWeight(DeltaSeconds, EquippedWeapon);
 			UpdateRootYawOffset(DeltaSeconds);
 
 			if (bIsFirstUpdate)
@@ -117,10 +120,9 @@ void UFPAnimInstance::NativePostEvaluateAnimation()
 	UpdateLeftHandModifyTransform();
 }
 
-void UFPAnimInstance::UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon)
+void UFPAnimInstance::UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon)
 {
 	EquippedWeaponWeakPtr = EquippedWeapon;
-	bHasEquippedWeapon = EquippedWeapon != nullptr;
 }
 
 void UFPAnimInstance::UpdateJumpData(float DeltaSeconds, const UFPCharacterMovementComponent* MoveComponent)
@@ -190,14 +192,14 @@ void UFPAnimInstance::UpdateCurrentDirection()
 	}
 }
 
-void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds)
+void UFPAnimInstance::UpdateBlendWeight(float DeltaSeconds, const AWeapon_Base* EquippedWeapon)
 {
 	// Update UpperBodyAdditiveWeight
 	const bool bAdditive = IsAnyMontagePlaying() && bIsOnGround;
 	UpperBodyAdditiveWeight = bAdditive ? 1.f : FMath::FInterpTo(UpperBodyAdditiveWeight, 0.f, DeltaSeconds, 6.f);
 	
 	// Update HipFireUpperBodyBlendWeight
-	if (bHasEquippedWeapon)
+	if (EquippedWeapon)
 	{
 		const bool bHipFire = GameplayTag_IsFiring || (bIsOnGround && !GameplayTag_IsSprinting);
 		HipFireUpperBodyBlendWeight = FMath::FInterpTo(HipFireUpperBodyBlendWeight, bHipFire ? 1.f : 0.f, DeltaSeconds, bHipFire ? 20.f : 3.f);
