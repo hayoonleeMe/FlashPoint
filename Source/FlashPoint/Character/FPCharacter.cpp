@@ -63,9 +63,13 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	SpringArmComponent->bDoCollisionTest = true;
 	SpringArmComponent->bUsePawnControlRotation = true;
 	
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
-	CameraComponent->SetupAttachment(SpringArmComponent);
+	ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Third Person Camera Component"));
+	ThirdPersonCameraComponent->SetupAttachment(SpringArmComponent);
 
+	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera Component"));
+	FirstPersonCameraComponent->SetupAttachment(GetMesh(), TEXT("CameraSocket"));
+	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FirstPersonCameraComponent->bAutoActivate = false;
 	WeaponManageComponent = CreateDefaultSubobject<UWeaponManageComponent>(TEXT("Weapon Manage Component"));
 }
 

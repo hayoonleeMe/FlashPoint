@@ -75,14 +75,22 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 	
+	// 3인칭 카메라
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCameraComponent> CameraComponent;
+	TObjectPtr<UCameraComponent> ThirdPersonCameraComponent;
 
 	// 실제로 Spring Arm Component의 Z Location을 설정하는 데 사용
 	float CurrentCameraHeight = 0.f;
 
 	// CurrentCameraHeight를 Interpolation을 통해 도달할 Target
 	float TargetCameraHeight = 0.f;
+	
+	// 1인칭 카메라
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UCameraComponent> FirstPersonCameraComponent;
+	
+public:
+	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 	// ============================================================================
 	// Weapon
