@@ -53,6 +53,7 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Sprint, "Input.Gameplay.Sprint");
 			UE_DEFINE_GAMEPLAY_TAG(Reload, "Input.Gameplay.Reload");
 			UE_DEFINE_GAMEPLAY_TAG(ToggleCamera, "Input.Gameplay.ToggleCamera");
+			UE_DEFINE_GAMEPLAY_TAG(AimDownSight, "Input.Gameplay.AimDownSight");
 
 			namespace QuickSlot
 			{
@@ -78,6 +79,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(Reload, "Ability.Reload");
 		UE_DEFINE_GAMEPLAY_TAG(DryFire, "Ability.DryFire");
 		UE_DEFINE_GAMEPLAY_TAG(ToggleCamera, "Ability.ToggleCamera");
+		UE_DEFINE_GAMEPLAY_TAG(AimDownSight, "Ability.AimDownSight");
 
 		namespace Fail
 		{
@@ -91,6 +93,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(IsFiring, "CharacterState.IsFiring");
 		UE_DEFINE_GAMEPLAY_TAG(IsMovingForwardFromInput, "CharacterState.IsMovingForwardFromInput");
 		UE_DEFINE_GAMEPLAY_TAG(IsFirstPerson, "CharacterState.IsFirstPerson");
+		UE_DEFINE_GAMEPLAY_TAG(IsAimingDownSight, "CharacterState.IsAimingDownSight");
 	}
 
 	namespace Weapon

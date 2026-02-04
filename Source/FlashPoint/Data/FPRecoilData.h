@@ -40,6 +40,10 @@ public:
 	// 발사 중단 후, 반동 패턴이 초기화되고 회복이 시작될 때까지의 딜레이
 	UPROPERTY(EditDefaultsOnly, Category = "Recoil")
 	float RecoveryDelay;
+	
+	// ADS 시 반동이 적용되는 비율
+	UPROPERTY(EditAnywhere, Category = "Recoil")
+	float ADSRecoilMultiplier;
 
 	// 무기 장착 시 기본적으로 조준점이 벌어지는 정도
 	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
@@ -56,4 +60,8 @@ public:
 	// 조준점이 정상 크기로 돌아오는 회복 속도
 	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
 	float AimSpreadRecoverySpeed;
+	
+	// ADS 시 AimSpread가 적용되는 비율
+	UPROPERTY(EditAnywhere, Category = "Aim Spread")
+	float ADSAimSpreadMultiplier;
 };

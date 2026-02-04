@@ -191,6 +191,9 @@ private:
 	// 현재 장착한 무기의 RecoilData
 	UPROPERTY()
 	TObjectPtr<UFPRecoilData> CurrentRecoilData;
+	
+	// 현재 ADS 상태인지 반환
+	bool IsAimingDownSight() const;
 
 	// 누적된 발사 횟수
 	// Curve로부터 반동 강도를 선택할 때 사용된다.
@@ -244,6 +247,10 @@ private:
 	// Sprint 상태에서 Aim Spread에 끼치는 영향
 	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
 	float AimSpreadSprintingOffset;
+	
+	// ADS 시 움직임에 의한 AimSpread Offset이 적용되는 비율
+	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
+	float ADSAimSpreadMovementMultiplier;
 
 	// 캐릭터의 움직임 상태에 따라 Aim Spread 오프셋을 계산한다.
 	float CalculateAimSpreadMovementOffset() const;

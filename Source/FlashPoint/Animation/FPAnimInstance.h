@@ -7,6 +7,7 @@
 #include "Animation/AnimInstance.h"
 #include "FPAnimInstance.generated.h"
 
+class AFPCharacter;
 class UFPCharacterMovementComponent;
 class AWeapon_Base;
 class UAbilitySystemComponent;
@@ -55,6 +56,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GameplayTag_IsFirstPerson;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsAimingDownSight;
 
 	TMap<FGameplayTag, bool*> TagToPropertyMap;
 	
@@ -221,4 +225,22 @@ protected:
 	// Idle State일 때 호출된다. (Idle에서 Blending Out 될 때 제외)
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
 	void ProcessTurnYawCurve();
+
+	// ============================================================================
+	// Aim Down Sight
+	// ============================================================================
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimDownSightAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimDownSightAlphaInterpSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector AimDownSightLocation;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRotator AimDownSightRotation;
+	
+	void UpdateAimDownSight(float DeltaSeconds, const AFPCharacter* Character, const AWeapon_Base* EquippedWeapon);
 };

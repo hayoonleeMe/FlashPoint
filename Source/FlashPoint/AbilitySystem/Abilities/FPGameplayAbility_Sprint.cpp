@@ -13,8 +13,9 @@ UFPGameplayAbility_Sprint::UFPGameplayAbility_Sprint()
 	AbilityTags.AddTag(FPGameplayTags::Ability::Sprint);
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState::IsSprinting);
 
-	// 총 발사 시 Sprint 제한
+	// 총 발사, ADS 시 Sprint 제한
 	ActivationBlockedTags.AddTag(FPGameplayTags::CharacterState::IsFiring);
+	ActivationBlockedTags.AddTag(FPGameplayTags::CharacterState::IsAimingDownSight);
 }
 
 void UFPGameplayAbility_Sprint::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

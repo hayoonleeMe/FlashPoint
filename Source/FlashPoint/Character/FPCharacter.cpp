@@ -70,6 +70,8 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	FirstPersonCameraComponent->SetupAttachment(GetMesh(), TEXT("CameraSocket"));
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 	FirstPersonCameraComponent->bAutoActivate = false;
+	FirstPersonCameraComponent->PostProcessSettings.VignetteIntensity = 0.7f;	// for ADS
+	
 	WeaponManageComponent = CreateDefaultSubobject<UWeaponManageComponent>(TEXT("Weapon Manage Component"));
 }
 
@@ -237,4 +239,21 @@ void AFPCharacter::ToggleCamera() const
 		// local only
 		AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsFirstPerson);
 	}
+}
+
+void AFPCharacter::StartAimDownSight()
+{
+	GetCharacterMovement<UFPCharacterMovementComponent>()->StartAimDownSight();
+	
+	// TODO : 게임옵션과 연동
+	FirstPersonCameraComponent->SetFieldOfView(70.f);
+	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = true;
+}
+
+void AFPCharacter::StopAimDownSight()
+{
+	GetCharacterMovement<UFPCharacterMovementComponent>()->StopAimDownSight();
+	
+	FirstPersonCameraComponent->SetFieldOfView(90.f);
+	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = false;
 }

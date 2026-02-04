@@ -17,6 +17,7 @@ UFPGameplayAbility_Reload::UFPGameplayAbility_Reload()
 	AbilityTags.AddTag(FPGameplayTags::Ability::Reload);
 	ActivationOwnedTags.AddTag(FPGameplayTags::Weapon::NoFire);
 	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::WeaponFire);
+	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::AimDownSight);
 
 	PlayRate = 1.f;
 }

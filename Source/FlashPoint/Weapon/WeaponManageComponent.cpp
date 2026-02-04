@@ -41,6 +41,7 @@ UWeaponManageComponent::UWeaponManageComponent()
 	AimSpreadFallingOffset = 20.f;
 	AimSpreadCrouchingOffset = -10.f;
 	AimSpreadSprintingOffset = 25.f;
+	ADSAimSpreadMovementMultiplier = 0.5f;
 	
 	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
 	OnMontageEndedDelegate.BindWeakLambda(this, [this](UAnimMontage* Montage, bool bInterrupted)
@@ -459,19 +460,24 @@ void UWeaponManageComponent::ApplyRecoil()
 	// ShotCount 누적
 	++RecoilShotCount;
 
-	const float RecoilPitch = CurrentRecoilData->VerticalRecoilCurve->GetFloatValue(RecoilShotCount);
+	const bool bIsADS = IsAimingDownSight();
+	const float RecoilMultiplier = bIsADS ? CurrentRecoilData->ADSRecoilMultiplier : 1.f;
+	const float AimSpreadMultiplier = bIsADS ? CurrentRecoilData->ADSAimSpreadMultiplier : 1.f;
+	
+	const float RecoilPitch = CurrentRecoilData->VerticalRecoilCurve->GetFloatValue(RecoilShotCount) * RecoilMultiplier;
 	// 좌우 반동은 무작위 방향 적용
-	const float RecoilYaw = CurrentRecoilData->HorizontalRecoilCurve->GetFloatValue(RecoilShotCount) * (FMath::RandBool() ? 1.f : -1.f);
+	const float RecoilYaw = CurrentRecoilData->HorizontalRecoilCurve->GetFloatValue(RecoilShotCount) * RecoilMultiplier * (FMath::RandBool() ? 1.f : -1.f);
 	TargetRecoilOffset += FVector2D(RecoilPitch, RecoilYaw);
 	bShouldApplyRecoil = true;
 
-	AimSpreadRecoilOffset = FMath::Min(AimSpreadRecoilOffset + CurrentRecoilData->AimSpreadIncrease, CurrentRecoilData->MaxAimSpread);
+	const float AimSpreadIncrease = CurrentRecoilData->AimSpreadIncrease * AimSpreadMultiplier;
+	AimSpreadRecoilOffset = FMath::Min(AimSpreadRecoilOffset + AimSpreadIncrease, CurrentRecoilData->MaxAimSpread);
 	UpdateCurrentAimSpread();
 	bShouldApplyRecovery = false;
 
 	if (UWorld* World = GetWorld())
 	{
-		World->GetTimerManager().SetTimer(RecoveryTimer, FTimerDelegate::CreateUObject(this, &ThisClass::StartRecovery), CurrentRecoilData->RecoveryDelay, false);;
+		World->GetTimerManager().SetTimer(RecoveryTimer, FTimerDelegate::CreateUObject(this, &ThisClass::StartRecovery), CurrentRecoilData->RecoveryDelay, false);
 	}
 }
 
@@ -526,6 +532,11 @@ void UWeaponManageComponent::TickComponent(float DeltaTime, enum ELevelTick Tick
 	UpdateCurrentAimSpread();
 }
 
+bool UWeaponManageComponent::IsAimingDownSight() const
+{
+	return OwnerASC && OwnerASC->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsAimingDownSight);
+}
+
 void UWeaponManageComponent::StartRecovery()
 {
 	RecoilShotCount = 0;
@@ -562,7 +573,8 @@ float UWeaponManageComponent::CalculateAimSpreadMovementOffset() const
 			MovementOffset += AimSpreadSprintingOffset;
 		}
 	}
-	return MovementOffset;
+	const float Multiplier = IsAimingDownSight() ? ADSAimSpreadMovementMultiplier : 1.f;
+	return MovementOffset * Multiplier;
 }
 
 void UWeaponManageComponent::UpdateCurrentAimSpread()

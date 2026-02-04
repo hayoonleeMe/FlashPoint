@@ -22,6 +22,11 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(PlayerHUD)
 
+void UPlayerHUD::ShowCrosshair(bool bShow) const
+{
+	WidgetSwitcher_Crosshair->SetVisibility(bShow ? ESlateVisibility::SelfHitTestInvisible : ESlateVisibility::Hidden);
+}
+
 void UPlayerHUD::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();

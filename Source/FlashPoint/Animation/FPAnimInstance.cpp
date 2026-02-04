@@ -7,6 +7,8 @@
 #include "AbilitySystemComponent.h"
 #include "FPGameplayTags.h"
 #include "KismetAnimationLibrary.h"
+#include "Camera/CameraComponent.h"
+#include "Character/FPCharacter.h"
 #include "Character/FPCharacterMovementComponent.h"
 #include "GameFramework/Character.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -29,6 +31,7 @@ UFPAnimInstance::UFPAnimInstance()
 	RootYawOffsetAngleCrouchClamp = { -90.f, 80.f };
 	TurnYawWeightCurveName = TEXT("TurnYawWeight");
 	RemainingTurnYawCurveName = TEXT("RemainingTurnYaw");
+	AimDownSightAlphaInterpSpeed = 12.f;
 }
 
 void UFPAnimInstance::NativeInitializeAnimation()
@@ -45,6 +48,7 @@ void UFPAnimInstance::NativeInitializeAnimation()
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsSprinting, &GameplayTag_IsSprinting);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFiring, &GameplayTag_IsFiring);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFirstPerson, &GameplayTag_IsFirstPerson);
+	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsAimingDownSight, &GameplayTag_IsAimingDownSight);
 
 	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwningActor()))
 	{
@@ -80,7 +84,7 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
 	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
 
-	if (const ACharacter* Character = Cast<ACharacter>(GetOwningActor()))
+	if (const AFPCharacter* Character = Cast<AFPCharacter>(GetOwningActor()))
 	{
 		if (const UFPCharacterMovementComponent* MoveComponent = Character->GetCharacterMovement<UFPCharacterMovementComponent>())
 		{
@@ -109,6 +113,7 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			UpdateBlendWeight(DeltaSeconds, EquippedWeapon);
 			UpdateLeftHandAttachData(DeltaSeconds, EquippedWeapon);
 			UpdateRootYawOffset(DeltaSeconds);
+			UpdateAimDownSight(DeltaSeconds, Character, EquippedWeapon);
 
 			if (bIsFirstUpdate)
 			{
@@ -309,4 +314,46 @@ void UFPAnimInstance::ProcessTurnYawCurve()
 		TurnYawCurveValue = 0.f;
 		PreviousTurnYawCurveValue = 0.f;
 	}
+}
+
+void UFPAnimInstance::UpdateAimDownSight(float DeltaSeconds, const AFPCharacter* Character, const AWeapon_Base* EquippedWeapon)
+{
+	if (!EquippedWeapon || !Character->IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (!GameplayTag_IsAimingDownSight)
+	{
+		AimDownSightAlpha = 0.f;
+		return;
+	}
+	
+	// Update Alpha
+	AimDownSightAlpha = FMath::FInterpTo(AimDownSightAlpha, 1.f, DeltaSeconds, AimDownSightAlphaInterpSpeed);
+	
+	// Calc ADS Transform
+	USkeletalMeshComponent* SKM = GetSkelMeshComponent();
+	
+	// Sight를 기준으로 오른손이 얼마나 떨어져있는지를 나타내는 트랜스폼
+	FTransform RightHand = SKM->GetBoneTransform(TEXT("hand_r"));
+	FTransform WeaponSight = EquippedWeapon->GetAimDownSightSocketTransform();
+	FTransform HandToSight = RightHand.GetRelativeTransform(WeaponSight);
+	
+	// Sight를 위치시킬 Target 트랜스폼
+	FVector CamLoc = Character->GetFirstPersonCameraComponent()->GetComponentLocation();
+	FRotator CamRot = Character->GetFirstPersonCameraComponent()->GetComponentRotation();
+	FTransform CameraTarget(CamRot, CamLoc + CamRot.Vector() * 10.f);
+	
+	// HandToSight를 CameraTarget을 기준으로 오른손이 얼마나 떨어졌는지 나타내는 트랜스폼으로 변환
+	// 즉, Sight가 CameraTarget에 있을 때 오른손이 얼마나 떨어졌는지 나타내는 트랜스폼이 계산됨
+	FTransform NewHand = HandToSight * CameraTarget;
+	
+	// VB head_hand_r 본의 부모인 head 본 공간으로 변환 
+	FVector NewLoc;
+	FRotator NewRot;
+	SKM->TransformToBoneSpace(TEXT("head"), NewHand.GetLocation(), NewHand.Rotator(), NewLoc, NewRot);
+	
+	AimDownSightLocation = FMath::VInterpTo(AimDownSightLocation, NewLoc, DeltaSeconds, AimDownSightAlphaInterpSpeed);
+	AimDownSightRotation = FMath::RInterpTo(AimDownSightRotation, NewRot, DeltaSeconds, AimDownSightAlphaInterpSpeed);
 }

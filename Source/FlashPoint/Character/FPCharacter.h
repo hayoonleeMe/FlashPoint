@@ -99,6 +99,11 @@ public:
 	// Weapon
 	// ============================================================================
 
+protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	// TODO : BlueprintReadOnly For Test
 	TObjectPtr<UWeaponManageComponent> WeaponManageComponent;
+
+public:
+	void StartAimDownSight();
+	void StopAimDownSight();
 };

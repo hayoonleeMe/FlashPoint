@@ -83,6 +83,8 @@ public:
 
 	FVector GetFirstPersonRightHandOffset() const;
 	
+	FTransform GetAimDownSightSocketTransform() const;
+	
 protected:
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent;
@@ -154,6 +156,9 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	FVector FirstPersonRightHandOffset;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FName AimDownSightSocketName;
 
 	// 현재 탄창에 남은 총알 수
 	// 서버에서만 유효하다.

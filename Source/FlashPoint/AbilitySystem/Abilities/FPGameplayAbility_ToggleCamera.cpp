@@ -12,6 +12,7 @@ UFPGameplayAbility_ToggleCamera::UFPGameplayAbility_ToggleCamera()
 {
 	NetExecutionPolicy = EGameplayAbilityNetExecutionPolicy::LocalOnly;
 	AbilityTags.AddTag(FPGameplayTags::Ability::ToggleCamera);
+	ActivationBlockedTags.AddTag(FPGameplayTags::CharacterState::IsAimingDownSight);
 }
 
 void UFPGameplayAbility_ToggleCamera::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

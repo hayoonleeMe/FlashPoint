@@ -26,6 +26,7 @@ AWeapon_Base::AWeapon_Base()
 	HeadShotMultiplier = 1.f;
 
 	LeftHandAttachSocketName = TEXT("LeftHandAttach");
+	AimDownSightSocketName = TEXT("AimDownSight");
 }
 
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
@@ -98,6 +99,11 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 FVector AWeapon_Base::GetFirstPersonRightHandOffset() const
 {
 	return FirstPersonRightHandOffset;
+}
+
+FTransform AWeapon_Base::GetAimDownSightSocketTransform() const
+{
+	return WeaponMeshComponent->GetSocketTransform(AimDownSightSocketName);
 }
 
 float AWeapon_Base::GetDamageByDistance(float Distance) const
