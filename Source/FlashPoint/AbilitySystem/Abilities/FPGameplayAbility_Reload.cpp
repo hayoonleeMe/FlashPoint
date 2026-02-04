@@ -24,37 +24,31 @@ UFPGameplayAbility_Reload::UFPGameplayAbility_Reload()
 bool UFPGameplayAbility_Reload::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                                    const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
-	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
-	{
-		return false;
-	}
-
-	// ActorInfo is already valid (checked in Super::CanActivateAbility)
 	// 장착 중인 무기가 유효한지 체크
-	AActor* AvatarActor = ActorInfo->AvatarActor.Get();
-	AWeapon_Base* Weapon = GetEquippedWeapon(AvatarActor);
-	if (!IsValid(Weapon))
+	const AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
+	UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(AvatarActor);
+	if (!WeaponManageComponent || !WeaponManageComponent->HasValidEquippedWeapon())
 	{
 		UE_LOG(LogFP, Warning, TEXT("[%hs] Can't activate ability because of invalid equipped weapon."), __FUNCTION__);
 		return false;
 	}
+	
+	// valid
+	const AWeapon_Base* Weapon = WeaponManageComponent->GetEquippedWeapon();
 
-	if (UWeaponManageComponent* WeaponManageComponent = AvatarActor->FindComponentByClass<UWeaponManageComponent>())
+	// 최소한의 ReserveAmmo가 있는지 체크
+	if (WeaponManageComponent->GetAmmoTagStacks().GetStackCount(Weapon->GetWeaponTypeTag()) < 1)
 	{
-		// 최소한의 ReserveAmmo가 있는지 체크
-		if (WeaponManageComponent->GetAmmoTagStacks().GetStackCount(Weapon->GetWeaponTypeTag()) < 1)
-		{
-			return false;
-		}
-
-		// 이미 탄창이 가득찼는지 체크
-		if (WeaponManageComponent->GetAmmoTagStacks().GetStackCount(FPGameplayTags::Weapon::Data::Ammo) == Weapon->GetMagCapacity())
-		{
-			return false;
-		}
+		return false;
 	}
 
-	return true;
+	// 이미 탄창이 가득찼는지 체크
+	if (WeaponManageComponent->GetAmmoTagStacks().GetStackCount(FPGameplayTags::Weapon::Data::Ammo) == Weapon->GetMagCapacity())
+	{
+		return false;
+	}
+
+	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
 void UFPGameplayAbility_Reload::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

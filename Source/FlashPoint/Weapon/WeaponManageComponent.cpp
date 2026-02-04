@@ -74,6 +74,11 @@ void UWeaponManageComponent::InitializeWithAbilitySystem(UAbilitySystemComponent
 	OwnerASC = ASC;
 }
 
+bool UWeaponManageComponent::HasValidEquippedWeapon() const
+{
+	return IsValid(EquippedWeapon);
+}
+
 int32 UWeaponManageComponent::GetReserveAmmoStackCount(const AActor* Actor)
 {
 	if (IsValid(Actor))

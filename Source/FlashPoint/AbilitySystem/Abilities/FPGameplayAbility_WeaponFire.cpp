@@ -36,21 +36,16 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
-	if (!Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags))
-	{
-		return false;
-	}
-
-	// ActorInfo is already valid (checked in Super::CanActivateAbility)
 	// 장착 중인 무기가 유효한지 체크
-	AActor* AvatarActor = ActorInfo->AvatarActor.Get();
-	if (!IsValid(GetEquippedWeapon(AvatarActor)))
+	const AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
+	const UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(AvatarActor);
+	if (!WeaponManageComponent || !WeaponManageComponent->HasValidEquippedWeapon())
 	{
 		UE_LOG(LogFP, Warning, TEXT("[%hs] Can't activate ability because of invalid equipped weapon."), __FUNCTION__);
 		return false;
 	}
 
-	return true;
+	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
 void UFPGameplayAbility_WeaponFire::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
