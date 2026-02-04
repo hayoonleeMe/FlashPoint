@@ -124,12 +124,6 @@ void UFPAnimInstance::UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon)
 	
 	if (EquippedWeaponWeakPtr.IsValid())
 	{
-		USkeletalMeshComponent* SKM = GetSkelMeshComponent();
-		
-		// Caching Relative Left Hand Attach Transform
-		const FTransform WeaponAttachWorld = EquippedWeapon->GetLeftHandAttachTransform();
-		SKM->TransformToBoneSpace(TEXT("weapon_r"), WeaponAttachWorld.GetLocation(), WeaponAttachWorld.Rotator(), LeftHandAttachLocation, LeftHandAttachRotation);
-		
 		// Caching First Person Right Hand Offset
 		FirstPersonRightHandOffset = EquippedWeapon->GetFirstPersonRightHandOffset();
 	}
@@ -246,7 +240,12 @@ void UFPAnimInstance::UpdateLeftHandAttachData(float DeltaSeconds, const AWeapon
 	else
 	{
 		LeftHandAttachAlpha = 0.f;
+		return;
 	}
+	
+	// Calc Relative Left Hand Attach Transform
+	const FTransform WeaponAttachWorld = EquippedWeapon->GetLeftHandAttachTransform();
+	GetSkelMeshComponent()->TransformToBoneSpace(TEXT("weapon_r"), WeaponAttachWorld.GetLocation(), WeaponAttachWorld.Rotator(), LeftHandAttachLocation, LeftHandAttachRotation);
 }
 
 void UFPAnimInstance::SetRootYawOffset(float InValue)
