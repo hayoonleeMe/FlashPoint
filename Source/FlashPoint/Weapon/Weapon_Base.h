@@ -21,9 +21,6 @@ struct FWeaponEquipInfo
 
 	UPROPERTY(EditDefaultsOnly)
 	FName AttachSocketName;
-	
-	UPROPERTY(EditDefaultsOnly)
-	FTransform AttachTransform;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UAnimMontage> EquipMontage;

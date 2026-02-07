@@ -229,7 +229,6 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		}
 
 		const FWeaponEquipInfo& EquipInfo = EquippedWeapon->GetEquipInfo();
-		EquippedWeapon->SetActorRelativeTransform(EquipInfo.AttachTransform);
 		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
 
 		// Give Data to Owner ASC
@@ -265,7 +264,6 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 		}
 
 		const FWeaponEquipInfo& EquipInfo = EquippedWeapon->GetEquipInfo();
-		EquippedWeapon->SetActorRelativeTransform(EquipInfo.AttachTransform);
 		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
 
 		// Give Data to Owner ASC

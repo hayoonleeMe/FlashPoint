@@ -250,7 +250,7 @@ void UFPAnimInstance::UpdateLeftHandAttachData(float DeltaSeconds, const AWeapon
 	
 	// Calc Relative Left Hand Attach Transform
 	const FTransform WeaponAttachWorld = EquippedWeapon->GetLeftHandAttachTransform();
-	GetSkelMeshComponent()->TransformToBoneSpace(TEXT("weapon_r"), WeaponAttachWorld.GetLocation(), WeaponAttachWorld.Rotator(), LeftHandAttachLocation, LeftHandAttachRotation);
+	GetSkelMeshComponent()->TransformToBoneSpace(TEXT("hand_r"), WeaponAttachWorld.GetLocation(), WeaponAttachWorld.Rotator(), LeftHandAttachLocation, LeftHandAttachRotation);
 }
 
 void UFPAnimInstance::SetRootYawOffset(float InValue)
