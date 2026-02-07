@@ -130,7 +130,7 @@ void UFPAnimInstance::UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon)
 	if (EquippedWeaponWeakPtr.IsValid())
 	{
 		// Caching First Person Right Hand Offset
-		FirstPersonRightHandOffset = EquippedWeapon->GetFirstPersonRightHandOffset();
+		EquippedWeapon->GetFirstPersonRightHandOffset(FirstPersonRightHandLocOffset, FirstPersonRightHandRotOffset);
 	}
 }
 

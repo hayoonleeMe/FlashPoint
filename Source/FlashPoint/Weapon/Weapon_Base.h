@@ -78,7 +78,7 @@ public:
 	// 로컬에서 캐릭터가 장착 중인 무기의 Weapon Fire Effects를 트리거
 	void TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& ImpactPoints, const TArray<FVector_NetQuantize>& EndPoints);
 
-	FVector GetFirstPersonRightHandOffset() const;
+	void GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutRot) const;
 	
 	FTransform GetAimDownSightSocketTransform() const;
 	
@@ -152,7 +152,10 @@ protected:
 	FName LeftHandAttachSocketName;
 	
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	FVector FirstPersonRightHandOffset;
+	FVector FirstPersonRightHandLocOffset;
+	
+	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
+	FRotator FirstPersonRightHandRotOffset;
 	
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	FName AimDownSightSocketName;

@@ -133,7 +133,10 @@ protected:
 	float FirstPersonPitch;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FVector FirstPersonRightHandOffset;
+	FVector FirstPersonRightHandLocOffset;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRotator FirstPersonRightHandRotOffset;
 
 	void UpdateAimingData(float DeltaSeconds, const ACharacter* Character);
 

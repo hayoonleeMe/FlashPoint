@@ -96,9 +96,10 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 	}
 }
 
-FVector AWeapon_Base::GetFirstPersonRightHandOffset() const
+void AWeapon_Base::GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutRot) const
 {
-	return FirstPersonRightHandOffset;
+	OutLoc = FirstPersonRightHandLocOffset;
+	OutRot = FirstPersonRightHandRotOffset;
 }
 
 FTransform AWeapon_Base::GetAimDownSightSocketTransform() const
