@@ -17,6 +17,9 @@ class FLASHPOINT_API UFPEnhancedPlayerInput : public UEnhancedPlayerInput
 	GENERATED_BODY()
 
 public:
+	// Move, Look InputAction의 Value를 반환한다.
+	static void GetMoveAndLookInputValue(const APlayerController* PC, FVector& OutMoveInput, FVector& OutLookInput);
+	
 	// InputTag에 해당하는 InputAction의 Key 입력을 Flush한다.
 	void FlushPressedInput(const FGameplayTag& InputTag);
 };

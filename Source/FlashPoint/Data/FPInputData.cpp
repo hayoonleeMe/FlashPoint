@@ -5,26 +5,44 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPInputData)
 
-const UInputAction* UFPInputData::FindNativeInputActionForInputTag(const FGameplayTag& InputTag) const
+const UInputAction* UFPInputData::FindInputActionForInputTag(const FGameplayTag& InputTag) const
 {
-	for (const FInputConfig& InputConfig : NativeInputConfigs)
-	{
-		if (InputConfig.InputTag.MatchesTag(InputTag))
-		{
-			return InputConfig.InputAction;
-		}
-	}
-	return nullptr;
+	return InputTagToInputActionMap.FindRef(InputTag); 
 }
 
-const UInputAction* UFPInputData::FindAbilityInputActionForInputTag(const FGameplayTag& InputTag) const
+void UFPInputData::PostLoad()
 {
-	for (const FInputConfig& InputConfig : AbilityInputConfigs)
+	Super::PostLoad();
+	
+	RebuildCache();
+}
+
+#if WITH_EDITOR
+void UFPInputData::PostEditChangeProperty(struct FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	
+	RebuildCache();
+}
+#endif
+
+void UFPInputData::RebuildCache()
+{
+	InputTagToInputActionMap.Empty(NativeInputConfigs.Num() + AbilityInputConfigs.Num());
+
+	for (const FInputConfig& InputConfig : NativeInputConfigs)
 	{
-		if (InputConfig.InputTag.MatchesTag(InputTag))
+		if (InputConfig.InputTag.IsValid() && InputConfig.InputAction)
 		{
-			return InputConfig.InputAction;
+			InputTagToInputActionMap.Add(InputConfig.InputTag, InputConfig.InputAction);
 		}
 	}
-	return nullptr;
+	
+	for (const FInputConfig& InputConfig : AbilityInputConfigs)
+	{
+		if (InputConfig.InputTag.IsValid() && InputConfig.InputAction)
+		{
+			InputTagToInputActionMap.Add(InputConfig.InputTag, InputConfig.InputAction);
+		}
+	}
 }

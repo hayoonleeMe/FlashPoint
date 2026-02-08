@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "FPAnimInstance.generated.h"
 
 class AFPCharacter;
@@ -246,4 +247,52 @@ protected:
 	FRotator AimDownSightRotation;
 	
 	void UpdateAimDownSight(float DeltaSeconds, const AFPCharacter* Character, const AWeapon_Base* EquippedWeapon);
+
+	// ============================================================================
+	// First Person Sway
+	// ============================================================================
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float MoveSwayAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector MoveSwayLocation;
+	
+	UPROPERTY(EditAnywhere)
+	FVector MoveSwayAmplitude;
+	
+	FVectorSpringState MoveSwaySpringState;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float LookSwayAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector LookSwayLocation;
+	
+	UPROPERTY(EditAnywhere)
+	FVector LookSwayAmplitude;
+
+	UPROPERTY(EditAnywhere)
+	float ADSLookSwayMultiplier;
+	
+	FVectorSpringState LookSwaySpringState;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float JumpSwayAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float JumpSwayValue;
+	
+	UPROPERTY(EditAnywhere)
+	float JumpSwayAmplitude;
+	
+	UPROPERTY(EditAnywhere)
+	float MaxJumpSway;
+
+	UPROPERTY(EditAnywhere)
+	float ADSJumpSwayMultiplier;
+	
+	FFloatSpringState JumpSwaySpringState;
+	
+	void UpdateFirstPersonSway(float DeltaSeconds, const ACharacter* Character);
 };

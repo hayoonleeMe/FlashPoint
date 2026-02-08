@@ -11,6 +11,7 @@
 #include "Character/FPCharacter.h"
 #include "Character/FPCharacterMovementComponent.h"
 #include "GameFramework/Character.h"
+#include "Input/FPEnhancedPlayerInput.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
@@ -32,6 +33,12 @@ UFPAnimInstance::UFPAnimInstance()
 	TurnYawWeightCurveName = TEXT("TurnYawWeight");
 	RemainingTurnYawCurveName = TEXT("RemainingTurnYaw");
 	AimDownSightAlphaInterpSpeed = 12.f;
+	LookSwayAmplitude = { 0.8f, 0.8f, 0.f };
+	ADSLookSwayMultiplier = 0.15f;
+	MoveSwayAmplitude = { 0.8f, 0.8f, 0.f };
+	JumpSwayAmplitude = 0.01f;
+	MaxJumpSway = 2.f;
+	ADSJumpSwayMultiplier = 0.05f;
 }
 
 void UFPAnimInstance::NativeInitializeAnimation()
@@ -114,6 +121,7 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			UpdateLeftHandAttachData(DeltaSeconds, EquippedWeapon);
 			UpdateRootYawOffset(DeltaSeconds);
 			UpdateAimDownSight(DeltaSeconds, Character, EquippedWeapon);
+			UpdateFirstPersonSway(DeltaSeconds, Character);
 
 			if (bIsFirstUpdate)
 			{
@@ -356,4 +364,43 @@ void UFPAnimInstance::UpdateAimDownSight(float DeltaSeconds, const AFPCharacter*
 	
 	AimDownSightLocation = FMath::VInterpTo(AimDownSightLocation, NewLoc, DeltaSeconds, AimDownSightAlphaInterpSpeed);
 	AimDownSightRotation = FMath::RInterpTo(AimDownSightRotation, NewRot, DeltaSeconds, AimDownSightAlphaInterpSpeed);
+}
+
+void UFPAnimInstance::UpdateFirstPersonSway(float DeltaSeconds, const ACharacter* Character)
+{
+	if (!GameplayTag_IsFirstPerson)
+	{
+		MoveSwayAlpha = LookSwayAlpha = JumpSwayAlpha = 0.f;
+		return;
+	}
+
+	// ADS일 때는 Look Sway만 적용
+	MoveSwayAlpha = GameplayTag_IsAimingDownSight ? 0.f : 1.f;
+	LookSwayAlpha = JumpSwayAlpha = 1.f;
+	
+	FVector MoveInput, LookInput;
+	UFPEnhancedPlayerInput::GetMoveAndLookInputValue(Character->GetController<APlayerController>(), MoveInput, LookInput);
+	
+	// Move Sway
+	if (MoveSwayAlpha > 0.f)
+	{
+		const FVector NewMoveSwayLocation = MoveInput * MoveSwayAmplitude;
+		const FVector TargetMoveSwayLocation(NewMoveSwayLocation.Y, -NewMoveSwayLocation.X, 0.f);
+		MoveSwayLocation = UKismetMathLibrary::VectorSpringInterp(MoveSwayLocation, TargetMoveSwayLocation, MoveSwaySpringState, 0.4f, 0.6f, DeltaSeconds, 0.006f);	
+	}
+
+	// Look Sway
+	if (LookSwayAlpha > 0.f)
+	{
+		const FVector NewLookSwayLocation = LookInput * LookSwayAmplitude * (GameplayTag_IsAimingDownSight ? ADSLookSwayMultiplier : 1.f);
+		const FVector TargetLookSwayLocation(NewLookSwayLocation.X, 0.f, -NewLookSwayLocation.Y);
+		LookSwayLocation = UKismetMathLibrary::VectorSpringInterp(LookSwayLocation, TargetLookSwayLocation, LookSwaySpringState, 0.4f, 0.6f, DeltaSeconds, 0.006f);
+	}
+	
+	// Jump Sway
+	if (JumpSwayAlpha > 0.f)
+	{
+		const float TargetJumpSway = FMath::Clamp(Velocity.Z * JumpSwayAmplitude, -MaxJumpSway, MaxJumpSway) * (GameplayTag_IsAimingDownSight ? ADSJumpSwayMultiplier : 1.f) * -1.f;
+		JumpSwayValue = UKismetMathLibrary::FloatSpringInterp(JumpSwayValue, TargetJumpSway, JumpSwaySpringState, 0.3f, 0.7f, DeltaSeconds, 0.006f);
+	}
 }

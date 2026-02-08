@@ -10,6 +10,27 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPEnhancedPlayerInput)
 
+void UFPEnhancedPlayerInput::GetMoveAndLookInputValue(const APlayerController* PC, FVector& OutMoveInput, FVector& OutLookInput)
+{
+	const UFPEnhancedPlayerInput* PlayerInput = Cast<UFPEnhancedPlayerInput>(PC ? PC->PlayerInput : nullptr);
+	if (!PlayerInput)
+	{
+		return;
+	}
+	
+	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
+	check(InputData);
+	
+	if (const UInputAction* MoveAction = InputData->FindInputActionForInputTag(FPGameplayTags::Input::Gameplay::Move))
+	{
+		OutMoveInput = PlayerInput->GetActionValue(MoveAction).Get<FVector>();
+	}
+	if (const UInputAction* LookAction = InputData->FindInputActionForInputTag(FPGameplayTags::Input::Gameplay::Look))
+	{
+		OutLookInput = PlayerInput->GetActionValue(LookAction).Get<FVector>();
+	}
+}
+
 void UFPEnhancedPlayerInput::FlushPressedInput(const FGameplayTag& InputTag)
 {
 	UWorld* World = GetWorld();
@@ -18,7 +39,7 @@ void UFPEnhancedPlayerInput::FlushPressedInput(const FGameplayTag& InputTag)
 	UFPInputData* InputData = UFPAssetManager::GetAssetByTag<UFPInputData>(FPGameplayTags::Asset::InputData);
 	check(InputData);
 
-	const UInputAction* InputAction = InputData->FindAbilityInputActionForInputTag(InputTag);
+	const UInputAction* InputAction = InputData->FindInputActionForInputTag(InputTag);
 	check(InputAction);
 	
 	const TArray<FEnhancedActionKeyMapping>& KeyMappings = GetEnhancedActionMappings();
