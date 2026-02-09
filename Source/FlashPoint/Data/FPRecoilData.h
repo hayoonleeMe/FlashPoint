@@ -64,4 +64,24 @@ public:
 	// ADS 시 AimSpread가 적용되는 비율
 	UPROPERTY(EditAnywhere, Category = "Aim Spread")
 	float ADSAimSpreadMultiplier;
+	
+	// 애니메이션 반동에 적용되는 반동 세기
+	UPROPERTY(EditDefaultsOnly, Category = "Anim")
+	float AnimRecoil;
+	
+	// 애니메이션 반동을 업데이트하는 보간 속도
+	UPROPERTY(EditDefaultsOnly, Category = "Anim")
+	float AnimRecoilInterpSpeed;
+	
+	// 애니메이션 반동이 초기화되는 보간 속도
+	UPROPERTY(EditDefaultsOnly, Category = "Anim")
+	float AnimRecoilRecoveryInterpSpeed;
+	
+	// ADS 시 Upward Anim Recoil이 적용되는 비율
+	UPROPERTY(EditDefaultsOnly, Category = "Anim")
+	float ADSUpwardAnimRecoilMultiplier;
+	
+	// ADS 시 Backward Anim Recoil이 적용되는 비율
+	UPROPERTY(EditDefaultsOnly, Category = "Anim")
+	float ADSBackwardAnimRecoilMultiplier;
 };

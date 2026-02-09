@@ -8,6 +8,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "FPAnimInstance.generated.h"
 
+class UFPRecoilData;
 class AFPCharacter;
 class UFPCharacterMovementComponent;
 class AWeapon_Base;
@@ -295,4 +296,24 @@ protected:
 	FFloatSpringState JumpSwaySpringState;
 	
 	void UpdateFirstPersonSway(float DeltaSeconds, const ACharacter* Character);
+	
+	// 무기가 변경될 때 캐싱되는 Recoil Data Asset
+	UPROPERTY()
+	TObjectPtr<UFPRecoilData> CurrentRecoilData;
+	
+	// 총을 후방으로 이동시키는 반동 값, Location Y에 더함
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RecoilBackward;
+	
+	// 총을 위로 올리는 반동 값, Rotation Roll에 더함
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RecoilUpward;
+	
+	float TargetRecoilBackward = 0.f;
+	float TargetRecoilUpward = 0.f;
+
+	// 로컬 캐릭터에서 총을 발사해 반동이 발생할 때 호출되고, Target Recoil Transform을 계산한다.
+	void ApplyRecoil();
+	
+	void UpdateRecoil(float DeltaSeconds);
 };

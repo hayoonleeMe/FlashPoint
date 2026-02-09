@@ -454,6 +454,8 @@ void UWeaponManageComponent::ApplyRecoil()
 	{
 		return;
 	}
+	
+	OnWeaponRecoilDelegate.Broadcast();
 
 	// ShotCount 누적
 	++RecoilShotCount;

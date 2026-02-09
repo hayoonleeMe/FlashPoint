@@ -26,6 +26,9 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAmmoTagStackChangedDelegate, const FGame
 // AimSpread가 변경될 때 브로드캐스트하는 델레게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAimSpreadChangedDelegate, float/*AimSpread*/);
 
+// 반동을 적용할 때 브로드캐스트하는 델레게이트
+DECLARE_MULTICAST_DELEGATE(FOnWeaponRecoilDelegate);
+
 /**
  * 무기를 관리하는 액터 컴포넌트
  */
@@ -170,6 +173,8 @@ public:
 	float GetCurrentAimSpread() const { return CurrentAimSpread; }
 
 	FOnAimSpreadChangedDelegate OnAimSpreadChangedDelegate;
+	
+	FOnWeaponRecoilDelegate OnWeaponRecoilDelegate;
 
 private:
 	UPROPERTY()

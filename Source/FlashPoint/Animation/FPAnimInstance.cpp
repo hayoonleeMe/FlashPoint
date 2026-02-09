@@ -10,9 +10,11 @@
 #include "Camera/CameraComponent.h"
 #include "Character/FPCharacter.h"
 #include "Character/FPCharacterMovementComponent.h"
+#include "Data/FPRecoilData.h"
 #include "GameFramework/Character.h"
 #include "Input/FPEnhancedPlayerInput.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "System/FPAssetManager.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
 
@@ -45,27 +47,31 @@ void UFPAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	if (UWeaponManageComponent* WeaponManageComp = GetOwningActor() ? GetOwningActor()->FindComponentByClass<UWeaponManageComponent>() : nullptr)
-	{
-		// bHasEquippedWeapon 업데이트를 위한 델레게이트 등록
-		WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateEquippedWeapon);		
-	}
-
 	// GameplayTag Property
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsSprinting, &GameplayTag_IsSprinting);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFiring, &GameplayTag_IsFiring);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFirstPerson, &GameplayTag_IsFirstPerson);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsAimingDownSight, &GameplayTag_IsAimingDownSight);
-
-	if (UAbilitySystemComponent* ASC = UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwningActor()))
-	{
-		RegisterGameplayTagWithProperty(ASC);
-	}
 }
 
 void UFPAnimInstance::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)
 {
 	RegisterGameplayTagWithProperty(ASC);
+
+	if (const APawn* Pawn = TryGetPawnOwner())
+	{
+		if (UWeaponManageComponent* WeaponManageComp = UWeaponManageComponent::Get(Pawn))
+		{
+			// bHasEquippedWeapon 업데이트를 위한 델레게이트 등록
+			WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateEquippedWeapon);
+		
+			if (Pawn->IsLocallyControlled())
+			{
+				// 로컬 캐릭터에서 총을 발사하고 반동을 적용할 때 Recoil Transform 계산을 위한 델레게이트 등록
+				WeaponManageComp->OnWeaponRecoilDelegate.AddUObject(this, &ThisClass::ApplyRecoil);
+			}
+		}
+	}
 }
 
 void UFPAnimInstance::RegisterGameplayTagWithProperty(UAbilitySystemComponent* ASC)
@@ -122,6 +128,7 @@ void UFPAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 			UpdateRootYawOffset(DeltaSeconds);
 			UpdateAimDownSight(DeltaSeconds, Character, EquippedWeapon);
 			UpdateFirstPersonSway(DeltaSeconds, Character);
+			UpdateRecoil(DeltaSeconds);
 
 			if (bIsFirstUpdate)
 			{
@@ -139,6 +146,13 @@ void UFPAnimInstance::UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon)
 	{
 		// Caching First Person Right Hand Offset
 		EquippedWeapon->GetFirstPersonRightHandOffset(FirstPersonRightHandLocOffset, FirstPersonRightHandRotOffset);
+		
+		// Caching Recoil Data Asset
+		CurrentRecoilData = UFPAssetManager::GetAssetByTag<UFPRecoilData>(UFPRecoilData::GetRecoilDataTagByWeaponType(EquippedWeapon->GetWeaponTypeTag()));
+	}
+	else
+	{
+		CurrentRecoilData = nullptr;
 	}
 }
 
@@ -403,4 +417,38 @@ void UFPAnimInstance::UpdateFirstPersonSway(float DeltaSeconds, const ACharacter
 		const float TargetJumpSway = FMath::Clamp(Velocity.Z * JumpSwayAmplitude, -MaxJumpSway, MaxJumpSway) * (GameplayTag_IsAimingDownSight ? ADSJumpSwayMultiplier : 1.f) * -1.f;
 		JumpSwayValue = UKismetMathLibrary::FloatSpringInterp(JumpSwayValue, TargetJumpSway, JumpSwaySpringState, 0.3f, 0.7f, DeltaSeconds, 0.006f);
 	}
+}
+
+void UFPAnimInstance::ApplyRecoil()
+{
+	if (!GameplayTag_IsFirstPerson || !CurrentRecoilData)
+	{
+		return;
+	}
+	
+	const float Intensity = CurrentRecoilData->AnimRecoil;
+	const float UpwardMultiplier = GameplayTag_IsAimingDownSight ? CurrentRecoilData->ADSUpwardAnimRecoilMultiplier : 1.f;
+	const float BackwardMultiplier = GameplayTag_IsAimingDownSight ? CurrentRecoilData->ADSBackwardAnimRecoilMultiplier : 1.f; 
+	
+	TargetRecoilUpward = FMath::FRandRange(-2.5f, -5.f) * Intensity * UpwardMultiplier;
+	TargetRecoilBackward = FMath::FRandRange(-1.1f, -2.1f) * Intensity * BackwardMultiplier;
+}
+
+void UFPAnimInstance::UpdateRecoil(float DeltaSeconds)
+{
+	if (!GameplayTag_IsFirstPerson || !CurrentRecoilData)
+	{
+		return;
+	}
+
+	const float RecoilInterpSpeed = CurrentRecoilData->AnimRecoilInterpSpeed;
+	const float RecoilRecoveryInterpSpeed = CurrentRecoilData->AnimRecoilRecoveryInterpSpeed;
+	
+	// Target을 향해 Interp
+	RecoilUpward = FMath::FInterpTo(RecoilUpward, TargetRecoilUpward, DeltaSeconds, RecoilInterpSpeed);
+	RecoilBackward = FMath::FInterpTo(RecoilBackward, TargetRecoilBackward, DeltaSeconds, RecoilInterpSpeed);
+	
+	// Target은 다시 0으로 Interp
+	TargetRecoilUpward = FMath::FInterpTo(TargetRecoilUpward, 0.f, DeltaSeconds, RecoilRecoveryInterpSpeed);
+	TargetRecoilBackward = FMath::FInterpTo(TargetRecoilBackward, 0.f, DeltaSeconds, RecoilRecoveryInterpSpeed);
 }
