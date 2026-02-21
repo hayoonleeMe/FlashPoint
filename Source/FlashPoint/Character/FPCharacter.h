@@ -58,15 +58,6 @@ protected:
 	UPROPERTY()
 	TObjectPtr<UFPAttributeSet> AttributeSet;
 
-public:
-	// DataTag에 해당하는 UFPAbilitySystemData를 ASC에 적용한다.
-	// Server Only
-	void ApplyAbilitySystemData(const FGameplayTag& DataTag);
-
-	// DataId에 해당하는 UFPAbilitySystemData를 ASC에서 제거한다.
-	// Server Only
-	void RemoveAbilitySystemData(const FGameplayTag& DataTag);
-
 protected:
 	// ============================================================================
 	// Camera

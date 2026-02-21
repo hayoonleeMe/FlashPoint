@@ -16,27 +16,10 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag Warehouse_FFA;
 		}
 
-		namespace RecoilData
-		{
-			extern FNativeGameplayTag Pistol;
-			extern FNativeGameplayTag Rifle;
-			extern FNativeGameplayTag Shotgun;
-			extern FNativeGameplayTag SMG;
-			extern FNativeGameplayTag SniperRifle;
-		}
-
-		namespace AbilitySystemData
-		{
-			extern FNativeGameplayTag Default;
-			extern FNativeGameplayTag Pistol;
-			extern FNativeGameplayTag Rifle;
-			extern FNativeGameplayTag Shotgun;
-			extern FNativeGameplayTag SMG;
-			extern FNativeGameplayTag SniperRifle;
-		}
-		
 		extern FNativeGameplayTag InputData;		
-		extern FNativeGameplayTag CosmeticData;		
+		extern FNativeGameplayTag CosmeticData;
+		extern FNativeGameplayTag AbilitySystemData;
+		extern FNativeGameplayTag RecoilData;
 	}
 	
 	namespace Input

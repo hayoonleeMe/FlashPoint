@@ -8,6 +8,33 @@
 #include "FPAssetData.generated.h"
 
 USTRUCT()
+struct FDoubleAssetTag
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag AssetTag;
+	
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag SubTag;
+	
+	bool operator==(const FDoubleAssetTag& Other) const
+	{
+		// SubTag는 비워두는 경우도 지원
+		if (!SubTag.IsValid() && !Other.SubTag.IsValid())
+		{
+			return AssetTag.MatchesTagExact(Other.AssetTag);
+		}
+		return AssetTag.MatchesTagExact(Other.AssetTag) && SubTag.MatchesTagExact(Other.SubTag);
+	}
+	
+	friend uint32 GetTypeHash(const FDoubleAssetTag& Key)
+	{
+		return HashCombine(GetTypeHash(Key.AssetTag), GetTypeHash(Key.SubTag));
+	}
+};
+
+USTRUCT()
 struct FAssetEntry
 {
 	GENERATED_BODY()
@@ -43,8 +70,8 @@ public:
 	// AssetId에 대한 AssetPath를 반환한다.
 	FSoftObjectPath GetAssetPathById(const FName& AssetId) const;
 
-	// AssetId에 대한 AssetPath를 반환한다.
-	FSoftObjectPath GetAssetPathByTag(const FGameplayTag& AssetTag) const;
+	// AssetTag와 SecondTag에 대한 AssetPath를 반환한다.
+	FSoftObjectPath GetAssetPathByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag) const;
 
 	// 모든 Preload할 애셋의 AssetPath TArray를 반환한다.
 	TArray<FSoftObjectPath> GetPreloadAssetPaths() const;
@@ -58,10 +85,10 @@ private:
 
 	UPROPERTY()
 	TMap<FName, FSoftObjectPath> AssetIdToPath;
-
+	
 	UPROPERTY(EditDefaultsOnly)
-	TMap<FGameplayTag, FAssetEntry> AssetTagToEntry;
-
+	TMap<FDoubleAssetTag, FAssetEntry> AssetTagToEntry;
+	
 	UPROPERTY()
-	TMap<FGameplayTag, FSoftObjectPath> AssetTagToPath;
+	TMap<FDoubleAssetTag, FSoftObjectPath> AssetTagToPath;
 };

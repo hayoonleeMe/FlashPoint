@@ -33,11 +33,11 @@ FSoftObjectPath UFPAssetManager::GetAssetPathById(const FName& AssetId)
 	return AssetData->GetAssetPathById(AssetId);
 }
 
-FSoftObjectPath UFPAssetManager::GetAssetPathByTag(const FGameplayTag& AssetTag)
+FSoftObjectPath UFPAssetManager::GetAssetPathByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag)
 {
 	const UFPAssetData* AssetData = Get().LoadedAssetData;
 	check(AssetData);
-	return AssetData->GetAssetPathByTag(AssetTag);
+	return AssetData->GetAssetPathByTag(AssetTag, SubTag);
 }
 
 UObject* UFPAssetManager::LoadSyncByPath(const FSoftObjectPath& AssetPath, bool bKeepInMemory)
@@ -84,12 +84,12 @@ UObject* UFPAssetManager::LoadSyncById(const FName& AssetId, bool bKeepInMemory)
 	return LoadSyncByPath(AssetPath, bKeepInMemory);
 }
 
-UObject* UFPAssetManager::LoadSyncByTag(const FGameplayTag& AssetTag, bool bKeepInMemory)
+UObject* UFPAssetManager::LoadSyncByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag, bool bKeepInMemory)
 {
 	const UFPAssetData* AssetData = Get().LoadedAssetData;
 	check(AssetData);
 	
-	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag);
+	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag, SubTag);
 	return LoadSyncByPath(AssetPath, bKeepInMemory);
 }
 
@@ -133,12 +133,13 @@ void UFPAssetManager::LoadAsyncById(const FName& AssetId, FAsyncLoadCompletedDel
 	LoadAsyncByPath(AssetPath, MoveTemp(AsyncLoadCompletedDelegate), bKeepInMemory);
 }
 
-void UFPAssetManager::LoadAsyncByTag(const FGameplayTag& AssetTag, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate, bool bKeepInMemory)
+void UFPAssetManager::LoadAsyncByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate,
+	bool bKeepInMemory)
 {
 	const UFPAssetData* AssetData = Get().LoadedAssetData;
 	check(AssetData);
 	
-	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag);
+	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag, SubTag);
 	LoadAsyncByPath(AssetPath, MoveTemp(AsyncLoadCompletedDelegate), bKeepInMemory);
 }
 

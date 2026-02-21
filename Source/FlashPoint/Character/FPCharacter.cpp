@@ -9,7 +9,6 @@
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
-#include "Data/FPAssetData.h"
 #include "Data/FPCosmeticData.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -180,26 +179,6 @@ void AFPCharacter::InitAbilitySystem()
 
 	if (HasAuthority())
 	{
-		ApplyAbilitySystemData(FPGameplayTags::Asset::AbilitySystemData::Default);
-	}
-}
-
-void AFPCharacter::ApplyAbilitySystemData(const FGameplayTag& DataTag)
-{
-	check(HasAuthority());
-	
-	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
-	{
-		AbilitySystemData->GiveDataToAbilitySystem(AbilitySystemComponent);
-	}
-}
-
-void AFPCharacter::RemoveAbilitySystemData(const FGameplayTag& DataTag)
-{
-	check(HasAuthority());
-	
-	if (const UFPAbilitySystemData* AbilitySystemData = UFPAssetManager::GetAssetByTag<UFPAbilitySystemData>(DataTag))
-	{
-		AbilitySystemData->RemoveDataFromAbilitySystem(AbilitySystemComponent);
+		UFPAbilitySystemData::GiveDataToAbilitySystem(this, FPGameplayTags::Weapon::Type::Unarmed);
 	}
 }
