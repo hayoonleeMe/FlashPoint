@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "Weapon_Base.generated.h"
 
+class UFPWeaponConfigData;
 class UAbilitySystemComponent;
 class UNiagaraSystem;
 class UNiagaraComponent;
@@ -45,14 +46,8 @@ public:
 
 	const FWeaponEquipInfo& GetEquipInfo() const { return EquipInfo; }
 	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
-
-	float GetMaxDamageRange() const { return MaxDamageRange; }
-	int32 GetBulletsPerCartridge() const { return BulletsPerCartridge; }
-	float GetHeadShotMultiplier() const { return HeadShotMultiplier; }
-	int32 GetMagCapacity() const { return MagCapacity; }
-	FString GetDisplayName() const { return DisplayName; }
-	UTexture2D* GetDisplayIcon() const { return DisplayIcon; }
-
+	UFPWeaponConfigData* GetWeaponConfigData() const { return WeaponConfigData; }
+	
 	void SetServerRemainAmmo(int32 InServerRemainAmmo) { ServerRemainAmmo = InServerRemainAmmo; }
 	int32 GetServerRemainAmmo() const { return ServerRemainAmmo; }
 	
@@ -83,6 +78,8 @@ public:
 	FTransform GetAimDownSightSocketTransform() const;
 	
 protected:
+	virtual void BeginPlay() override;
+	
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent;
 
@@ -127,29 +124,12 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	FGameplayTag WeaponTypeTag;
 
-	// 한 번에 발사되는 총알 수 
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	int32 BulletsPerCartridge;
+	UPROPERTY(Transient)
+	TObjectPtr<UFPWeaponConfigData> WeaponConfigData;
 
-	// 한 탄창 당 총알 수
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	int32 MagCapacity;
-
-	// 최대 사거리
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	float MaxDamageRange;
-
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	float BaseDamage;
-
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	TObjectPtr<UCurveFloat> DamageFallOffCurve;
-
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	float HeadShotMultiplier;
-
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	FName LeftHandAttachSocketName;
+	// 현재 탄창에 남은 총알 수
+	// 서버에서만 유효하다.
+	int32 ServerRemainAmmo = 0;
 	
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	FVector FirstPersonRightHandLocOffset;
@@ -159,16 +139,4 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
 	FName AimDownSightSocketName;
-
-	// 현재 탄창에 남은 총알 수
-	// 서버에서만 유효하다.
-	int32 ServerRemainAmmo = 0;
-
-	// HUD에 표시할 무기 이름
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	FString DisplayName;
-
-	// HUD에 표시할 Icon
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Weapon Config")
-	TObjectPtr<UTexture2D> DisplayIcon;
 };

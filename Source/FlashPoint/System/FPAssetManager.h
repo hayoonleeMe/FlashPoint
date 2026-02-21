@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Engine/AssetManager.h"
 #include "FPAssetManager.generated.h"
 
@@ -30,8 +31,8 @@ public:
 	// AssetId에 해당하는 애셋의 FSoftObjectPath를 반환한다.
 	static FSoftObjectPath GetAssetPathById(const FName& AssetId);
 
-	// AssetTag에 해당하는 애셋의 FSoftObjectPath를 반환한다.
-	static FSoftObjectPath GetAssetPathByTag(const FGameplayTag& AssetTag);
+	// AssetTag와 SubTag에 해당하는 애셋의 FSoftObjectPath를 반환한다.
+	static FSoftObjectPath GetAssetPathByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag = FGameplayTag::EmptyTag);
 
 	// AssetPath에 해당하는 애셋을 동기적으로 로드하고 반환한다.
 	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
@@ -67,20 +68,20 @@ public:
 		return LoadedSubclass;
 	}
 
-	// AssetTag에 해당하는 애셋을 동기적으로 로드하고 반환한다.
+	// AssetTag와 SubTag에 해당하는 애셋을 동기적으로 로드하고 반환한다.
 	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
-	static UObject* LoadSyncByTag(const FGameplayTag& AssetTag, bool bKeepInMemory = true);
+	static UObject* LoadSyncByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag = FGameplayTag::EmptyTag, bool bKeepInMemory = true);
 	
 	template <typename AssetType>
-	static AssetType* GetAssetByTag(const FGameplayTag& AssetTag, bool bKeepInMemory = true)
+	static AssetType* GetAssetByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag = FGameplayTag::EmptyTag, bool bKeepInMemory = true)
 	{
-		return Cast<AssetType>(LoadSyncByTag(AssetTag, bKeepInMemory));
+		return Cast<AssetType>(LoadSyncByTag(AssetTag, SubTag, bKeepInMemory));
 	}
 
 	template <typename ClassType>
-	static TSubclassOf<ClassType> GetSubclassByTag(const FGameplayTag& AssetTag, bool bKeepInMemory = true)
+	static TSubclassOf<ClassType> GetSubclassByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag = FGameplayTag::EmptyTag, bool bKeepInMemory = true)
 	{
-		TSubclassOf<ClassType> LoadedSubclass = Cast<UClass>(LoadSyncByTag(AssetTag, bKeepInMemory));
+		TSubclassOf<ClassType> LoadedSubclass = Cast<UClass>(LoadSyncByTag(AssetTag, SubTag, bKeepInMemory));
 		return LoadedSubclass;
 	}
 
@@ -94,10 +95,10 @@ public:
 	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
 	static void LoadAsyncById(const FName& AssetId, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate = FAsyncLoadCompletedDelegate(), bool bKeepInMemory = true);
 
-	// AssetTag에 해당하는 애셋을 비동기적으로 로드한다.
+	// AssetTag와 SubTag에 해당하는 애셋을 비동기적으로 로드한다.
 	// 로드가 끝나면 AsyncLoadCompletedDelegate가 실행되고, 애셋을 전달한다.
 	// bKeepInMemory가 true면, 로드할 때 LoadedAssets에 저장해 GC에 제거되지 않도록 메모리에 유지한다.
-	static void LoadAsyncByTag(const FGameplayTag& AssetTag, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate = FAsyncLoadCompletedDelegate(), bool bKeepInMemory = true);
+	static void LoadAsyncByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag = FGameplayTag::EmptyTag, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate = FAsyncLoadCompletedDelegate(), bool bKeepInMemory = true);
 
 	// 로드된 모든 애셋을 메모리에서 해제한다.
 	// LoadedAssets에서 제거해 GC에 의해 제거되도록 한다.

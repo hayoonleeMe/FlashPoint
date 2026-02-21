@@ -59,18 +59,20 @@ EDataValidationResult UFPAssetData::IsDataValid(FDataValidationContext& Context)
 
 	for (const auto& Pair : AssetTagToEntry)
 	{
-		const FGameplayTag& AssetTag = Pair.Key;
+		const FGameplayTag& AssetTag = Pair.Key.AssetTag;
+		const FGameplayTag& SubTag = Pair.Key.SubTag;
 		const FSoftObjectPath& AssetPath = Pair.Value.AssetPath;
 
+		// AssetTag만 체크하고 SubTag는 비어있을 수 있도록 구현
 		if (!AssetTag.IsValid())
 		{
-			Context.AddError(FText::FromString(FString::Printf(TEXT("Asset Tag is None"))));
+			Context.AddError(FText::FromString(FString::Printf(TEXT("AssetTag is None"))));
 			Result = EDataValidationResult::Invalid;
 		}
 			
 		if (!AssetPath.IsValid())
 		{
-			Context.AddError(FText::FromString(FString::Printf(TEXT("Asset Path is Invalid : [Asset Tag %s]"), *AssetTag.ToString())));
+			Context.AddError(FText::FromString(FString::Printf(TEXT("Asset Path is Invalid : [AssetTag %s, SubTag %s]"), *AssetTag.ToString(), *SubTag.ToString())));
 			Result = EDataValidationResult::Invalid;
 		}
 	}
@@ -89,10 +91,10 @@ FSoftObjectPath UFPAssetData::GetAssetPathById(const FName& AssetId) const
 	return FSoftObjectPath();
 }
 
-FSoftObjectPath UFPAssetData::GetAssetPathByTag(const FGameplayTag& AssetTag) const
+FSoftObjectPath UFPAssetData::GetAssetPathByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag) const
 {
-	const FSoftObjectPath* PathPtr = AssetTagToPath.Find(AssetTag);
-	if (ensureAlwaysMsgf(PathPtr, TEXT("Can't find AssetPath by AssetTag %s"), *AssetTag.ToString()))
+	const FSoftObjectPath* PathPtr = AssetTagToPath.Find({ AssetTag, SubTag });
+	if (ensureAlwaysMsgf(PathPtr, TEXT("Can't find AssetPath by AssetTag %s, SubTag %s"), *AssetTag.ToString(), *SubTag.ToString()))
 	{
 		return *PathPtr;
 	}

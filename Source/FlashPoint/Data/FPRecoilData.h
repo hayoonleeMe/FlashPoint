@@ -3,28 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "Curves/CurveFloat.h"
 #include "FPRecoilData.generated.h"
 
 /**
  * 반동에 대한 정보를 저장하는 DataAsset
- *
- * DA_AssetData에 Asset.RecoilData GameplayTag로 무기별로 저장된다.
  */
 UCLASS(BlueprintType)
 class FLASHPOINT_API UFPRecoilData : public UDataAsset
 {
 	GENERATED_BODY()
-
-	// Key: Weapon.Type Tag, Value: Asset.RecoilData Tag로 이루어진 Map을 반환한다.
-	static const TMap<FGameplayTag, FGameplayTag>& GetWeaponTypeToRecoilDataTagMap();
 	
 public:
-	// WeaponTypeTag에 해당하는 RecoilData Tag를 반환한다.
-	static FGameplayTag GetRecoilDataTagByWeaponType(const FGameplayTag& WeaponTypeTag);
-	
 	// 수직 반동 세기 커브 (X: 누적 발사 수, Y: 세기)
 	UPROPERTY(EditDefaultsOnly, Category = "Recoil")
 	TObjectPtr<UCurveFloat> VerticalRecoilCurve;

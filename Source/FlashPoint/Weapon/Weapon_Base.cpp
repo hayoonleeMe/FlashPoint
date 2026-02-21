@@ -5,10 +5,13 @@
 
 #include "AbilitySystemBlueprintLibrary.h"
 #include "FPGameplayTags.h"
+#include "FPLogChannels.h"
+#include "FPWeaponConfigData.h"
 #include "NiagaraComponent.h"
 #include "NiagaraDataInterfaceArrayFunctionLibrary.h"
 #include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "System/FPAssetManager.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Weapon_Base) 
 
@@ -21,11 +24,7 @@ AWeapon_Base::AWeapon_Base()
 	SetRootComponent(WeaponMeshComponent);
 	WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMeshComponent->SetHiddenInGame(true);
-
-	BulletsPerCartridge = 1;
-	HeadShotMultiplier = 1.f;
-
-	LeftHandAttachSocketName = TEXT("LeftHandAttach");
+	
 	AimDownSightSocketName = TEXT("AimDownSight");
 }
 
@@ -36,7 +35,7 @@ FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
 
 FTransform AWeapon_Base::GetLeftHandAttachTransform() const
 {
-	return WeaponMeshComponent->GetSocketTransform(LeftHandAttachSocketName);
+	return WeaponMeshComponent->GetSocketTransform(WeaponConfigData->LeftHandAttachSocketName);
 }
 
 void AWeapon_Base::OnEquipped()
@@ -96,6 +95,17 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 	}
 }
 
+void AWeapon_Base::BeginPlay()
+{
+	Super::BeginPlay();
+	
+	WeaponConfigData = UFPAssetManager::GetAssetByTag<UFPWeaponConfigData>(FPGameplayTags::Asset::WeaponConfigData, WeaponTypeTag);
+	if (!ensure(WeaponConfigData))
+	{
+		UE_LOG(LogFP, Warning, TEXT("[%hs] Can't Get WeaponConfigData Asset."), __FUNCTION__);
+	}
+}
+
 void AWeapon_Base::GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutRot) const
 {
 	OutLoc = FirstPersonRightHandLocOffset;
@@ -109,11 +119,11 @@ FTransform AWeapon_Base::GetAimDownSightSocketTransform() const
 
 float AWeapon_Base::GetDamageByDistance(float Distance) const
 {
-	if (DamageFallOffCurve)
+	if (WeaponConfigData->DamageFallOffCurve)
 	{
-		return BaseDamage * DamageFallOffCurve->GetFloatValue(Distance);
+		return WeaponConfigData->BaseDamage * WeaponConfigData->DamageFallOffCurve->GetFloatValue(Distance);
 	}
-	return BaseDamage;
+	return WeaponConfigData->BaseDamage;
 }
 
 UAbilitySystemComponent* AWeapon_Base::GetOwnerASC() const

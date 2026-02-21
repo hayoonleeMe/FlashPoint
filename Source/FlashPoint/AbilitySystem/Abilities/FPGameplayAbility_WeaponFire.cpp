@@ -15,6 +15,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Player/BasePlayerState.h"
+#include "Weapon/FPWeaponConfigData.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameplayAbility_WeaponFire)
 
@@ -288,7 +289,7 @@ FVector UFPGameplayAbility_WeaponFire::GetTargetLocation() const
 	AWeapon_Base* Weapon = GetEquippedWeapon();
 	check(Weapon);
 
-	const float MaxDamageRange = Weapon->GetMaxDamageRange();
+	const float MaxDamageRange = Weapon->GetWeaponConfigData()->MaxDamageRange;
 	
 	// Viewport Size
 	FVector2D ViewportSize;
@@ -337,9 +338,9 @@ void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithSpreadInCartridge(const
 	AWeapon_Base* Weapon = GetEquippedWeapon();
 	check(Weapon);
 	
-	const int32 BulletsPerCartridge = Weapon->GetBulletsPerCartridge();
+	const int32 BulletsPerCartridge = Weapon->GetWeaponConfigData()->BulletsPerCartridge;
 	const float TotalSpreadAmount = WeaponManageComponent->GetCurrentAimSpread();
-	const float MaxDamageRange = Weapon->GetMaxDamageRange();
+	const float MaxDamageRange = Weapon->GetWeaponConfigData()->MaxDamageRange;
 	const FVector TargetDir = (TargetLoc - TraceStart).GetSafeNormal();
 	const FVector BaseSpreadCalcLoc = TraceStart + TargetDir * SpreadCalcDistance;
 
@@ -466,7 +467,7 @@ void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(FGameplayAbilityTargetDa
 					const bool bHeadShot = HitData->HitResult.BoneName == TEXT("head");
 					if (bHeadShot)
 					{
-						BaseDamage *= Weapon->GetHeadShotMultiplier();
+						BaseDamage *= Weapon->GetWeaponConfigData()->HeadShotMultiplier;
 						NET_LOG(GetAvatarActorFromActorInfo(), LogTemp, Warning, TEXT("HeadShot"));
 					}
 

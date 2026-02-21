@@ -7,6 +7,7 @@
 #include "FPLogChannels.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
+#include "Weapon/FPWeaponConfigData.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
 
@@ -44,10 +45,11 @@ bool UFPGameplayAbility_Reload::CanActivateAbility(const FGameplayAbilitySpecHan
 	}
 
 	// 이미 탄창이 가득찼는지 체크
-	if (WeaponManageComponent->GetAmmoTagStacks().GetStackCount(FPGameplayTags::Weapon::Data::Ammo) == Weapon->GetMagCapacity())
+	if (WeaponManageComponent->GetAmmoTagStacks().GetStackCount(FPGameplayTags::Weapon::Data::Ammo) == Weapon->GetWeaponConfigData()->MagCapacity)
 	{
 		return false;
 	}
+	
 
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
@@ -111,7 +113,7 @@ void UFPGameplayAbility_Reload::Reload() const
 			FGameplayTagStackContainer& AmmoTagStacks = WeaponManageComponent->GetAmmoTagStacks();
 			int32 Ammo = AmmoTagStacks.GetStackCount(FPGameplayTags::Weapon::Data::Ammo);
 			int32 ReserveAmmo = AmmoTagStacks.GetStackCount(Weapon->GetWeaponTypeTag());
-			const int32 MagCapacity = Weapon->GetMagCapacity();
+			const int32 MagCapacity = Weapon->GetWeaponConfigData()->MagCapacity;
 
 			int32 Amount = FMath::Min(MagCapacity - Ammo, ReserveAmmo);
 			Ammo += Amount;
