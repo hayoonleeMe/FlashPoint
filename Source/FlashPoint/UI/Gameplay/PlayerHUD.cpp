@@ -17,6 +17,7 @@
 #include "GameFramework/PlayerState.h"
 #include "Player/BasePlayerController.h"
 #include "Scoreboard/MiniScoreboard.h"
+#include "Weapon/FPWeaponConfigData.h"
 #include "Weapon/WeaponManageComponent.h"
 #include "Weapon/Weapon_Base.h"
 
@@ -142,8 +143,8 @@ void UPlayerHUD::OnWeaponEquipStateChanged(int32 ActiveSlotIndex, AWeapon_Base* 
 		WeaponSlotImages[ActiveSlotIndex]->SetColorAndOpacity(FLinearColor::White);
 		if (EquippedWeapon)
 		{
-			WeaponSlotImages[ActiveSlotIndex]->SetBrushFromTexture(EquippedWeapon->GetDisplayIcon(), true);
-			Text_WeaponName->SetText(FText::FromString(EquippedWeapon->GetDisplayName()));
+			WeaponSlotImages[ActiveSlotIndex]->SetBrushFromTexture(EquippedWeapon->GetWeaponConfigData()->DisplayIcon, true);
+			Text_WeaponName->SetText(FText::FromString(EquippedWeapon->GetWeaponConfigData()->DisplayName));
 		}
 		else
 		{

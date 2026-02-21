@@ -20,6 +20,7 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag CosmeticData;
 		extern FNativeGameplayTag AbilitySystemData;
 		extern FNativeGameplayTag RecoilData;
+		extern FNativeGameplayTag WeaponConfigData;
 	}
 	
 	namespace Input

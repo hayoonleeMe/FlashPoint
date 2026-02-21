@@ -18,6 +18,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(CosmeticData, "Asset.CosmeticData");
 		UE_DEFINE_GAMEPLAY_TAG(AbilitySystemData, "Asset.AbilitySystemData");
 		UE_DEFINE_GAMEPLAY_TAG(RecoilData, "Asset.RecoilData");
+		UE_DEFINE_GAMEPLAY_TAG(WeaponConfigData, "Asset.WeaponConfigData");
 	}
 	
 	namespace Input
