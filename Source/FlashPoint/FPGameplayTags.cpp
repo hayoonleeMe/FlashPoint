@@ -13,28 +13,11 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Warehouse_TDM, "Asset.Level.Warehouse_TDM");
 			UE_DEFINE_GAMEPLAY_TAG(Warehouse_FFA, "Asset.Level.Warehouse_FFA");
 		}
-
-		namespace RecoilData
-		{
-			UE_DEFINE_GAMEPLAY_TAG(Pistol, "Asset.RecoilData.Pistol");
-			UE_DEFINE_GAMEPLAY_TAG(Rifle, "Asset.RecoilData.Rifle");
-			UE_DEFINE_GAMEPLAY_TAG(Shotgun, "Asset.RecoilData.Shotgun");
-			UE_DEFINE_GAMEPLAY_TAG(SMG, "Asset.RecoilData.SMG");
-			UE_DEFINE_GAMEPLAY_TAG(SniperRifle, "Asset.RecoilData.SniperRifle");
-		}
-
-		namespace AbilitySystemData
-		{
-			UE_DEFINE_GAMEPLAY_TAG(Default, "Asset.AbilitySystemData.Default");
-			UE_DEFINE_GAMEPLAY_TAG(Pistol, "Asset.AbilitySystemData.Pistol");
-			UE_DEFINE_GAMEPLAY_TAG(Rifle, "Asset.AbilitySystemData.Rifle");
-			UE_DEFINE_GAMEPLAY_TAG(Shotgun, "Asset.AbilitySystemData.Shotgun");
-			UE_DEFINE_GAMEPLAY_TAG(SMG, "Asset.AbilitySystemData.SMG");
-			UE_DEFINE_GAMEPLAY_TAG(SniperRifle, "Asset.AbilitySystemData.SniperRifle");
-		}
 		
 		UE_DEFINE_GAMEPLAY_TAG(InputData, "Asset.InputData");
 		UE_DEFINE_GAMEPLAY_TAG(CosmeticData, "Asset.CosmeticData");
+		UE_DEFINE_GAMEPLAY_TAG(AbilitySystemData, "Asset.AbilitySystemData");
+		UE_DEFINE_GAMEPLAY_TAG(RecoilData, "Asset.RecoilData");
 	}
 	
 	namespace Input
