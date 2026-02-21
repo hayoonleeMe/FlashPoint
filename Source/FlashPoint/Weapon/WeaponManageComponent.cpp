@@ -6,6 +6,7 @@
 #include "AbilitySystemComponent.h"
 #include "FPGameplayTags.h"
 #include "FPLogChannels.h"
+#include "FPWeaponConfigData.h"
 #include "Data/FPAbilitySystemData.h"
 #include "Data/FPCosmeticData.h"
 #include "Data/FPRecoilData.h"
@@ -230,7 +231,7 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, EquippedWeapon->GetWeaponTypeTag());
 
 		// 장착한 무기의 탄창에 있는 총알 수로 업데이트
-		AmmoTagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, EquippedWeapon->GetMagCapacity());
+		AmmoTagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, EquippedWeapon->GetWeaponConfigData()->MagCapacity);
 
 		// Reserve Ammo를 HUD에 업데이트하기 위해 동일한 값으로 설정
 		AmmoTagStacks.AddTagStack(EquippedWeapon->GetWeaponTypeTag(), AmmoTagStacks.GetStackCount(EquippedWeapon->GetWeaponTypeTag()));
