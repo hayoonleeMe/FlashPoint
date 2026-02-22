@@ -223,9 +223,8 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 			AttachTargetComp = Character->GetMesh();
 		}
 
-		const FWeaponEquipInfo& EquipInfo = EquippedWeapon->GetEquipInfo();
-		EquippedWeapon->SetActorRelativeTransform(EquipInfo.AttachTransform);
-		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
+		EquippedWeapon->SetActorRelativeTransform(EquippedWeapon->GetWeaponConfigData()->AttachTransform);
+		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquippedWeapon->GetWeaponConfigData()->AttachSocketName);
 
 		// Give Data to Owner ASC
 		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, EquippedWeapon->GetWeaponTypeTag());
@@ -259,9 +258,8 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 			AttachTargetComp = Character->GetMesh();
 		}
 
-		const FWeaponEquipInfo& EquipInfo = EquippedWeapon->GetEquipInfo();
-		EquippedWeapon->SetActorRelativeTransform(EquipInfo.AttachTransform);
-		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquipInfo.AttachSocketName);
+		EquippedWeapon->SetActorRelativeTransform(EquippedWeapon->GetWeaponConfigData()->AttachTransform);
+		EquippedWeapon->AttachToComponent(AttachTargetComp, FAttachmentTransformRules::KeepRelativeTransform, EquippedWeapon->GetWeaponConfigData()->AttachSocketName);
 
 		// Give Data to Owner ASC
 		UFPAbilitySystemData::GiveDataToAbilitySystem(OwningPawn, EquippedWeapon->GetWeaponTypeTag());
@@ -374,9 +372,8 @@ void UWeaponManageComponent::HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEqu
 	UAnimMontage* WeaponEquipMontage = nullptr;
 	if (Weapon)
 	{
-		const FWeaponEquipInfo& WeaponEquipInfo = Weapon->GetEquipInfo();
-		WeaponAnimLayerClass = bIsEquip ? CosmeticData->SelectAnimLayer(WeaponEquipInfo.CosmeticTags) : CosmeticData->GetDefaultAnimLayer();
-		WeaponEquipMontage = bIsEquip ? WeaponEquipInfo.EquipMontage : WeaponEquipInfo.UnEquipMontage;
+		WeaponAnimLayerClass = bIsEquip ? CosmeticData->SelectAnimLayer(EquippedWeapon->GetWeaponConfigData()->CosmeticTags) : CosmeticData->GetDefaultAnimLayer();
+		WeaponEquipMontage = bIsEquip ? EquippedWeapon->GetWeaponConfigData()->EquipMontage : EquippedWeapon->GetWeaponConfigData()->UnEquipMontage;
 	}
 	else
 	{

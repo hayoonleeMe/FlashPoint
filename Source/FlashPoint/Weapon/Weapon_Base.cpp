@@ -71,7 +71,7 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 {
 	if (!TracerComponent || !TracerComponent->IsActive())
 	{
-		TracerComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(TracerSystem, WeaponMeshComponent, TEXT("MuzzleFlash"), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset, true);
+		TracerComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(WeaponConfigData->TracerSystem, WeaponMeshComponent, TEXT("MuzzleFlash"), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset, true);
 		bTracerTrigger = false;
 	}
 

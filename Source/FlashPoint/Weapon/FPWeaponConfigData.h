@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "FPWeaponConfigData.generated.h"
+
+class UNiagaraSystem;
 
 /**
  * 무기 데이터를 저장하는 Data Asset
@@ -50,4 +53,26 @@ public:
 	// HUD에 표시할 Icon
 	UPROPERTY(EditDefaultsOnly, Category="UI")
 	TObjectPtr<UTexture2D> DisplayIcon;
+	
+	// 무기를 장착할 캐릭터 메시의 소켓 이름
+	UPROPERTY(EditDefaultsOnly, Category="Equip")
+	FName AttachSocketName;
+	
+	// 무기를 장착할 Relative Transform
+	UPROPERTY(EditDefaultsOnly, Category="Equip")
+	FTransform AttachTransform;
+
+	UPROPERTY(EditDefaultsOnly, Category="Equip")
+	TObjectPtr<UAnimMontage> EquipMontage;
+
+	UPROPERTY(EditDefaultsOnly, Category="Equip")
+	TObjectPtr<UAnimMontage> UnEquipMontage;
+
+	// CosmeticData에서 필요한 정보를 쿼리할 태그
+	UPROPERTY(EditDefaultsOnly, Category="Equip")
+	FGameplayTagContainer CosmeticTags;
+	
+	// 총알 궤적을 나타낼 NiagaraSystem
+	UPROPERTY(EditDefaultsOnly, Category="Fire Effects")
+	TObjectPtr<UNiagaraSystem> TracerSystem;
 };

@@ -13,30 +13,6 @@ class UNiagaraSystem;
 class UNiagaraComponent;
 
 /**
- * 무기 장착에 필요한 정보를 저장하는 구조체
- */
-USTRUCT(BlueprintType)
-struct FWeaponEquipInfo
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly)
-	FName AttachSocketName;
-	
-	UPROPERTY(EditDefaultsOnly)
-	FTransform AttachTransform;
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UAnimMontage> EquipMontage;
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UAnimMontage> UnEquipMontage;
-
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTagContainer CosmeticTags;
-};
-
-/**
  * 무기를 정의하는 기본 액터 클래스
  */
 UCLASS()
@@ -47,7 +23,6 @@ class FLASHPOINT_API AWeapon_Base : public AActor
 public:
 	AWeapon_Base();
 
-	const FWeaponEquipInfo& GetEquipInfo() const { return EquipInfo; }
 	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
 	UFPWeaponConfigData* GetWeaponConfigData() const { return WeaponConfigData; }
 	
@@ -90,14 +65,6 @@ protected:
 		return Cast<T>(GetOwnerASC());
 	}
 
-	// ============================================================================
-	// Equip
-	// ============================================================================
-	
-	// 장착에 필요한 정보 
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Equip")
-	FWeaponEquipInfo EquipInfo;
-
 	// 일정 시간 뒤 무기를 다시 표시할 때 사용
 	FTimerHandle ShowWeaponTimerHandle;
 
@@ -107,9 +74,6 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UNiagaraComponent> TracerComponent;
-
-	UPROPERTY(EditDefaultsOnly, Category="FlashPoint|Fire Effects")
-	TObjectPtr<UNiagaraSystem> TracerSystem;
 
 	// Tracer를 표시하는 Trigger 변수
 	// 처음 true로 설정된 뒤, 값이 바뀔 때마다 Tracer를 표시 
