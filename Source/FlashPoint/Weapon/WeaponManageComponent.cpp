@@ -368,16 +368,12 @@ void UWeaponManageComponent::HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEqu
 	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetByTag<UFPCosmeticData>(FPGameplayTags::Asset::CosmeticData);
 	check(CosmeticData);
 	
-	TSubclassOf<UAnimInstance> WeaponAnimLayerClass = nullptr;
+	TSubclassOf<UAnimInstance> WeaponAnimLayerClass = CosmeticData->GetDefaultAnimLayer();
 	UAnimMontage* WeaponEquipMontage = nullptr;
 	if (Weapon)
 	{
 		WeaponAnimLayerClass = bIsEquip ? CosmeticData->SelectAnimLayer(EquippedWeapon->GetWeaponConfigData()->CosmeticTags) : CosmeticData->GetDefaultAnimLayer();
 		WeaponEquipMontage = bIsEquip ? EquippedWeapon->GetWeaponConfigData()->EquipMontage : EquippedWeapon->GetWeaponConfigData()->UnEquipMontage;
-	}
-	else
-	{
-		WeaponAnimLayerClass = CosmeticData->GetDefaultAnimLayer();
 	}
 
 	if (!WeaponAnimLayerClass)
