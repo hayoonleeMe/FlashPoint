@@ -244,6 +244,8 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		EquippedWeapon->OnEquipped();
 
 		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
+
+		UpdateWeaponEquipTag(true);
 	}
 }
 
@@ -278,6 +280,12 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 		EquippedWeapon->OnEquipped();
 
 		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
+		
+		UpdateWeaponEquipTag(true);
+	}
+	else
+	{
+		UpdateWeaponEquipTag(false);
 	}
 }
 
@@ -298,6 +306,8 @@ void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 			
 			// 슬롯에서 제거
 			WeaponSlots[ActiveSlotIndex] = nullptr;
+			
+			UpdateWeaponEquipTag(false);
 		}
 
 		// 탄창에 남은 총알 수 저장
@@ -351,10 +361,39 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 		{
 			UE_LOG(LogFP, Error, TEXT("[%hs] No RecoilData found for equipped weapon."), __FUNCTION__);
 		}
+		
+		UpdateWeaponEquipTag(true);
+	}
+	else
+	{
+		UpdateWeaponEquipTag(false);
 	}
 
 	OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
 	UpdateCurrentAimSpread();
+}
+
+void UWeaponManageComponent::UpdateWeaponEquipTag(bool bEquipped) const
+{
+	if (!ensure(OwnerASC))
+	{
+		return;
+	}
+	
+	if (bEquipped)
+	{
+		if (!OwnerASC->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsEquippingWeapon))
+		{
+			OwnerASC->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsEquippingWeapon);
+		}
+	}
+	else
+	{
+		if (OwnerASC->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsEquippingWeapon))
+		{
+			OwnerASC->RemoveLooseGameplayTag(FPGameplayTags::CharacterState::IsEquippingWeapon);
+		}
+	}
 }
 
 void UWeaponManageComponent::OnRep_WeaponEquipStateUpdateCounter()

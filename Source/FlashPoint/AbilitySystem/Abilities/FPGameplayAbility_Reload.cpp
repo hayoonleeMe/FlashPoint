@@ -4,7 +4,6 @@
 #include "FPGameplayAbility_Reload.h"
 
 #include "FPGameplayTags.h"
-#include "FPLogChannels.h"
 #include "Abilities/Tasks/AbilityTask_PlayMontageAndWait.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayEvent.h"
 #include "Weapon/FPWeaponConfigData.h"
@@ -19,6 +18,7 @@ UFPGameplayAbility_Reload::UFPGameplayAbility_Reload()
 	ActivationOwnedTags.AddTag(FPGameplayTags::Weapon::NoFire);
 	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::WeaponFire);
 	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::AimDownSight);
+	ActivationRequiredTags.AddTag(FPGameplayTags::CharacterState::IsEquippingWeapon);
 
 	PlayRate = 1.f;
 }
@@ -26,17 +26,18 @@ UFPGameplayAbility_Reload::UFPGameplayAbility_Reload()
 bool UFPGameplayAbility_Reload::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
                                                    const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
-	// 장착 중인 무기가 유효한지 체크
 	const AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
 	UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(AvatarActor);
-	if (!WeaponManageComponent || !WeaponManageComponent->HasValidEquippedWeapon())
+	if (!WeaponManageComponent)
 	{
-		UE_LOG(LogFP, Warning, TEXT("[%hs] Can't activate ability because of invalid equipped weapon."), __FUNCTION__);
 		return false;
 	}
 	
-	// valid
 	const AWeapon_Base* Weapon = WeaponManageComponent->GetEquippedWeapon();
+	if (!IsValid(Weapon))
+	{
+		return false;
+	}
 
 	// 최소한의 ReserveAmmo가 있는지 체크
 	if (WeaponManageComponent->GetAmmoTagStacks().GetStackCount(Weapon->GetWeaponTypeTag()) < 1)
@@ -50,7 +51,6 @@ bool UFPGameplayAbility_Reload::CanActivateAbility(const FGameplayAbilitySpecHan
 		return false;
 	}
 	
-
 	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 

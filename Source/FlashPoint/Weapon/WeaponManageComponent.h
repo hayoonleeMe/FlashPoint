@@ -116,6 +116,9 @@ private:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon);
+	
+	// 무기를 장착 중임을 나타내는 태그를 업데이트한다.
+	void UpdateWeaponEquipTag(bool bEquipped) const;
 
 	// 슬롯 변경, 장착 무기 변경 등 Equip State 변경을 알리기 위한 트리거 프로퍼티 
 	UPROPERTY(ReplicatedUsing=OnRep_WeaponEquipStateUpdateCounter)

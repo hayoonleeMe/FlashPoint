@@ -24,6 +24,7 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 	AbilityTags.AddTag(FPGameplayTags::Ability::WeaponFire);
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState::IsFiring);
 	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon::NoFire);
+	ActivationRequiredTags.AddTag(FPGameplayTags::CharacterState::IsEquippingWeapon);
 	
 	// Sprint 중 발사 시 Sprint 취소
 	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::Sprint);
@@ -32,21 +33,6 @@ UFPGameplayAbility_WeaponFire::UFPGameplayAbility_WeaponFire()
 
 	SpreadCalcDistance = 1500.f;
 	SpreadDistribution = 1.f;
-}
-
-bool UFPGameplayAbility_WeaponFire::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
-	const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
-{
-	// 장착 중인 무기가 유효한지 체크
-	const AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
-	const UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(AvatarActor);
-	if (!WeaponManageComponent || !WeaponManageComponent->HasValidEquippedWeapon())
-	{
-		UE_LOG(LogFP, Warning, TEXT("[%hs] Can't activate ability because of invalid equipped weapon."), __FUNCTION__);
-		return false;
-	}
-
-	return Super::CanActivateAbility(Handle, ActorInfo, SourceTags, TargetTags, OptionalRelevantTags);
 }
 
 void UFPGameplayAbility_WeaponFire::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,

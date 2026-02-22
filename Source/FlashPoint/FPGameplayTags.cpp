@@ -78,6 +78,7 @@ namespace FPGameplayTags
 		UE_DEFINE_GAMEPLAY_TAG(IsMovingForwardFromInput, "CharacterState.IsMovingForwardFromInput");
 		UE_DEFINE_GAMEPLAY_TAG(IsFirstPerson, "CharacterState.IsFirstPerson");
 		UE_DEFINE_GAMEPLAY_TAG(IsAimingDownSight, "CharacterState.IsAimingDownSight");
+		UE_DEFINE_GAMEPLAY_TAG(IsEquippingWeapon, "CharacterState.IsEquippingWeapon");
 	}
 
 	namespace Weapon

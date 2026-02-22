@@ -5,7 +5,6 @@
 
 #include "AbilitySystemComponent.h"
 #include "FPGameplayTags.h"
-#include "FPLogChannels.h"
 #include "Character/FPCharacter.h"
 #include "Component/UIManageComponent.h"
 #include "UI/Gameplay/PlayerHUD.h"
@@ -19,6 +18,7 @@ UFPGameplayAbility_AimDownSight::UFPGameplayAbility_AimDownSight()
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState::IsAimingDownSight);
 	ActivationBlockedTags.AddTag(FPGameplayTags::Weapon::NoFire);
 	CancelAbilitiesWithTag.AddTag(FPGameplayTags::Ability::Sprint);
+	ActivationRequiredTags.AddTag(FPGameplayTags::CharacterState::IsEquippingWeapon);
 }
 
 void UFPGameplayAbility_AimDownSight::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -30,12 +30,10 @@ void UFPGameplayAbility_AimDownSight::InputReleased(const FGameplayAbilitySpecHa
 bool UFPGameplayAbility_AimDownSight::CanActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
 	const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
-	// 장착 중인 무기가 유효한지 체크
-	const AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
-	const UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(AvatarActor);
-	if (!WeaponManageComponent || !WeaponManageComponent->HasValidEquippedWeapon())
+	// 이전 ADS가 끝나 다시 시작할 수 있는지 체크
+	const AFPCharacter* FPCharacter = Cast<AFPCharacter>(ActorInfo->AvatarActor);
+	if (!IsValid(FPCharacter) || !FPCharacter->CanStartAimDownSight())
 	{
-		UE_LOG(LogFP, Warning, TEXT("[%hs] Can't activate ability because of invalid equipped weapon."), __FUNCTION__);
 		return false;
 	}
 	
