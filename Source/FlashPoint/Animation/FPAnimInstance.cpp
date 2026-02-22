@@ -148,7 +148,7 @@ void UFPAnimInstance::UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon)
 		EquippedWeapon->GetFirstPersonRightHandOffset(FirstPersonRightHandLocOffset, FirstPersonRightHandRotOffset);
 		
 		// Caching Recoil Data Asset
-		CurrentRecoilData = UFPAssetManager::GetAssetByTag<UFPRecoilData>(UFPRecoilData::GetRecoilDataTagByWeaponType(EquippedWeapon->GetWeaponTypeTag()));
+		CurrentRecoilData = UFPAssetManager::GetAssetByTag<UFPRecoilData>(FPGameplayTags::Asset::RecoilData, EquippedWeapon->GetWeaponTypeTag());
 	}
 	else
 	{

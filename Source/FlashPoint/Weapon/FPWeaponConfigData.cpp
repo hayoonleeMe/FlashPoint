@@ -2,3 +2,11 @@
 
 
 #include "FPWeaponConfigData.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(FPWeaponConfigData)
+
+UFPWeaponConfigData::UFPWeaponConfigData()
+{
+	LeftHandAttachSocketName = TEXT("LeftHandAttach");
+	AimDownSightSocketName = TEXT("AimDownSight");
+}

@@ -25,7 +25,6 @@ AWeapon_Base::AWeapon_Base()
 	WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMeshComponent->SetHiddenInGame(true);
 	
-	AimDownSightSocketName = TEXT("AimDownSight");
 }
 
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
@@ -73,7 +72,7 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 {
 	if (!TracerComponent || !TracerComponent->IsActive())
 	{
-		TracerComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(TracerSystem, WeaponMeshComponent, TEXT("MuzzleFlash"), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset, true);
+		TracerComponent = UNiagaraFunctionLibrary::SpawnSystemAttached(WeaponConfigData->TracerSystem, WeaponMeshComponent, TEXT("MuzzleFlash"), FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::KeepRelativeOffset, true);
 		bTracerTrigger = false;
 	}
 
@@ -108,8 +107,8 @@ void AWeapon_Base::BeginPlay()
 
 void AWeapon_Base::GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutRot) const
 {
-	OutLoc = FirstPersonRightHandLocOffset;
-	OutRot = FirstPersonRightHandRotOffset;
+	OutLoc = WeaponConfigData->FirstPersonRightHandLocOffset;
+	OutRot = WeaponConfigData->FirstPersonRightHandRotOffset;
 }
 
 FTransform AWeapon_Base::GetAimDownSightSocketTransform() const
