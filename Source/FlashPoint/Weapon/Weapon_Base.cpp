@@ -24,7 +24,17 @@ AWeapon_Base::AWeapon_Base()
 	SetRootComponent(WeaponMeshComponent);
 	WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	WeaponMeshComponent->SetHiddenInGame(true);
+}
+
+void AWeapon_Base::Destroyed()
+{
+	// 클라에선 장착 중인 상태였다면 제거되기 전에 장착해제 로직 수행
+	if (!HasAuthority() && GetOwner())
+	{
+		OnUnEquipped();
+	}
 	
+	Super::Destroyed();
 }
 
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const

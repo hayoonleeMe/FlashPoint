@@ -299,17 +299,6 @@ void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 		// Remove Data from Owner ASC
 		UFPAbilitySystemData::RemoveDataFromAbilitySystem(GetOwner(), EquippedWeapon->GetWeaponTypeTag());
 
-		if (bDestroy)
-		{
-			// 클라이언트에서 장착 해제한 무기 액터의 OnUnEquipped() 호출을 보장하기 위해 일정 시간 뒤에 Destroy
-			EquippedWeapon->SetLifeSpan(5.f);
-			
-			// 슬롯에서 제거
-			WeaponSlots[ActiveSlotIndex] = nullptr;
-			
-			UpdateWeaponEquipTag(false);
-		}
-
 		// 탄창에 남은 총알 수 저장
 		EquippedWeapon->SetServerRemainAmmo(AmmoTagStacks.GetStackCount(FPGameplayTags::Weapon::Data::Ammo));
 
@@ -317,8 +306,18 @@ void UWeaponManageComponent::UnEquipWeapon(bool bDestroy)
 		AmmoTagStacks.AddTagStack(FPGameplayTags::Weapon::Data::Ammo, 0);
 
 		EquippedWeapon->OnUnEquipped();
+		
+		if (bDestroy)
+		{
+			EquippedWeapon->Destroy();
+			
+			// 슬롯에서 제거
+			WeaponSlots[ActiveSlotIndex] = nullptr;
+			
+			UpdateWeaponEquipTag(false);
+		}
+		
 		EquippedWeapon = nullptr;
-
 		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
 	}
 }
@@ -327,22 +326,12 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 {
 	if (IsValid(UnEquippedWeapon))
 	{
-		if (!EquippedWeapon)
-		{
-			// 새롭게 장착한 무기가 없고 장착 해제만 했을 때만 Unarmed로 업데이트
-			// 새로 장착할 무기가 있다면, 새 무기로 덮어씌어지므로 여기선 무시
-			HandleWeaponEquip(UnEquippedWeapon, false);
-		}
-		
-		// 클라이언트에서 장착 해제된 무기 처리
+		// 이전에 장착했던 무기가 슬롯에 존재하므로 장착 해제 로직 수행
 		UnEquippedWeapon->OnUnEquipped();
 	}
 	
 	// 장착 무기 변경 시 반동 데이터 초기화
 	ClearRecoil();
-
-	// UnEquip에 따른 WeaponOffset 초기화
-	AimSpreadWeaponOffset = 0.f;
 	
 	if (IsValid(EquippedWeapon))
 	{
@@ -366,6 +355,9 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 	}
 	else
 	{
+		// 새롭게 장착한 무기가 없고 장착 해제만 했을 때만 Unarmed로 업데이트
+		HandleWeaponEquip(nullptr);
+		
 		UpdateWeaponEquipTag(false);
 	}
 
@@ -521,6 +513,7 @@ void UWeaponManageComponent::ClearRecoil()
 	bShouldApplyRecoil = bShouldApplyRecovery = false;
 	CurrentRecoilData = nullptr;
 
+	AimSpreadWeaponOffset = 0.f;
 	AimSpreadRecoilOffset = 0.f;
 	UpdateCurrentAimSpread();
 }

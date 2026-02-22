@@ -21,6 +21,8 @@ class FLASHPOINT_API AWeapon_Base : public AActor
 
 public:
 	AWeapon_Base();
+	
+	virtual void Destroyed() override;
 
 	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
 	UFPWeaponConfigData* GetWeaponConfigData() const { return WeaponConfigData; }
