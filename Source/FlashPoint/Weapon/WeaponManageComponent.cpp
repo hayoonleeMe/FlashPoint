@@ -127,7 +127,7 @@ void UWeaponManageComponent::ServerEquipWeaponAtSlot_Implementation(int32 SlotNu
 	// Armed -> Unarmed
 	if (EquippedWeapon && !WeaponSlots[SlotNumber - 1])
 	{
-		HandleWeaponEquip(EquippedWeapon, false);
+		HandleWeaponEquip(EquippedWeapon, EWeaponEquipMethod::UnEquip);
 	}
 	
 	// 현재 무기 장착 중이면 장착 해제
@@ -167,7 +167,7 @@ void UWeaponManageComponent::ServerUnEquipWeapon_Implementation()
 	// Armed -> Unarmed
 	if (EquippedWeapon)
 	{
-		HandleWeaponEquip(EquippedWeapon, false);
+		HandleWeaponEquip(EquippedWeapon, EWeaponEquipMethod::UnEquip);
 	}
 	
 	UnEquipWeapon(true);
@@ -192,7 +192,7 @@ void UWeaponManageComponent::BeginPlay()
 	// 초기 Anim Layer 설정
 	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetByTag<UFPCosmeticData>(FPGameplayTags::Asset::CosmeticData);
 	check(CosmeticData);
-	HandleWeaponEquip(nullptr);
+	HandleWeaponEquip(nullptr, EWeaponEquipMethod::Initial);
 
 	// Bind Callback
 	AmmoTagStacks.OnTagStackChangedDelegate.AddUObject(this, &ThisClass::OnAmmoTagStackChanged);
@@ -240,7 +240,7 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		// Reserve Ammo를 HUD에 업데이트하기 위해 동일한 값으로 설정
 		AmmoTagStacks.AddTagStack(EquippedWeapon->GetWeaponTypeTag(), AmmoTagStacks.GetStackCount(EquippedWeapon->GetWeaponTypeTag()));
 		
-		HandleWeaponEquip(EquippedWeapon, true);
+		HandleWeaponEquip(EquippedWeapon, EWeaponEquipMethod::Equip);
 		EquippedWeapon->OnEquipped();
 
 		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
@@ -276,7 +276,7 @@ void UWeaponManageComponent::EquipWeaponInternal(AWeapon_Base* WeaponInSlot)
 		// Reserve Ammo를 HUD에 업데이트하기 위해 동일한 값으로 설정
 		AmmoTagStacks.AddTagStack(EquippedWeapon->GetWeaponTypeTag(), AmmoTagStacks.GetStackCount(EquippedWeapon->GetWeaponTypeTag()));
 		
-		HandleWeaponEquip(EquippedWeapon, true);
+		HandleWeaponEquip(EquippedWeapon, EWeaponEquipMethod::Equip);
 		EquippedWeapon->OnEquipped();
 
 		OnEquippedWeaponChanged.Broadcast(EquippedWeapon);
@@ -335,7 +335,7 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 	
 	if (IsValid(EquippedWeapon))
 	{
-		HandleWeaponEquip(EquippedWeapon, true);
+		HandleWeaponEquip(EquippedWeapon, EWeaponEquipMethod::Equip);
 		
 		// 클라이언트에서 장착된 무기 처리
 		EquippedWeapon->OnEquipped();
@@ -356,7 +356,7 @@ void UWeaponManageComponent::OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon
 	else
 	{
 		// 새롭게 장착한 무기가 없고 장착 해제만 했을 때만 Unarmed로 업데이트
-		HandleWeaponEquip(nullptr);
+		HandleWeaponEquip(nullptr, EWeaponEquipMethod::UnEquip);
 		
 		UpdateWeaponEquipTag(false);
 	}
@@ -393,7 +393,7 @@ void UWeaponManageComponent::OnRep_WeaponEquipStateUpdateCounter()
 	OnWeaponEquipStateChangedDelegate.Broadcast(ActiveSlotIndex, EquippedWeapon);
 }
 
-void UWeaponManageComponent::HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEquip)
+void UWeaponManageComponent::HandleWeaponEquip(AWeapon_Base* Weapon, EWeaponEquipMethod EquipMethod)
 {
 	if (!OwnerCharacter || !OwnerCharacterMesh)
 	{
@@ -403,36 +403,40 @@ void UWeaponManageComponent::HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEqu
 	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetByTag<UFPCosmeticData>(FPGameplayTags::Asset::CosmeticData);
 	check(CosmeticData);
 	
+	const bool bIsEquip = EquipMethod == EWeaponEquipMethod::Equip;
+	
 	TSubclassOf<UAnimInstance> WeaponAnimLayerClass = CosmeticData->GetDefaultAnimLayer();
-	UAnimMontage* WeaponEquipMontage = nullptr;
+	UAnimMontage* EquipMontage = CosmeticData->DefaultUnEquipMontage;
 	if (Weapon)
 	{
 		WeaponAnimLayerClass = bIsEquip ? CosmeticData->SelectAnimLayer(Weapon->GetWeaponConfigData()->CosmeticTags) : CosmeticData->GetDefaultAnimLayer();
-		WeaponEquipMontage = bIsEquip ? Weapon->GetWeaponConfigData()->EquipMontage : Weapon->GetWeaponConfigData()->UnEquipMontage;
+		if (UAnimMontage* WeaponEquipMontage = bIsEquip ? Weapon->GetWeaponConfigData()->EquipMontage : Weapon->GetWeaponConfigData()->UnEquipMontage)
+		{
+			// 유효한 몽타주가 설정돼있을 때만 사용
+			EquipMontage = WeaponEquipMontage;
+		}
 	}
 
-	if (!WeaponAnimLayerClass)
-	{
-		return;
-	}
-	
+	// 기존에 장착한 무기의 Anim Layer 제거
 	if (CurrentWeaponAnimLayerClass)
 	{
-		// 기존에 장착한 무기의 Anim Layer 제거
 		OwnerCharacterMesh->UnlinkAnimClassLayers(CurrentWeaponAnimLayerClass);
 	}
 	
 	// 새로 장착한 무기의 Anim Layer로 업데이트
-	CurrentWeaponAnimLayerClass = WeaponAnimLayerClass;
-	OwnerCharacterMesh->LinkAnimClassLayers(CurrentWeaponAnimLayerClass);
+	if (WeaponAnimLayerClass)
+	{
+		CurrentWeaponAnimLayerClass = WeaponAnimLayerClass;
+		OwnerCharacterMesh->LinkAnimClassLayers(CurrentWeaponAnimLayerClass);
+	}
 	
 	// 몽타주 재생
-	if (WeaponEquipMontage)
+	if (EquipMethod != EWeaponEquipMethod::Initial && EquipMontage)
 	{
-		OwnerCharacter->PlayAnimMontage(WeaponEquipMontage);
+		OwnerCharacter->PlayAnimMontage(EquipMontage);
 		
 		// 장착 중 무기 발사를 막고, 몽타주가 종료되면 다시 허용하도록
-		BindMontageEndedDelegate(WeaponEquipMontage);
+		BindMontageEndedDelegate(EquipMontage);
 		UpdateFireBlockTag(true);
 	}
 }

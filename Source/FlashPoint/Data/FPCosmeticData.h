@@ -90,9 +90,14 @@ public:
 	const FCharacterMeshEntry* GetCharacterMeshEntryByTeam(ETeam Team) const;
 
 protected:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="Anim Layer")
 	FAnimLayerSet AnimLayerSet;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="Character Mesh")
 	FCharacterMeshSet CharacterMeshSet;
+	
+public:
+	// 무기 공통으로 사용하는 장착 해제 애님 몽타주
+	UPROPERTY(EditDefaultsOnly, Category="Animation")
+	TObjectPtr<UAnimMontage> DefaultUnEquipMontage;
 };

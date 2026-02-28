@@ -126,10 +126,18 @@ private:
 
 	UFUNCTION()
 	void OnRep_WeaponEquipStateUpdateCounter();
+
+	// 무기 장착 방식을 나타내는 enum class
+	enum class EWeaponEquipMethod
+	{
+		Initial,
+		Equip,
+		UnEquip
+	};
 	
 	// 캐릭터에 적용할 무기 장착 로직을 처리한다.
 	// WeaponAnimLayer를 연결하고 WeaponEquipMontage를 재생한다.
-	void HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEquip = false);
+	void HandleWeaponEquip(AWeapon_Base* Weapon, EWeaponEquipMethod EquipMethod);
 	
 	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
 	void BindMontageEndedDelegate(UAnimMontage* Montage);
