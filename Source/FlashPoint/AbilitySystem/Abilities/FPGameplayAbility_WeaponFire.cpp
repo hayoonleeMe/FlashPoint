@@ -315,7 +315,7 @@ FVector UFPGameplayAbility_WeaponFire::GetWeaponTargetingSourceLocation() const
 
 void UFPGameplayAbility_WeaponFire::GenerateTraceEndsWithSpreadInCartridge(const FVector& TraceStart, const FVector& TargetLoc, TArray<FVector>& OutTraceEnds) const
 {
-	const UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetAvatarActorFromActorInfo());
+	const UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(GetAvatarActorFromActorInfo());
 	if (!WeaponManageComponent)
 	{
 		return;
@@ -474,7 +474,7 @@ void UFPGameplayAbility_WeaponFire::ApplyDamageToTarget(FGameplayAbilityTargetDa
 
 void UFPGameplayAbility_WeaponFire::ApplyRecoil() const
 {
-	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetAvatarActorFromActorInfo()))
+	if (UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(GetAvatarActorFromActorInfo()))
 	{
 		WeaponManageComponent->ApplyRecoil();
 	}

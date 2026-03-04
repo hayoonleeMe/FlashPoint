@@ -59,7 +59,7 @@ void UFPGameplayAbility_AimDownSight::ActivateAbility(const FGameplayAbilitySpec
 	AFPCharacter* FPCharacter = Cast<AFPCharacter>(ActorInfo->AvatarActor);
 	if (FPCharacter && FPCharacter->IsLocallyControlled())
 	{
-		if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(FPCharacter))
+		if (UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(FPCharacter))	
 		{
 			EquippedWeaponWeakPtr = WeaponManageComponent->GetEquippedWeapon();
 		}

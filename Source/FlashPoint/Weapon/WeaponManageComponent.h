@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Components/ActorComponent.h"
+#include "Component/FPActorComponent.h"
 #include "System/GameplayTagStackContainer.h"
 #include "WeaponManageComponent.generated.h"
 
@@ -33,13 +33,11 @@ DECLARE_MULTICAST_DELEGATE(FOnWeaponRecoilDelegate);
  * 무기를 관리하는 액터 컴포넌트
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FLASHPOINT_API UWeaponManageComponent : public UActorComponent
+class FLASHPOINT_API UWeaponManageComponent : public UFPActorComponent
 {
 	GENERATED_BODY()
 
 public:
-	static UWeaponManageComponent* Get(const AActor* OwnerActor);
-	
 	UWeaponManageComponent();
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void InitializeComponent() override;
@@ -67,8 +65,6 @@ public:
 
 	// 모든 무기 타입의 ReserveAmmo의 Stack Count가 변경될 때 InDelegate를 브로드캐스트하도록 등록한다.
 	void RegisterAllReserveAmmoChangedEvent(const FOnAmmoTagStackChangedDelegate::FDelegate& InDelegate);
-
-	bool HasAuthority() const;
 
 	// SlotNumber 슬롯의 무기를 장착한다.
 	UFUNCTION(Server, Reliable, BlueprintCallable) 	// TODO : BlueprintCallable for Test

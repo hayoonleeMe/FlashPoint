@@ -61,15 +61,15 @@ void UFPAnimInstance::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)
 
 	if (const APawn* Pawn = TryGetPawnOwner())
 	{
-		if (UWeaponManageComponent* WeaponManageComp = UWeaponManageComponent::Get(Pawn))
+		if (UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(Pawn))
 		{
 			// bHasEquippedWeapon 업데이트를 위한 델레게이트 등록
-			WeaponManageComp->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateEquippedWeapon);
+			WeaponManageComponent->OnEquippedWeaponChanged.AddUObject(this, &ThisClass::UpdateEquippedWeapon);
 		
 			if (Pawn->IsLocallyControlled())
 			{
 				// 로컬 캐릭터에서 총을 발사하고 반동을 적용할 때 Recoil Transform 계산을 위한 델레게이트 등록
-				WeaponManageComp->OnWeaponRecoilDelegate.AddUObject(this, &ThisClass::ApplyRecoil);
+				WeaponManageComponent->OnWeaponRecoilDelegate.AddUObject(this, &ThisClass::ApplyRecoil);
 			}
 		}
 	}

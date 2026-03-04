@@ -18,15 +18,6 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(WeaponManageComponent) 
 
-UWeaponManageComponent* UWeaponManageComponent::Get(const AActor* OwnerActor)
-{
-	if (IsValid(OwnerActor))
-	{
-		return OwnerActor->FindComponentByClass<UWeaponManageComponent>();
-	}
-	return nullptr;
-}
-
 UWeaponManageComponent::UWeaponManageComponent()
 {
 	bAutoActivate = true;
@@ -107,11 +98,6 @@ void UWeaponManageComponent::RegisterAllReserveAmmoChangedEvent(const FOnAmmoTag
 	{
 		AmmoTagStackChangedEventMap.FindOrAdd(Pair.Key).Add(InDelegate);
 	}
-}
-
-bool UWeaponManageComponent::HasAuthority() const
-{
-	return GetOwner() != nullptr && GetOwner()->HasAuthority();
 }
 
 void UWeaponManageComponent::ServerEquipWeaponAtSlot_Implementation(int32 SlotNumber)
@@ -218,6 +204,7 @@ void UWeaponManageComponent::EquipWeaponInternal(const TSubclassOf<AWeapon_Base>
 		// Spawn
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.Owner = OwningPawn;
+		SpawnParams.Instigator = OwningPawn;
 
 		EquippedWeapon = GetWorld()->SpawnActor<AWeapon_Base>(WeaponClass, SpawnParams);
 		WeaponSlots[ActiveSlotIndex] = EquippedWeapon;

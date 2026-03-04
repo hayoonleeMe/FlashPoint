@@ -27,7 +27,7 @@ bool UFPGameplayAbility_Reload::CanActivateAbility(const FGameplayAbilitySpecHan
                                                    const FGameplayTagContainer* SourceTags, const FGameplayTagContainer* TargetTags, FGameplayTagContainer* OptionalRelevantTags) const
 {
 	const AActor* AvatarActor = ActorInfo ? ActorInfo->AvatarActor.Get() : nullptr;
-	UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(AvatarActor);
+	UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(AvatarActor);
 	if (!WeaponManageComponent)
 	{
 		return false;

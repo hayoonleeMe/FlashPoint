@@ -130,7 +130,7 @@ void AFPPlayerController::Input_Scoreboard(const FInputActionValue& InputValue)
 
 void AFPPlayerController::Input_QuickSlot1()
 {
-	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetPawn()))
+	if (UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(GetPawn()))
 	{
 		WeaponManageComponent->ServerEquipWeaponAtSlot(1);
 	}
@@ -138,7 +138,7 @@ void AFPPlayerController::Input_QuickSlot1()
 
 void AFPPlayerController::Input_QuickSlot2()
 {
-	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetPawn()))
+	if (UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(GetPawn()))
 	{
 		WeaponManageComponent->ServerEquipWeaponAtSlot(2);
 	}
@@ -146,7 +146,7 @@ void AFPPlayerController::Input_QuickSlot2()
 
 void AFPPlayerController::Input_QuickSlot3()
 {
-	if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(GetPawn()))
+	if (UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(GetPawn()))
 	{
 		WeaponManageComponent->ServerEquipWeaponAtSlot(3);
 	}
