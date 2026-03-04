@@ -25,6 +25,9 @@ UCLASS()
 class FLASHPOINT_API UPlayerHUD : public UUserWidget
 {
 	GENERATED_BODY()
+	
+public:
+	void ShowCrosshair(bool bShow) const;
 
 protected:
 	virtual void NativeOnInitialized() override;

@@ -26,6 +26,17 @@ AWeapon_Base::AWeapon_Base()
 	WeaponMeshComponent->SetHiddenInGame(true);
 }
 
+void AWeapon_Base::Destroyed()
+{
+	// 클라에선 장착 중인 상태였다면 제거되기 전에 장착해제 로직 수행
+	if (!HasAuthority() && GetOwner())
+	{
+		OnUnEquipped();
+	}
+	
+	Super::Destroyed();
+}
+
 FVector AWeapon_Base::GetWeaponTargetingSourceLocation() const
 {
 	return WeaponMeshComponent->GetSocketLocation(TEXT("MuzzleFlash"));
@@ -102,6 +113,25 @@ void AWeapon_Base::BeginPlay()
 	{
 		UE_LOG(LogFP, Warning, TEXT("[%hs] Can't Get WeaponConfigData Asset."), __FUNCTION__);
 	}
+}
+
+void AWeapon_Base::GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutRot) const
+{
+	OutLoc = WeaponConfigData->FirstPersonRightHandLocOffset;
+	OutRot = WeaponConfigData->FirstPersonRightHandRotOffset;
+}
+
+FTransform AWeapon_Base::GetAimDownSightSocketTransform() const
+{
+	return WeaponMeshComponent->GetSocketTransform(AimDownSightSocketName);
+}
+
+void AWeapon_Base::StartAimDownSight()
+{
+}
+
+void AWeapon_Base::StopAimDownSight()
+{
 }
 
 float AWeapon_Base::GetDamageByDistance(float Distance) const

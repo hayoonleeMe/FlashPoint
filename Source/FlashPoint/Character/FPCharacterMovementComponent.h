@@ -38,6 +38,9 @@ private:
 		// Sprint를 수행하는지 여부를 나타내는 상태 (FLAG_Custom_0 플래그 사용)
 		uint8 bWantsToSprint : 1;
 		
+		// Aim Down Sight를 수행하는지 여부를 나타내는 상태 (FLAG_Custom_1 플래그 사용)
+		uint8 bWantsToAimDownSight : 1;
+		
 		// Move 데이터 초기화
 		virtual void Clear() override;
 
@@ -67,6 +70,11 @@ public:
 	void StopSprint();
 	
 	uint8 bWantsToSprint : 1;
+
+	void StartAimDownSight();
+	void StopAimDownSight();
+	
+	uint8 bWantsToAimDownSight : 1;
 	
 	virtual float GetMaxSpeed() const override;
 	
@@ -80,4 +88,7 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly, Category="Speed")
 	float SprintSpeedMultiplier;
+	
+	UPROPERTY(EditDefaultsOnly, Category="Speed")
+	float AimDownSightSpeedMultiplier;
 };

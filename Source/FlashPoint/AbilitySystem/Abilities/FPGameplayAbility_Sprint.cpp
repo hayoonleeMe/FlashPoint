@@ -7,14 +7,16 @@
 #include "FPGameplayTags.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayTag.h"
 #include "Character/FPCharacterMovementComponent.h"
+#include "GameFramework/Character.h"
 
 UFPGameplayAbility_Sprint::UFPGameplayAbility_Sprint()
 {
 	AbilityTags.AddTag(FPGameplayTags::Ability::Sprint);
 	ActivationOwnedTags.AddTag(FPGameplayTags::CharacterState::IsSprinting);
 
-	// 총 발사 시 Sprint 제한
+	// 총 발사, ADS 시 Sprint 제한
 	ActivationBlockedTags.AddTag(FPGameplayTags::CharacterState::IsFiring);
+	ActivationBlockedTags.AddTag(FPGameplayTags::CharacterState::IsAimingDownSight);
 }
 
 void UFPGameplayAbility_Sprint::InputReleased(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo,
@@ -64,6 +66,15 @@ void UFPGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle
 	
 	if (IsLocallyControlled())
 	{
+		// Crouch 상태면 해제
+		if (ACharacter* AvatarCharacter = Cast<ACharacter>(GetAvatarActorFromActorInfo()))
+		{
+			if (AvatarCharacter->bIsCrouched)
+			{
+				AvatarCharacter->UnCrouch();
+			}
+		}
+		
 		if (UFPCharacterMovementComponent* CharacterMovement = Cast<UFPCharacterMovementComponent>(ActorInfo->MovementComponent.Get()))
 		{
 			CharacterMovement->StartSprint();

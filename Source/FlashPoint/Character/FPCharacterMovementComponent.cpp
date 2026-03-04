@@ -13,6 +13,7 @@ UFPCharacterMovementComponent::UFPCharacterMovementComponent()
 	GroundTraceDistance = 100000.f;
 	
 	SprintSpeedMultiplier = 1.5f;
+	AimDownSightSpeedMultiplier = 0.5f;
 }
 
 bool UFPCharacterMovementComponent::CanAttemptJump() const
@@ -64,6 +65,7 @@ void UFPCharacterMovementComponent::FFPSavedMove::Clear()
 	Super::Clear();
 	
 	bWantsToSprint = false;
+	bWantsToAimDownSight = false;
 }
 
 void UFPCharacterMovementComponent::FFPSavedMove::SetMoveFor(ACharacter* C, float InDeltaTime, FVector const& NewAccel,
@@ -74,6 +76,7 @@ void UFPCharacterMovementComponent::FFPSavedMove::SetMoveFor(ACharacter* C, floa
 	if (UFPCharacterMovementComponent* CharacterMovement = C->GetCharacterMovement<UFPCharacterMovementComponent>())
 	{
 		bWantsToSprint = CharacterMovement->bWantsToSprint;
+		bWantsToAimDownSight = CharacterMovement->bWantsToAimDownSight;
 	}
 }
 
@@ -82,6 +85,11 @@ bool UFPCharacterMovementComponent::FFPSavedMove::CanCombineWith(const FSavedMov
 	const FFPSavedMove* NewMove = static_cast<FFPSavedMove*>(NewMovePtr.Get());
 	
 	if (bWantsToSprint != NewMove->bWantsToSprint)
+	{
+		return false;
+	}
+	
+	if (bWantsToAimDownSight != NewMove->bWantsToAimDownSight)
 	{
 		return false;
 	}
@@ -96,6 +104,11 @@ uint8 UFPCharacterMovementComponent::FFPSavedMove::GetCompressedFlags() const
 	if (bWantsToSprint)
 	{
 		Result |= FLAG_Custom_0;
+	}
+	
+	if (bWantsToAimDownSight)
+	{
+		Result |= FLAG_Custom_1;
 	}
 	
 	return Result;
@@ -121,6 +134,16 @@ void UFPCharacterMovementComponent::StopSprint()
 	bWantsToSprint = false;
 }
 
+void UFPCharacterMovementComponent::StartAimDownSight()
+{
+	bWantsToAimDownSight = true;
+}
+
+void UFPCharacterMovementComponent::StopAimDownSight()
+{
+	bWantsToAimDownSight = false;
+}
+
 float UFPCharacterMovementComponent::GetMaxSpeed() const
 {
 	float MaxSpeed = Super::GetMaxSpeed();
@@ -128,6 +151,11 @@ float UFPCharacterMovementComponent::GetMaxSpeed() const
 	if (bWantsToSprint)
 	{
 		MaxSpeed *= SprintSpeedMultiplier;
+	}
+	
+	if (bWantsToAimDownSight)
+	{
+		MaxSpeed *= AimDownSightSpeedMultiplier;
 	}
 	
 	return MaxSpeed;
@@ -150,4 +178,5 @@ void UFPCharacterMovementComponent::UpdateFromCompressedFlags(uint8 Flags)
 	// FSavedMove_Client에 압축되어 저장된 입력 Flag를 Character Movement Component로 가져온다.
 	// 이를 통해 이동 속도를 결정할 상태를 업데이트한다.
 	bWantsToSprint = (Flags & FSavedMove_Character::FLAG_Custom_0) != 0;
+	bWantsToAimDownSight = (Flags & FSavedMove_Character::FLAG_Custom_1) != 0;
 }

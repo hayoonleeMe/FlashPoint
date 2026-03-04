@@ -5,10 +5,6 @@
 
 #include "UObject/ObjectSaveContext.h"
 
-#if WITH_EDITOR
-#include "Misc/DataValidation.h"
-#endif
-
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPAssetData)
 
 void UFPAssetData::PreSave(FObjectPreSaveContext SaveContext)
@@ -35,6 +31,8 @@ void UFPAssetData::PreSave(FObjectPreSaveContext SaveContext)
 }
 
 #if WITH_EDITOR
+#include "Misc/DataValidation.h"
+
 EDataValidationResult UFPAssetData::IsDataValid(FDataValidationContext& Context) const
 {
 	EDataValidationResult Result = Super::IsDataValid(Context);

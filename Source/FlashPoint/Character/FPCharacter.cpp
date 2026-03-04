@@ -45,6 +45,7 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	GetCharacterMovement()->SetCrouchedHalfHeight(65.f);
 
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Spawner, ECR_Overlap);
+	GetCapsuleComponent()->SetCapsuleRadius(48.f);
 
 	GetMesh()->SetRelativeLocation(FVector(0.f, 0.f, -90.f));
 	GetMesh()->SetRelativeRotation(FRotator(0.f, 270.f, 0.f));
@@ -62,9 +63,15 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	SpringArmComponent->bDoCollisionTest = true;
 	SpringArmComponent->bUsePawnControlRotation = true;
 	
-	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera Component"));
-	CameraComponent->SetupAttachment(SpringArmComponent);
+	ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Third Person Camera Component"));
+	ThirdPersonCameraComponent->SetupAttachment(SpringArmComponent);
 
+	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera Component"));
+	FirstPersonCameraComponent->SetupAttachment(GetMesh(), TEXT("CameraSocket"));
+	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FirstPersonCameraComponent->bAutoActivate = false;
+	FirstPersonCameraComponent->PostProcessSettings.VignetteIntensity = 0.7f;	// for ADS
+	
 	WeaponManageComponent = CreateDefaultSubobject<UWeaponManageComponent>(TEXT("Weapon Manage Component"));
 }
 
@@ -87,15 +94,21 @@ void AFPCharacter::Tick(float DeltaSeconds)
 		bWasMovingForwardFromInput = bIsMovingForwardFromInput;
 	}
 
-	TargetCameraHeight = BaseEyeHeight * 2.f;
-	if (bIsCrouched && GetVelocity().SizeSquared2D() > 0.f)
+	// 3인칭 카메라 높이 보간
+	if (ThirdPersonCameraComponent->IsActive())
 	{
-		// Crouch + Walk 하면 캐릭터가 살짝 일어나서 걸으므로 카메라 위치도 높여준다.
-		TargetCameraHeight += 20.f;
+		TargetCameraHeight = BaseEyeHeight * 2.f;
+        if (bIsCrouched && GetVelocity().SizeSquared2D() > 0.f)
+        {
+        	// Crouch + Walk 하면 캐릭터가 살짝 일어나서 걸으므로 카메라 위치도 높여준다.
+        	TargetCameraHeight += 20.f;
+        }
+        CurrentCameraHeight = FMath::FInterpTo(CurrentCameraHeight, TargetCameraHeight, DeltaSeconds, 7.f);
+        const FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
+        SpringArmComponent->SetRelativeLocation(FVector(CameraLocation.X, CameraLocation.Y, CurrentCameraHeight));	
 	}
-	CurrentCameraHeight = FMath::FInterpTo(CurrentCameraHeight, TargetCameraHeight, DeltaSeconds, 7.f);
-	const FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
-	SpringArmComponent->SetRelativeLocation(FVector(CameraLocation.X, CameraLocation.Y, CurrentCameraHeight));
+	
+	UpdateAimDownSight(DeltaSeconds);
 }
 
 void AFPCharacter::PossessedBy(AController* NewController)
@@ -111,6 +124,17 @@ void AFPCharacter::OnRep_PlayerState()
 
 	InitAbilitySystem();
 	SetCharacterMesh();
+}
+
+void AFPCharacter::PawnClientRestart()
+{
+	Super::PawnClientRestart();
+	
+	// 로컬 클라이언트 캐릭터에서만 호출됨
+	// todo : retrieve from game settings
+	BaseFOV = 90.f;
+	ThirdPersonCameraComponent->SetFieldOfView(BaseFOV);
+	FirstPersonCameraComponent->SetFieldOfView(BaseFOV);
 }
 
 UAbilitySystemComponent* AFPCharacter::GetAbilitySystemComponent() const
@@ -181,4 +205,82 @@ void AFPCharacter::InitAbilitySystem()
 	{
 		UFPAbilitySystemData::GiveDataToAbilitySystem(this, FPGameplayTags::Weapon::Type::Unarmed);
 	}
+}
+
+void AFPCharacter::ToggleCamera() const
+{
+	if (!AbilitySystemComponent)
+	{
+		return;
+	}
+	
+	if (FirstPersonCameraComponent->IsActive())
+	{
+		// FPS -> TPS
+		FirstPersonCameraComponent->Deactivate();
+		ThirdPersonCameraComponent->Activate();
+		
+		// local only
+		AbilitySystemComponent->RemoveLooseGameplayTag(FPGameplayTags::CharacterState::IsFirstPerson);
+	}
+	else
+	{
+		// TPS -> FPS
+		ThirdPersonCameraComponent->Deactivate();
+		FirstPersonCameraComponent->Activate();
+		
+		// local only
+		AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsFirstPerson);
+	}
+}
+
+void AFPCharacter::UpdateAimDownSight(float DeltaSeconds)
+{
+	const float TargetAlpha = bAimDownSightStarted ? 1.f : 0.f;
+	
+	if (AimDownSightAlpha == TargetAlpha || !IsLocallyControlled())
+	{
+		return;
+	}
+	
+	const float DeltaAlpha = DeltaSeconds / CachedTimeToADS * (bAimDownSightStarted ? 1.f : -1.f);
+	AimDownSightAlpha = FMath::Clamp(AimDownSightAlpha + DeltaAlpha, 0.f, 1.f);
+	
+	const float CurrentFOV = FMath::Lerp(BaseFOV, CachedAimDownSightFOV, AimDownSightAlpha);
+	FirstPersonCameraComponent->SetFieldOfView(CurrentFOV);
+	ThirdPersonCameraComponent->SetFieldOfView(CurrentFOV);
+}
+
+void AFPCharacter::StartAimDownSight(float CameraFOV, float InTimeToADS)
+{
+	GetCharacterMovement<UFPCharacterMovementComponent>()->StartAimDownSight();
+	
+	bIsThirdPersonBeforeADS = ThirdPersonCameraComponent->IsActive();
+	if (bIsThirdPersonBeforeADS)
+	{
+		ToggleCamera();
+	}
+	
+	bAimDownSightStarted = true;
+	CachedTimeToADS = InTimeToADS;
+	CachedAimDownSightFOV = CameraFOV;
+	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = true;
+}
+
+void AFPCharacter::StopAimDownSight()
+{
+	GetCharacterMovement<UFPCharacterMovementComponent>()->StopAimDownSight();
+	
+	if (bIsThirdPersonBeforeADS)
+	{
+		ToggleCamera();
+	}
+	
+	bAimDownSightStarted = false;
+	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = false;
+}
+
+bool AFPCharacter::CanStartAimDownSight() const
+{
+	return FMath::IsNearlyEqual(AimDownSightAlpha, 0.f);
 }

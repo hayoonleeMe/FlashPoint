@@ -38,6 +38,8 @@ namespace FPGameplayTags
 			extern FNativeGameplayTag Scoreboard;
 			extern FNativeGameplayTag Sprint;
 			extern FNativeGameplayTag Reload;
+			extern FNativeGameplayTag ToggleCamera;
+			extern FNativeGameplayTag AimDownSight;
 
 			namespace QuickSlot
 			{
@@ -62,6 +64,8 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag Crouch;
 		extern FNativeGameplayTag Reload;
 		extern FNativeGameplayTag DryFire;
+		extern FNativeGameplayTag ToggleCamera;
+		extern FNativeGameplayTag AimDownSight;
 
 		namespace Fail
 		{
@@ -74,6 +78,9 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag IsSprinting;
 		extern FNativeGameplayTag IsFiring;
 		extern FNativeGameplayTag IsMovingForwardFromInput;
+		extern FNativeGameplayTag IsFirstPerson;
+		extern FNativeGameplayTag IsAimingDownSight;
+		extern FNativeGameplayTag IsEquippingWeapon;
 	}
 
 	namespace Weapon

@@ -26,6 +26,9 @@ DECLARE_MULTICAST_DELEGATE_TwoParams(FOnAmmoTagStackChangedDelegate, const FGame
 // AimSpread가 변경될 때 브로드캐스트하는 델레게이트
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnAimSpreadChangedDelegate, float/*AimSpread*/);
 
+// 반동을 적용할 때 브로드캐스트하는 델레게이트
+DECLARE_MULTICAST_DELEGATE(FOnWeaponRecoilDelegate);
+
 /**
  * 무기를 관리하는 액터 컴포넌트
  */
@@ -43,7 +46,11 @@ public:
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
 
+	UFUNCTION(BlueprintCallable)
 	AWeapon_Base* GetEquippedWeapon() const { return EquippedWeapon; }
+	
+	// 장착 중인 무기가 유효한지 반환
+	bool HasValidEquippedWeapon() const;
 
 	FOnEquippedWeaponChangedDelegate OnEquippedWeaponChanged;
 
@@ -110,6 +117,9 @@ private:
 
 	UFUNCTION()
 	void OnRep_EquippedWeapon(AWeapon_Base* UnEquippedWeapon);
+	
+	// 무기를 장착 중임을 나타내는 태그를 업데이트한다.
+	void UpdateWeaponEquipTag(bool bEquipped) const;
 
 	// 슬롯 변경, 장착 무기 변경 등 Equip State 변경을 알리기 위한 트리거 프로퍼티 
 	UPROPERTY(ReplicatedUsing=OnRep_WeaponEquipStateUpdateCounter)
@@ -117,10 +127,18 @@ private:
 
 	UFUNCTION()
 	void OnRep_WeaponEquipStateUpdateCounter();
+
+	// 무기 장착 방식을 나타내는 enum class
+	enum class EWeaponEquipMethod
+	{
+		Initial,
+		Equip,
+		UnEquip
+	};
 	
 	// 캐릭터에 적용할 무기 장착 로직을 처리한다.
 	// WeaponAnimLayer를 연결하고 WeaponEquipMontage를 재생한다.
-	void HandleWeaponEquip(AWeapon_Base* Weapon, bool bIsEquip = false);
+	void HandleWeaponEquip(AWeapon_Base* Weapon, EWeaponEquipMethod EquipMethod);
 	
 	// EquipMontage or UnEquipMontage가 종료되면 발사를 막는 태그를 제거하도록 등록
 	void BindMontageEndedDelegate(UAnimMontage* Montage);
@@ -167,6 +185,8 @@ public:
 	float GetCurrentAimSpread() const { return CurrentAimSpread; }
 
 	FOnAimSpreadChangedDelegate OnAimSpreadChangedDelegate;
+	
+	FOnWeaponRecoilDelegate OnWeaponRecoilDelegate;
 
 private:
 	UPROPERTY()
@@ -188,6 +208,9 @@ private:
 	// 현재 장착한 무기의 RecoilData
 	UPROPERTY()
 	TObjectPtr<UFPRecoilData> CurrentRecoilData;
+	
+	// 현재 ADS 상태인지 반환
+	bool IsAimingDownSight() const;
 
 	// 누적된 발사 횟수
 	// Curve로부터 반동 강도를 선택할 때 사용된다.
@@ -241,6 +264,10 @@ private:
 	// Sprint 상태에서 Aim Spread에 끼치는 영향
 	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
 	float AimSpreadSprintingOffset;
+	
+	// ADS 시 움직임에 의한 AimSpread Offset이 적용되는 비율
+	UPROPERTY(EditDefaultsOnly, Category = "Aim Spread")
+	float ADSAimSpreadMovementMultiplier;
 
 	// 캐릭터의 움직임 상태에 따라 Aim Spread 오프셋을 계산한다.
 	float CalculateAimSpreadMovementOffset() const;

@@ -20,4 +20,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category=AnimNotify)
 	FGameplayTag EventTag;
+	
+private:
+	virtual FString GetNotifyName_Implementation() const override;
 };

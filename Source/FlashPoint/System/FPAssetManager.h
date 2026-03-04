@@ -108,6 +108,10 @@ private:
 	// UFPAssetData에서 Preload를 수행하도록 설정된 모든 애셋을 로드한다.
 	void LoadPreloadAssets();
 
+	// LoadedAssetData를 반환한다.
+	// 아직 로드되지 않았으면 로드 후 반환한다.
+	UFPAssetData* GetOrLoadAssetData();
+
 	// 로드된 애셋을 메모리에 유지하기 위해 LoadedAssets에 추가한다.
 	void AddLoadedAsset(const UObject* LoadedAsset);
 

@@ -29,7 +29,7 @@ void UFPInputComponent::BindNativeAction(const UFPInputData* InputData, const FG
 {
 	check(InputData);
 
-	if (const UInputAction* InputAction = InputData->FindNativeInputActionForInputTag(InputTag))
+	if (const UInputAction* InputAction = InputData->FindInputActionForInputTag(InputTag))
 	{
 		BindAction(InputAction, TriggerEvent, Object, Func);
 	}

@@ -9,7 +9,6 @@
 
 class UFPWeaponConfigData;
 class UAbilitySystemComponent;
-class UNiagaraSystem;
 class UNiagaraComponent;
 
 /**
@@ -22,6 +21,8 @@ class FLASHPOINT_API AWeapon_Base : public AActor
 
 public:
 	AWeapon_Base();
+	
+	virtual void Destroyed() override;
 
 	FGameplayTag GetWeaponTypeTag() const { return WeaponTypeTag; }
 	UFPWeaponConfigData* GetWeaponConfigData() const { return WeaponConfigData; }
@@ -50,6 +51,13 @@ public:
 
 	// 로컬에서 캐릭터가 장착 중인 무기의 Weapon Fire Effects를 트리거
 	void TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& ImpactPoints, const TArray<FVector_NetQuantize>& EndPoints);
+
+	void GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutRot) const;
+	
+	FTransform GetAimDownSightSocketTransform() const;
+	
+	void StartAimDownSight();
+	void StopAimDownSight();
 	
 protected:
 	virtual void BeginPlay() override;

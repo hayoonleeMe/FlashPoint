@@ -5,8 +5,11 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "Animation/AnimInstance.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "FPAnimInstance.generated.h"
 
+class UFPRecoilData;
+class AFPCharacter;
 class UFPCharacterMovementComponent;
 class AWeapon_Base;
 class UAbilitySystemComponent;
@@ -34,7 +37,6 @@ class FLASHPOINT_API UFPAnimInstance : public UAnimInstance
 public:
 	UFPAnimInstance();
 	virtual void NativeInitializeAnimation() override;
-	virtual void NativePostEvaluateAnimation() override;
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
@@ -53,6 +55,15 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GameplayTag_IsFiring;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsFirstPerson;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsAimingDownSight;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsEquippingWeapon;
 
 	TMap<FGameplayTag, bool*> TagToPropertyMap;
 	
@@ -86,13 +97,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	uint8 bIsJumping : 1;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	uint8 bHasEquippedWeapon : 1;
-
 	UPROPERTY()
 	TWeakObjectPtr<AWeapon_Base> EquippedWeaponWeakPtr;
 
-	void UpdateHasEquippedWeapon(AWeapon_Base* EquippedWeapon);
+	void UpdateEquippedWeapon(AWeapon_Base* EquippedWeapon);
 
 	// 캐릭터 최하단에서 땅까지 거리
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -121,8 +129,21 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float AimPitch;
+	
+	// SimulatedProxy에서 AimPitch를 계산할 때 적용할 Interpolation Speed
+	UPROPERTY(EditAnywhere)
+	float RemoteAimPitchInterpSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float FirstPersonPitch;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector FirstPersonRightHandLocOffset;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRotator FirstPersonRightHandRotOffset;
 
-	void UpdateAimingData(const ACharacter* Character);
+	void UpdateAimingData(float DeltaSeconds, const ACharacter* Character);
 
 	// 캐릭터가 이동할 방향
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -144,18 +165,29 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	float HipFireUpperBodyBlendWeight;
 
-	void UpdateBlendWeight(float DeltaSeconds);
-
-	// 왼손을 무기에 부착할 Transform (Only Translation)
-	// Character Mesh의 hand_r 기준
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FTransform LeftHandModifyTransform;
+	void UpdateBlendWeight(float DeltaSeconds, const AWeapon_Base* EquippedWeapon);
 
 	// 왼손을 무기에 부착할지를 결정하는 Alpha
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float LeftHandModifyAlpha;
+	float LeftHandAttachAlpha;
+	
+	UPROPERTY(EditAnywhere)
+	FName DisableLeftHandIKCurveName;
 
-	void UpdateLeftHandModifyTransform();
+	// 왼손을 무기에 부착할 위치
+	// Character Mesh의 weapon_r bone 기준
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector LeftHandAttachLocation;
+
+	// 왼손을 무기에 부착할 회전값
+	// Character Mesh의 weapon_r bone 기준
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRotator LeftHandAttachRotation;
+
+	UPROPERTY(EditAnywhere)
+	float LeftHandAttachDataInterpSpeed;
+
+	void UpdateLeftHandAttachData(float DeltaSeconds, const AWeapon_Base* EquippedWeapon);
 
 	// TurnInPlace가 Blend Out 상태인지 여부
 	// Idle State 일 때 false로 설정되고, 그 외에는 true이다.
@@ -201,4 +233,90 @@ protected:
 	// Idle State일 때 호출된다. (Idle에서 Blending Out 될 때 제외)
 	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe))
 	void ProcessTurnYawCurve();
+
+	// ============================================================================
+	// Aim Down Sight
+	// ============================================================================
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimDownSightAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AimDownSightAlphaInterpSpeed;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector AimDownSightLocation;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FRotator AimDownSightRotation;
+	
+	void UpdateAimDownSight(float DeltaSeconds, const AFPCharacter* Character, const AWeapon_Base* EquippedWeapon);
+
+	// ============================================================================
+	// First Person Sway
+	// ============================================================================
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float MoveSwayAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector MoveSwayLocation;
+	
+	UPROPERTY(EditAnywhere)
+	FVector MoveSwayAmplitude;
+	
+	FVectorSpringState MoveSwaySpringState;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float LookSwayAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	FVector LookSwayLocation;
+	
+	UPROPERTY(EditAnywhere)
+	FVector LookSwayAmplitude;
+
+	UPROPERTY(EditAnywhere)
+	float ADSLookSwayMultiplier;
+	
+	FVectorSpringState LookSwaySpringState;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float JumpSwayAlpha;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float JumpSwayValue;
+	
+	UPROPERTY(EditAnywhere)
+	float JumpSwayAmplitude;
+	
+	UPROPERTY(EditAnywhere)
+	float MaxJumpSway;
+
+	UPROPERTY(EditAnywhere)
+	float ADSJumpSwayMultiplier;
+	
+	FFloatSpringState JumpSwaySpringState;
+	
+	void UpdateFirstPersonSway(float DeltaSeconds, const ACharacter* Character);
+	
+	// 무기가 변경될 때 캐싱되는 Recoil Data Asset
+	UPROPERTY()
+	TObjectPtr<UFPRecoilData> CurrentRecoilData;
+	
+	// 총을 후방으로 이동시키는 반동 값, Location Y에 더함
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RecoilBackward;
+	
+	// 총을 위로 올리는 반동 값, Rotation Roll에 더함
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float RecoilUpward;
+	
+	float TargetRecoilBackward = 0.f;
+	float TargetRecoilUpward = 0.f;
+
+	// 로컬 캐릭터에서 총을 발사해 반동이 발생할 때 호출되고, Target Recoil Transform을 계산한다.
+	void ApplyRecoil();
+	
+	void UpdateRecoil(float DeltaSeconds);
 };
