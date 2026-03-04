@@ -7,6 +7,7 @@
 #include "FPGameplayTags.h"
 #include "Abilities/Tasks/AbilityTask_WaitGameplayTag.h"
 #include "Character/FPCharacterMovementComponent.h"
+#include "GameFramework/Character.h"
 
 UFPGameplayAbility_Sprint::UFPGameplayAbility_Sprint()
 {
@@ -65,6 +66,15 @@ void UFPGameplayAbility_Sprint::ActivateAbility(const FGameplayAbilitySpecHandle
 	
 	if (IsLocallyControlled())
 	{
+		// Crouch 상태면 해제
+		if (ACharacter* AvatarCharacter = Cast<ACharacter>(GetAvatarActorFromActorInfo()))
+		{
+			if (AvatarCharacter->bIsCrouched)
+			{
+				AvatarCharacter->UnCrouch();
+			}
+		}
+		
 		if (UFPCharacterMovementComponent* CharacterMovement = Cast<UFPCharacterMovementComponent>(ActorInfo->MovementComponent.Get()))
 		{
 			CharacterMovement->StartSprint();
