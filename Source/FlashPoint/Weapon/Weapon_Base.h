@@ -56,6 +56,9 @@ public:
 	
 	FTransform GetAimDownSightSocketTransform() const;
 	
+	void StartAimDownSight();
+	void StopAimDownSight();
+	
 protected:
 	virtual void BeginPlay() override;
 	

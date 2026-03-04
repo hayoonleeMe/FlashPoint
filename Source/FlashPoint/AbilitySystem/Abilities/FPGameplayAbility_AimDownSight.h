@@ -6,6 +6,8 @@
 #include "FPGameplayAbility.h"
 #include "FPGameplayAbility_AimDownSight.generated.h"
 
+class AWeapon_Base;
+
 /**
  * Aim Down Sight를 수행하는 어빌리티
  */
@@ -25,6 +27,6 @@ protected:
 	virtual void EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled) override;
 	
 private:
-	// ADS를 수행하기 전 3인칭 시점이었는지
-	bool bIsThirdPersonBeforeADS = false;
+	UPROPERTY()
+	TWeakObjectPtr<AWeapon_Base> EquippedWeaponWeakPtr;
 };

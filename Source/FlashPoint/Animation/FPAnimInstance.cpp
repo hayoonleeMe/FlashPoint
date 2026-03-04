@@ -345,15 +345,9 @@ void UFPAnimInstance::UpdateAimDownSight(float DeltaSeconds, const AFPCharacter*
 	{
 		return;
 	}
-
-	if (!GameplayTag_IsAimingDownSight)
-	{
-		AimDownSightAlpha = 0.f;
-		return;
-	}
 	
 	// Update Alpha
-	AimDownSightAlpha = FMath::FInterpTo(AimDownSightAlpha, 1.f, DeltaSeconds, AimDownSightAlphaInterpSpeed);
+	AimDownSightAlpha = Character->GetAimDownSightAlpha();
 	
 	// Calc ADS Transform
 	USkeletalMeshComponent* SKM = GetSkelMeshComponent();

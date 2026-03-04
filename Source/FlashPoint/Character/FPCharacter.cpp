@@ -107,6 +107,8 @@ void AFPCharacter::Tick(float DeltaSeconds)
         const FVector CameraLocation = SpringArmComponent->GetRelativeLocation();
         SpringArmComponent->SetRelativeLocation(FVector(CameraLocation.X, CameraLocation.Y, CurrentCameraHeight));	
 	}
+	
+	UpdateAimDownSight(DeltaSeconds);
 }
 
 void AFPCharacter::PossessedBy(AController* NewController)
@@ -122,6 +124,17 @@ void AFPCharacter::OnRep_PlayerState()
 
 	InitAbilitySystem();
 	SetCharacterMesh();
+}
+
+void AFPCharacter::PawnClientRestart()
+{
+	Super::PawnClientRestart();
+	
+	// 로컬 클라이언트 캐릭터에서만 호출됨
+	// todo : retrieve from game settings
+	BaseFOV = 90.f;
+	ThirdPersonCameraComponent->SetFieldOfView(BaseFOV);
+	FirstPersonCameraComponent->SetFieldOfView(BaseFOV);
 }
 
 UAbilitySystemComponent* AFPCharacter::GetAbilitySystemComponent() const
@@ -221,12 +234,36 @@ void AFPCharacter::ToggleCamera() const
 	}
 }
 
-void AFPCharacter::StartAimDownSight()
+void AFPCharacter::UpdateAimDownSight(float DeltaSeconds)
+{
+	const float TargetAlpha = bAimDownSightStarted ? 1.f : 0.f;
+	
+	if (AimDownSightAlpha == TargetAlpha || !IsLocallyControlled())
+	{
+		return;
+	}
+	
+	const float DeltaAlpha = DeltaSeconds / CachedTimeToADS * (bAimDownSightStarted ? 1.f : -1.f);
+	AimDownSightAlpha = FMath::Clamp(AimDownSightAlpha + DeltaAlpha, 0.f, 1.f);
+	
+	const float CurrentFOV = FMath::Lerp(BaseFOV, CachedAimDownSightFOV, AimDownSightAlpha);
+	FirstPersonCameraComponent->SetFieldOfView(CurrentFOV);
+	ThirdPersonCameraComponent->SetFieldOfView(CurrentFOV);
+}
+
+void AFPCharacter::StartAimDownSight(float CameraFOV, float InTimeToADS)
 {
 	GetCharacterMovement<UFPCharacterMovementComponent>()->StartAimDownSight();
 	
-	// TODO : 게임옵션과 연동
-	FirstPersonCameraComponent->SetFieldOfView(70.f);
+	bIsThirdPersonBeforeADS = ThirdPersonCameraComponent->IsActive();
+	if (bIsThirdPersonBeforeADS)
+	{
+		ToggleCamera();
+	}
+	
+	bAimDownSightStarted = true;
+	CachedTimeToADS = InTimeToADS;
+	CachedAimDownSightFOV = CameraFOV;
 	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = true;
 }
 
@@ -234,6 +271,16 @@ void AFPCharacter::StopAimDownSight()
 {
 	GetCharacterMovement<UFPCharacterMovementComponent>()->StopAimDownSight();
 	
-	FirstPersonCameraComponent->SetFieldOfView(90.f);
+	if (bIsThirdPersonBeforeADS)
+	{
+		ToggleCamera();
+	}
+	
+	bAimDownSightStarted = false;
 	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = false;
+}
+
+bool AFPCharacter::CanStartAimDownSight() const
+{
+	return FMath::IsNearlyEqual(AimDownSightAlpha, 0.f);
 }

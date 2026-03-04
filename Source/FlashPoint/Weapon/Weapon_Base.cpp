@@ -126,6 +126,14 @@ FTransform AWeapon_Base::GetAimDownSightSocketTransform() const
 	return WeaponMeshComponent->GetSocketTransform(AimDownSightSocketName);
 }
 
+void AWeapon_Base::StartAimDownSight()
+{
+}
+
+void AWeapon_Base::StopAimDownSight()
+{
+}
+
 float AWeapon_Base::GetDamageByDistance(float Distance) const
 {
 	if (WeaponConfigData->DamageFallOffCurve)

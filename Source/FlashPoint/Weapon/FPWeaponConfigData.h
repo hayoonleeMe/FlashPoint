@@ -43,6 +43,10 @@ public:
 	// 헤드샷 데미지 배율
 	UPROPERTY(EditDefaultsOnly, Category="Stat")
 	float HeadShotMultiplier;
+	
+	// AimDownSight 시 걸리는 시간
+	UPROPERTY(EditDefaultsOnly, Category="Stat")
+	float TimeToADS;
 
 	// 왼손을 부착할 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category="Animation")
@@ -59,6 +63,10 @@ public:
 	// AimDownSight 시 카메라 앞에 위치시킬 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category="Animation")
 	FName AimDownSightSocketName;
+	
+	// AimDownSight 시 카메라에 적용할 FOV
+	UPROPERTY(EditAnywhere, Category="FOV")
+	float AimDownSightFOV;
 	
 	// HUD에 표시할 무기 이름
 	UPROPERTY(EditDefaultsOnly, Category="UI")

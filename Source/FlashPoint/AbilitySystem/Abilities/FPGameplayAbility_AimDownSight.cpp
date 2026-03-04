@@ -10,6 +10,7 @@
 #include "Component/UIManageComponent.h"
 #include "UI/Gameplay/PlayerHUD.h"
 #include "Weapon/WeaponManageComponent.h"
+#include "Weapon/Weapon_Base.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPGameplayAbility_AimDownSight)
 
@@ -58,13 +59,18 @@ void UFPGameplayAbility_AimDownSight::ActivateAbility(const FGameplayAbilitySpec
 	AFPCharacter* FPCharacter = Cast<AFPCharacter>(ActorInfo->AvatarActor);
 	if (FPCharacter && FPCharacter->IsLocallyControlled())
 	{
-		bIsThirdPersonBeforeADS = !GetAbilitySystemComponentFromActorInfo_Checked()->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsFirstPerson);
-		if (bIsThirdPersonBeforeADS)
+		if (UWeaponManageComponent* WeaponManageComponent = UWeaponManageComponent::Get(FPCharacter))
 		{
-			FPCharacter->ToggleCamera();
+			EquippedWeaponWeakPtr = WeaponManageComponent->GetEquippedWeapon();
+		}
+		if (EquippedWeaponWeakPtr.IsValid())
+		{
+			const float CameraFOV = EquippedWeaponWeakPtr->GetWeaponConfigData()->AimDownSightFOV;
+			const float TimeToADS = EquippedWeaponWeakPtr->GetWeaponConfigData()->TimeToADS;
+			FPCharacter->StartAimDownSight(CameraFOV, TimeToADS);
+			EquippedWeaponWeakPtr->StartAimDownSight();
 		}
 		
-		FPCharacter->StartAimDownSight();
 		
 		// Hide Crosshair
 		if (const UUIManageComponent* UIManageComponent = UUIManageComponent::Get(FPCharacter->GetController<APlayerController>()))
@@ -83,12 +89,12 @@ void UFPGameplayAbility_AimDownSight::EndAbility(const FGameplayAbilitySpecHandl
 	AFPCharacter* FPCharacter = Cast<AFPCharacter>(ActorInfo->AvatarActor);
 	if (FPCharacter && FPCharacter->IsLocallyControlled())
 	{
-		if (bIsThirdPersonBeforeADS)
-		{
-			FPCharacter->ToggleCamera();
-		}
-		
 		FPCharacter->StopAimDownSight();
+		
+		if (EquippedWeaponWeakPtr.IsValid())
+		{
+			EquippedWeaponWeakPtr->StopAimDownSight();
+		}
 		
 		// Show Crosshair
 		if (const UUIManageComponent* UIManageComponent = UUIManageComponent::Get(FPCharacter->GetController<APlayerController>()))

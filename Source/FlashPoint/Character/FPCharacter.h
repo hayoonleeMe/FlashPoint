@@ -27,6 +27,7 @@ public:
 	virtual void Tick(float DeltaSeconds) override;
 	virtual void PossessedBy(AController* NewController) override;
 	virtual void OnRep_PlayerState() override;
+	virtual void PawnClientRestart() override;
 
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	UFPAbilitySystemComponent* GetFPAbilitySystemComponent() const;
@@ -94,7 +95,28 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	// TODO : BlueprintReadOnly For Test
 	TObjectPtr<UWeaponManageComponent> WeaponManageComponent;
 
+	// 카메라의 기본 FOV
+	// todo : 게임 설정과 연동해 초기화
+	float BaseFOV = 0.f;
+
+	// ADS 진행 정도를 나타내는 Alpha
+	float AimDownSightAlpha = 0.f;
+	bool bAimDownSightStarted = false;
+	float CachedAimDownSightFOV = 0.f;
+	float CachedTimeToADS = 0.f;
+	
+	// ADS를 수행하기 전 3인칭 시점이었는지
+	bool bIsThirdPersonBeforeADS = false;
+	
+	void UpdateAimDownSight(float DeltaSeconds);
+	
 public:
-	void StartAimDownSight();
+	void StartAimDownSight(float CameraFOV, float InTimeToADS);
 	void StopAimDownSight();
+	
+	float GetAimDownSightAlpha() const { return AimDownSightAlpha; }
+	
+	// ADS가 완전히 끝나 다시 시작할 수 있을지 여부를 반환
+	bool CanStartAimDownSight() const;
+
 };
