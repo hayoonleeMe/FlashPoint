@@ -21,6 +21,7 @@ namespace FPGameplayTags
 		extern FNativeGameplayTag AbilitySystemData;
 		extern FNativeGameplayTag RecoilData;
 		extern FNativeGameplayTag WeaponConfigData;
+		extern FNativeGameplayTag AttachmentData;
 	}
 	
 	namespace Input
