@@ -61,6 +61,9 @@ protected:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	bool GameplayTag_IsAimingDownSight;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	bool GameplayTag_IsEquippingWeapon;
 
 	TMap<FGameplayTag, bool*> TagToPropertyMap;
 	

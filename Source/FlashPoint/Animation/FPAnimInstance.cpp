@@ -52,6 +52,7 @@ void UFPAnimInstance::NativeInitializeAnimation()
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFiring, &GameplayTag_IsFiring);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsFirstPerson, &GameplayTag_IsFirstPerson);
 	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsAimingDownSight, &GameplayTag_IsAimingDownSight);
+	TagToPropertyMap.Add(FPGameplayTags::CharacterState::IsEquippingWeapon, &GameplayTag_IsEquippingWeapon);
 }
 
 void UFPAnimInstance::InitializeWithAbilitySystem(UAbilitySystemComponent* ASC)
