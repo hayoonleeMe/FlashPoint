@@ -92,7 +92,7 @@ public:
 	// ============================================================================
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)	// TODO : BlueprintReadOnly For Test
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	TObjectPtr<UWeaponManageComponent> WeaponManageComponent;
 
 	// 카메라의 기본 FOV

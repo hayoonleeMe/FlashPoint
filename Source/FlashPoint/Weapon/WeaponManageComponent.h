@@ -46,6 +46,7 @@ public:
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
 
+	UFUNCTION(BlueprintCallable)
 	AWeapon_Base* GetEquippedWeapon() const { return EquippedWeapon; }
 	
 	// 장착 중인 무기가 유효한지 반환
