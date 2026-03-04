@@ -28,14 +28,14 @@ void UFPAssetManager::Initialize()
 
 FSoftObjectPath UFPAssetManager::GetAssetPathById(const FName& AssetId)
 {
-	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	const UFPAssetData* AssetData = Get().GetOrLoadAssetData();
 	check(AssetData);
 	return AssetData->GetAssetPathById(AssetId);
 }
 
 FSoftObjectPath UFPAssetManager::GetAssetPathByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag)
 {
-	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	const UFPAssetData* AssetData = Get().GetOrLoadAssetData();
 	check(AssetData);
 	return AssetData->GetAssetPathByTag(AssetTag, SubTag);
 }
@@ -77,7 +77,7 @@ UObject* UFPAssetManager::LoadSyncByPath(const FSoftObjectPath& AssetPath, bool 
 
 UObject* UFPAssetManager::LoadSyncById(const FName& AssetId, bool bKeepInMemory)
 {
-	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	const UFPAssetData* AssetData = Get().GetOrLoadAssetData();
 	check(AssetData);
 	
 	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathById(AssetId);
@@ -86,7 +86,7 @@ UObject* UFPAssetManager::LoadSyncById(const FName& AssetId, bool bKeepInMemory)
 
 UObject* UFPAssetManager::LoadSyncByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag, bool bKeepInMemory)
 {
-	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	const UFPAssetData* AssetData = Get().GetOrLoadAssetData();
 	check(AssetData);
 	
 	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag, SubTag);
@@ -126,7 +126,7 @@ void UFPAssetManager::LoadAsyncByPath(const FSoftObjectPath& AssetPath, FAsyncLo
 
 void UFPAssetManager::LoadAsyncById(const FName& AssetId, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate, bool bKeepInMemory)
 {
-	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	const UFPAssetData* AssetData = Get().GetOrLoadAssetData();
 	check(AssetData);
 	
 	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathById(AssetId);
@@ -136,7 +136,7 @@ void UFPAssetManager::LoadAsyncById(const FName& AssetId, FAsyncLoadCompletedDel
 void UFPAssetManager::LoadAsyncByTag(const FGameplayTag& AssetTag, const FGameplayTag& SubTag, FAsyncLoadCompletedDelegate AsyncLoadCompletedDelegate,
 	bool bKeepInMemory)
 {
-	const UFPAssetData* AssetData = Get().LoadedAssetData;
+	const UFPAssetData* AssetData = Get().GetOrLoadAssetData();
 	check(AssetData);
 	
 	const FSoftObjectPath& AssetPath = AssetData->GetAssetPathByTag(AssetTag, SubTag);
@@ -152,6 +152,8 @@ void UFPAssetManager::ReleaseAll()
 
 void UFPAssetManager::LoadPreloadAssets()
 {
+	check(IsInGameThread());
+	
 	if (LoadedAssetData)
 	{
 		return;
@@ -184,6 +186,15 @@ void UFPAssetManager::LoadPreloadAssets()
 	{
 		UE_LOG(LogFP, Fatal, TEXT("Failed to load PrimaryAssetType %s"), *PrimaryAssetType.ToString());
 	}
+}
+
+UFPAssetData* UFPAssetManager::GetOrLoadAssetData()
+{
+	if (!LoadedAssetData)
+	{
+		LoadPreloadAssets();
+	}
+	return LoadedAssetData;
 }
 
 void UFPAssetManager::AddLoadedAsset(const UObject* LoadedAsset)
