@@ -1,0 +1,31 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "WeaponAttachmentComponent.h"
+
+#include "WeaponAttachmentInterface.h"
+#include "Attachment/AttachmentBase.h"
+
+#include UE_INLINE_GENERATED_CPP_BY_NAME(WeaponAttachmentComponent)
+
+void UWeaponAttachmentComponent::OnAttachmentAdded(EAttachmentSlot AttachmentSlot, const FEquippedAttachment& EquippedAttachment)
+{
+	Super::OnAttachmentAdded(AttachmentSlot, EquippedAttachment);
+	
+	// 추가된 부착물 액터를 변환해 배열에 저장
+	if (TScriptInterface<IWeaponAttachmentInterface> Interface = EquippedAttachment.AttachmentActor)
+	{
+		WeaponAttachmentInterfaces.Add(Interface);
+	}
+}
+
+void UWeaponAttachmentComponent::OnAttachmentRemoved(EAttachmentSlot AttachmentSlot, const FEquippedAttachment& EquippedAttachment)
+{
+	Super::OnAttachmentRemoved(AttachmentSlot, EquippedAttachment);
+	
+	// 제거된 부착물 액터를 배열에서 제거
+	if (TScriptInterface<IWeaponAttachmentInterface> Interface = EquippedAttachment.AttachmentActor)
+	{
+		WeaponAttachmentInterfaces.RemoveSingleSwap(Interface, EAllowShrinking::No);
+	}
+}
