@@ -5,6 +5,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "FPGameplayTags.h"
+#include "Abilities/Tasks/AbilityTask_WaitGameplayTag.h"
 #include "Character/FPCharacter.h"
 #include "Component/UIManageComponent.h"
 #include "UI/Gameplay/PlayerHUD.h"
@@ -44,6 +45,14 @@ void UFPGameplayAbility_AimDownSight::ActivateAbility(const FGameplayAbilitySpec
                                                       const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+	
+	// NoFire 태그가 추가되면 종료
+	if (UAbilityTask_WaitGameplayTagAdded* WaitGameplayTagAddedTask = UAbilityTask_WaitGameplayTagAdded::WaitGameplayTagAdd(this, FPGameplayTags::Weapon::NoFire, nullptr, true))
+	{
+		// 태스크 제거 시 알아서 GameplayTag Event 제거
+		WaitGameplayTagAddedTask->Added.AddDynamic(this, &ThisClass::K2_EndAbility);
+		WaitGameplayTagAddedTask->ReadyForActivation();
+	}
 
 	// 카메라 전환, 이동속도 변경 요청 등은 로컬에서만 수행
 	AFPCharacter* FPCharacter = Cast<AFPCharacter>(ActorInfo->AvatarActor);
