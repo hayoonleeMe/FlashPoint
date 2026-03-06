@@ -12,6 +12,9 @@
 #include "NiagaraFunctionLibrary.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "System/FPAssetManager.h"
+#include "Attachment/FPAttachmentData.h"
+#include "Attachment/Weapon/WeaponAttachmentComponent.h"
+#include "Attachment/Weapon/WeaponAttachmentInterface.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Weapon_Base) 
 
@@ -23,7 +26,14 @@ AWeapon_Base::AWeapon_Base()
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon Mesh Component"));
 	SetRootComponent(WeaponMeshComponent);
 	WeaponMeshComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	WeaponMeshComponent->SetHiddenInGame(true);
+	WeaponMeshComponent->SetHiddenInGame(true, true);
+	
+	WeaponAttachmentComponent = CreateDefaultSubobject<UWeaponAttachmentComponent>(TEXT("Weapon Attachment Component"));
+}
+
+UMeshComponent* AWeapon_Base::GetAttachmentOwnerMeshComponent() const
+{
+	return WeaponMeshComponent;
 }
 
 void AWeapon_Base::Destroyed()
@@ -51,8 +61,16 @@ void AWeapon_Base::OnEquipped()
 {
 	GetWorldTimerManager().SetTimer(ShowWeaponTimerHandle, FTimerDelegate::CreateLambda([this]()
 	{
-		WeaponMeshComponent->SetHiddenInGame(false);
+		ShowWeapon(true);
 	}), 0.2f, false);
+	
+	for (const TScriptInterface<IWeaponAttachmentInterface>& Interface : WeaponAttachmentComponent->GetWeaponAttachmentInterfaces())
+	{
+		if (Interface)
+		{
+			Interface->OnWeaponEquipped();
+		}
+	}
 }
 
 void AWeapon_Base::OnUnEquipped()
@@ -63,7 +81,15 @@ void AWeapon_Base::OnUnEquipped()
 		ASC->FlushPressedInput(FPGameplayTags::Input::Gameplay::WeaponFire);
 	}
 
-	WeaponMeshComponent->SetHiddenInGame(true);
+	ShowWeapon(false);
+	
+	for (const TScriptInterface<IWeaponAttachmentInterface>& Interface : WeaponAttachmentComponent->GetWeaponAttachmentInterfaces())
+	{
+		if (Interface)
+		{
+			Interface->OnWeaponUnEquipped();
+		}
+	}
 }
 
 void AWeapon_Base::BroadcastWeaponFireEffects_Implementation(const TArray<FVector_NetQuantize>& ImpactPoints, const TArray<FVector_NetQuantize>& EndPoints)
@@ -123,15 +149,63 @@ void AWeapon_Base::GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutR
 
 FTransform AWeapon_Base::GetAimDownSightSocketTransform() const
 {
-	return WeaponMeshComponent->GetSocketTransform(AimDownSightSocketName);
+	FTransform AttachmentTransform;
+	if (WeaponAttachmentComponent->GetAttachmentSocketTransform(AttachmentTransform, EAttachmentSlot::UpperRail, WeaponConfigData->AimDownSightSocketName))
+	{
+		return AttachmentTransform;
+	}
+	return WeaponMeshComponent->GetSocketTransform(WeaponConfigData->AimDownSightSocketName);
+}
+
+float AWeapon_Base::GetAimDownSightFOV() const
+{
+	// 스코프를 장착중이면 스코프 스탯 반환
+	if (const UAttachmentStat_UpperRail* UpperRailStat = WeaponAttachmentComponent->GetUpperRailStat())
+	{
+		return UpperRailStat->AimDownSightFOV;
+	}
+	return WeaponConfigData->AimDownSightFOV;
+}
+
+}
+
+float AWeapon_Base::GetAimDownSightSpeedModifier() const
+{
+	// 스코프를 장착중이면 스코프 스탯 반환
+	if (const UAttachmentStat_UpperRail* UpperRailStat = WeaponAttachmentComponent->GetUpperRailStat())
+	{
+		return UpperRailStat->AimDownSightSpeedModifier;
+	}
+	return 0.f;
+}
+
+float AWeapon_Base::GetTimeToADS() const
+{
+	// Speed Modifier를 적용한 TimeToADS를 반환한다.
+	return WeaponConfigData->TimeToADS / FMath::Max(1.f + GetAimDownSightSpeedModifier(), 0.1f);
+}
 }
 
 void AWeapon_Base::StartAimDownSight()
 {
+	for (const TScriptInterface<IWeaponAttachmentInterface>& Interface : WeaponAttachmentComponent->GetWeaponAttachmentInterfaces())
+	{
+		if (Interface)
+		{
+			Interface->StartAimDownSight();
+		}
+	}
 }
 
 void AWeapon_Base::StopAimDownSight()
 {
+	for (const TScriptInterface<IWeaponAttachmentInterface>& Interface : WeaponAttachmentComponent->GetWeaponAttachmentInterfaces())
+	{
+		if (Interface)
+		{
+			Interface->StopAimDownSight();		
+		}
+	}
 }
 
 float AWeapon_Base::GetDamageByDistance(float Distance) const
@@ -146,4 +220,17 @@ float AWeapon_Base::GetDamageByDistance(float Distance) const
 UAbilitySystemComponent* AWeapon_Base::GetOwnerASC() const
 {
 	return UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
+}
+
+void AWeapon_Base::ShowWeapon(bool bShow)
+{
+	WeaponMeshComponent->SetHiddenInGame(!bShow);
+
+	for (const TScriptInterface<IWeaponAttachmentInterface>& Interface : WeaponAttachmentComponent->GetWeaponAttachmentInterfaces())
+	{
+		if (Interface)
+		{
+			Interface->ShowWeaponAttachment(bShow);
+		}
+	}
 }

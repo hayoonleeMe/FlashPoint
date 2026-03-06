@@ -65,9 +65,9 @@ void UFPGameplayAbility_AimDownSight::ActivateAbility(const FGameplayAbilitySpec
 		}
 		if (EquippedWeaponWeakPtr.IsValid())
 		{
-			const float CameraFOV = EquippedWeaponWeakPtr->GetWeaponConfigData()->AimDownSightFOV;
-			const float TimeToADS = EquippedWeaponWeakPtr->GetWeaponConfigData()->TimeToADS;
 			FPCharacter->StartAimDownSight(CameraFOV, TimeToADS);
+			const float CameraFOV = EquippedWeaponWeakPtr->GetAimDownSightFOV();
+			const float TimeToADS = EquippedWeaponWeakPtr->GetTimeToADS();
 			EquippedWeaponWeakPtr->StartAimDownSight();
 		}
 		

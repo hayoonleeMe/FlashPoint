@@ -18,6 +18,11 @@ class FLASHPOINT_API UWeaponAttachmentComponent : public UAttachmentManageCompon
 
 public:
 	const TArray<TScriptInterface<IWeaponAttachmentInterface>>& GetWeaponAttachmentInterfaces() const { return WeaponAttachmentInterfaces; }
+	
+	// 현재 장착 중인 UpperRail 부착물의 스탯 객체를 반환한다.
+	// UpperRail을 장착 중이 아니면 nullptr를 반환한다.
+	UFUNCTION(BlueprintCallable)
+	const UAttachmentStat_UpperRail* GetUpperRailStat() const;
 
 protected:
 	// Begin UAttachmentManageComponent

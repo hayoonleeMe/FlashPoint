@@ -94,6 +94,30 @@ UFPAttachmentData* UAttachmentManageComponent::GetAttachmentData(EAttachmentSlot
 	return EquippedAttachments.FindRef(AttachmentSlot).AttachmentData;
 }
 
+void UAttachmentManageComponent::GetAllEquippedAttachmentMeshes(TArray<UMeshComponent*>& OutArray) const
+{
+	for (const auto& Pair : EquippedAttachments)
+	{
+		if (AAttachmentBase* AttachmentActor = Pair.Value.AttachmentActor)
+		{
+			AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
+			{
+				OutArray.Add(Component);
+			});
+		}
+	}
+}
+
+bool UAttachmentManageComponent::GetAttachmentSocketTransform(FTransform& OutTransform, EAttachmentSlot AttachmentSlot, const FName& SocketName, ERelativeTransformSpace TransformSpace) const
+{
+	if (const AAttachmentBase* AttachmentActor = EquippedAttachments.FindRef(AttachmentSlot).AttachmentActor)
+	{
+		OutTransform = AttachmentActor->GetAttachmentSocketTransform(SocketName, TransformSpace);
+		return true;
+	}
+	return false;
+}
+
 void UAttachmentManageComponent::BeginPlay()
 {
 	Super::BeginPlay();

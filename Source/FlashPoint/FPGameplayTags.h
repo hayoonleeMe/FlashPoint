@@ -106,6 +106,17 @@ namespace FPGameplayTags
 		}
 	}
 
+	namespace Attachment
+	{
+		namespace UpperRail
+		{
+			namespace Scope
+			{
+				extern FNativeGameplayTag x8;
+			}
+		}
+	}
+	
 	namespace Attributes
 	{
 		extern FNativeGameplayTag IncomingDamage;

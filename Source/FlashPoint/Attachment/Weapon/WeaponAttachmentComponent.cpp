@@ -8,6 +8,11 @@
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(WeaponAttachmentComponent)
 
+const UAttachmentStat_UpperRail* UWeaponAttachmentComponent::GetUpperRailStat() const
+{
+	return GetAttachmentStat<UAttachmentStat_UpperRail>(EAttachmentSlot::UpperRail);
+}
+
 void UWeaponAttachmentComponent::OnAttachmentAdded(EAttachmentSlot AttachmentSlot, const FEquippedAttachment& EquippedAttachment)
 {
 	Super::OnAttachmentAdded(AttachmentSlot, EquippedAttachment);

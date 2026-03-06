@@ -16,6 +16,7 @@ class AAttachmentBase;
 UENUM(BlueprintType)
 enum class EAttachmentSlot : uint8
 {
+	UpperRail,
 	MAX UMETA(Hidden)
 };
 
@@ -97,6 +98,13 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UFPAttachmentData* GetAttachmentData(EAttachmentSlot AttachmentSlot) const;
 	
+	// 현재 장착중인 부착물의 모든 MeshComponent를 OutArray에 추가한다.
+	// OutArray를 초기화하지 않고 Add()로 추가한다.
+	void GetAllEquippedAttachmentMeshes(TArray<UMeshComponent*>& OutArray) const;
+	
+	// 부착물 메시의 소켓 트랜스폼을 OutTransform에 저장하고 성공 여부를 반환한다.
+	bool GetAttachmentSocketTransform(FTransform& OutTransform, EAttachmentSlot AttachmentSlot, const FName& SocketName, ERelativeTransformSpace TransformSpace = RTS_World) const;
+	
 	// 부착물 착용 상태가 변경될 때 호출되는 델레게이트
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FAttachmentChangedDelegate, EAttachmentSlot /*AttachmentSlot*/, AActor* /*AttachmentActor*/);
 	
@@ -121,6 +129,17 @@ protected:
 	
 	// 부착물이 제거될 때 호출된다.
 	virtual void OnAttachmentRemoved(EAttachmentSlot AttachmentSlot, const FEquippedAttachment& EquippedAttachment);
+	
+	// AttachmentSlot에 장착된 부착물의 T 타입의 스탯 객체를 반환한다.
+	template <class T>
+	const T* GetAttachmentStat(EAttachmentSlot AttachmentSlot) const
+	{
+		if (const UFPAttachmentData* AttachmentData = EquippedAttachments.FindRef(AttachmentSlot).AttachmentData)
+		{
+			return AttachmentData->GetAttachmentStat<T>();
+		}
+		return nullptr;
+	}
 	
 private:
 	// 게임 시작 시 기본으로 장착될 부착물

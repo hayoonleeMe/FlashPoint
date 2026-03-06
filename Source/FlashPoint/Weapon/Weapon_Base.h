@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Attachment/AttachmentOwnerInterface.h"
 #include "GameFramework/Actor.h"
 #include "Weapon_Base.generated.h"
 
+class UWeaponAttachmentComponent;
 class UFPWeaponConfigData;
 class UAbilitySystemComponent;
 class UNiagaraComponent;
@@ -15,12 +17,16 @@ class UNiagaraComponent;
  * 무기를 정의하는 기본 액터 클래스
  */
 UCLASS()
-class FLASHPOINT_API AWeapon_Base : public AActor
+class FLASHPOINT_API AWeapon_Base : public AActor, public IAttachmentOwnerInterface
 {
 	GENERATED_BODY()
 
 public:
 	AWeapon_Base();
+	
+	// Begin IAttachmentOwnerInterface
+	virtual UMeshComponent* GetAttachmentOwnerMeshComponent() const override;
+	// End IAttachmentOwnerInterface
 	
 	virtual void Destroyed() override;
 
@@ -55,6 +61,9 @@ public:
 	void GetFirstPersonRightHandOffset(FVector& OutLoc, FRotator& OutRot) const;
 	
 	FTransform GetAimDownSightSocketTransform() const;
+	float GetAimDownSightFOV() const;
+	float GetAimDownSightSpeedModifier() const;
+	float GetTimeToADS() const;
 	
 	void StartAimDownSight();
 	void StopAimDownSight();
@@ -75,6 +84,9 @@ protected:
 
 	// 일정 시간 뒤 무기를 다시 표시할 때 사용
 	FTimerHandle ShowWeaponTimerHandle;
+	
+	// 무기 메시를 표시하거나 숨긴다.
+	virtual void ShowWeapon(bool bShow);
 
 	// ============================================================================
 	// Fire Effects
@@ -101,4 +113,11 @@ protected:
 	// 현재 탄창에 남은 총알 수
 	// 서버에서만 유효하다.
 	int32 ServerRemainAmmo = 0;
+	
+	// ============================================================================
+	// Attachment
+	// ============================================================================
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attachment");
+	TObjectPtr<UWeaponAttachmentComponent> WeaponAttachmentComponent;
 };
