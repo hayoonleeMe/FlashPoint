@@ -114,6 +114,11 @@ namespace FPGameplayTags
 			{
 				extern FNativeGameplayTag x8;
 			}
+			
+			namespace Sight
+			{
+				extern FNativeGameplayTag RedDot;
+			}
 		}
 	}
 	

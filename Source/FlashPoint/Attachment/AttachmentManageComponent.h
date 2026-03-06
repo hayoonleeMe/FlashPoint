@@ -64,6 +64,21 @@ struct FAttachmentEquipData
 };
 
 /**
+ * 부착물이 장착될 때 어떤 본을 숨기고 표시할지 정보를 저장하는 구조체
+ */
+USTRUCT(BlueprintType)
+struct FAttachmentBoneVisibilityConfig
+{
+	GENERATED_BODY()
+	
+	UPROPERTY(EditAnywhere)
+	TArray<FName> BonesToHide;
+	
+	UPROPERTY(EditAnywhere)
+	TArray<FName> BonesToShow;
+};
+
+/**
  * 부착물을 장착하고 관리하는 컴포넌트
  */
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -167,6 +182,13 @@ private:
 	
 	// 장착 중인 부착물 중 AttachmentSlot의 부착물을 제거한다.
 	void RemoveAttachment_Internal(EAttachmentSlot AttachmentSlot);
+
+	// 특정 슬롯에 부착물이 장착될 때 OwnerMesh에서 어떤 본을 숨기고 표시할지를 나타내는 컨테이너
+	UPROPERTY(EditDefaultsOnly)
+	TMap<EAttachmentSlot, FAttachmentBoneVisibilityConfig> BoneVisibilityConfigs;
+
+	// OwnerMesh Bone Visibility를 업데이트한다.
+	void UpdateOwnerMeshBoneVisibility(EAttachmentSlot AttachmentSlot, bool bAttachmentAdded) const;
 	
 public:
 #if WITH_EDITOR

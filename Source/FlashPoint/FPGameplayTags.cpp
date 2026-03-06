@@ -113,6 +113,10 @@ namespace FPGameplayTags
 				UE_DEFINE_GAMEPLAY_TAG(x8, "Attachment.UpperRail.Scope.x8");
 			}
 
+			namespace Sight
+			{
+				UE_DEFINE_GAMEPLAY_TAG(RedDot, "Attachment.UpperRail.Sight.RedDot");
+			}
 		}
 	}
 	
