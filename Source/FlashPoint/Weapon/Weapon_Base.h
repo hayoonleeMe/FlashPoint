@@ -8,7 +8,9 @@
 #include "GameFramework/Actor.h"
 #include "Weapon_Base.generated.h"
 
+class UCustomFovComponent;
 class UWeaponAttachmentComponent;
+enum class EAttachmentSlot : uint8;
 class UFPWeaponConfigData;
 class UAbilitySystemComponent;
 class UNiagaraComponent;
@@ -62,6 +64,7 @@ public:
 	
 	FTransform GetAimDownSightSocketTransform() const;
 	float GetAimDownSightFOV() const;
+	float GetAimDownSightWeaponFOV() const;
 	float GetAimDownSightSpeedModifier() const;
 	float GetTimeToADS() const;
 	
@@ -81,6 +84,8 @@ protected:
 	{
 		return Cast<T>(GetOwnerASC());
 	}
+	
+	bool IsOwnerLocallyControlled() const;
 
 	// 일정 시간 뒤 무기를 다시 표시할 때 사용
 	FTimerHandle ShowWeaponTimerHandle;
@@ -120,4 +125,14 @@ protected:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Attachment");
 	TObjectPtr<UWeaponAttachmentComponent> WeaponAttachmentComponent;
+	
+	void OnAttachmentAdded(EAttachmentSlot AttachmentSlot, AActor* AttachmentActor);
+	void OnAttachmentRemoved(EAttachmentSlot AttachmentSlot, AActor* AttachmentActor);
+
+	// ============================================================================
+	// CustomFOV
+	// ============================================================================
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="CustomFOV")
+	TObjectPtr<UCustomFovComponent> CustomFovComponent;
 };

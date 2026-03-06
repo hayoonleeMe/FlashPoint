@@ -6,6 +6,7 @@
 #include "FPGameplayAbility.h"
 #include "FPGameplayAbility_AimDownSight.generated.h"
 
+class UFPWeaponConfigData;
 class AWeapon_Base;
 
 /**
@@ -29,4 +30,7 @@ protected:
 private:
 	UPROPERTY()
 	TWeakObjectPtr<AWeapon_Base> EquippedWeaponWeakPtr;
+	
+	UPROPERTY()
+	TObjectPtr<UFPWeaponConfigData> EquippedWeaponConfigData;
 };

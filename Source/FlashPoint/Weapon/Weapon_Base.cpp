@@ -15,6 +15,7 @@
 #include "Attachment/FPAttachmentData.h"
 #include "Attachment/Weapon/WeaponAttachmentComponent.h"
 #include "Attachment/Weapon/WeaponAttachmentInterface.h"
+#include "Component/DynamicMaterial/CustomFovComponent.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(Weapon_Base) 
 
@@ -132,6 +133,15 @@ void AWeapon_Base::TriggerWeaponFireEffects(const TArray<FVector_NetQuantize>& I
 
 void AWeapon_Base::BeginPlay()
 {
+	// 로컬 클라이언트에서 CustomFovComponent 등록
+	if (IsOwnerLocallyControlled() && !CustomFovComponent)
+	{
+		CustomFovComponent = UCustomFovComponent::CreateComponent(this, TEXT("Custom FOV Component"), GetOwnerASC(), { WeaponMeshComponent });
+	}
+	
+	WeaponAttachmentComponent->OnAttachmentAddedDelegate.AddUObject(this, &ThisClass::OnAttachmentAdded);
+	WeaponAttachmentComponent->OnAttachmentRemovedDelegate.AddUObject(this, &ThisClass::OnAttachmentRemoved);
+	
 	Super::BeginPlay();
 	
 	WeaponConfigData = UFPAssetManager::GetAssetByTag<UFPWeaponConfigData>(FPGameplayTags::Asset::WeaponConfigData, WeaponTypeTag);
@@ -167,6 +177,14 @@ float AWeapon_Base::GetAimDownSightFOV() const
 	return WeaponConfigData->AimDownSightFOV;
 }
 
+float AWeapon_Base::GetAimDownSightWeaponFOV() const
+{
+	// 스코프를 장착중이면 스코프 스탯 반환
+	if (const UAttachmentStat_UpperRail* UpperRailStat = WeaponAttachmentComponent->GetUpperRailStat())
+	{
+		return UpperRailStat->AimDownSightWeaponFOV;
+	}
+	return WeaponConfigData->AimDownSightWeaponFOV;
 }
 
 float AWeapon_Base::GetAimDownSightSpeedModifier() const
@@ -195,6 +213,11 @@ void AWeapon_Base::StartAimDownSight()
 			Interface->StartAimDownSight();
 		}
 	}
+	
+	if (CustomFovComponent)
+	{
+		CustomFovComponent->SetCustomFOV(GetAimDownSightWeaponFOV());
+	}
 }
 
 void AWeapon_Base::StopAimDownSight()
@@ -205,6 +228,11 @@ void AWeapon_Base::StopAimDownSight()
 		{
 			Interface->StopAimDownSight();		
 		}
+	}
+	
+	if (CustomFovComponent)
+	{
+		CustomFovComponent->SetCustomFOV(WeaponConfigData->FirstPersonDefaultWeaponFOV);
 	}
 }
 
@@ -222,6 +250,12 @@ UAbilitySystemComponent* AWeapon_Base::GetOwnerASC() const
 	return UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner());
 }
 
+bool AWeapon_Base::IsOwnerLocallyControlled() const
+{
+	APawn* OwnerPawn = GetOwner<APawn>();
+	return OwnerPawn && OwnerPawn->IsLocallyControlled();
+}
+
 void AWeapon_Base::ShowWeapon(bool bShow)
 {
 	WeaponMeshComponent->SetHiddenInGame(!bShow);
@@ -231,6 +265,34 @@ void AWeapon_Base::ShowWeapon(bool bShow)
 		if (Interface)
 		{
 			Interface->ShowWeaponAttachment(bShow);
+		}
+	}
+}
+
+void AWeapon_Base::OnAttachmentAdded(EAttachmentSlot AttachmentSlot, AActor* AttachmentActor)
+{
+	if (CustomFovComponent)
+	{
+		if (IsValid(AttachmentActor))
+		{
+			AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
+			{
+				CustomFovComponent->RegisterMesh(Component);
+			});
+		}
+	}
+}
+
+void AWeapon_Base::OnAttachmentRemoved(EAttachmentSlot AttachmentSlot, AActor* AttachmentActor)
+{
+	if (CustomFovComponent)
+	{
+		if (IsValid(AttachmentActor))
+		{
+			AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
+			{
+				CustomFovComponent->UnRegisterMesh(Component);
+			});
 		}
 	}
 }
