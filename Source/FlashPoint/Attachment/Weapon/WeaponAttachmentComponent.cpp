@@ -15,22 +15,22 @@ const UAttachmentStat_UpperRail* UWeaponAttachmentComponent::GetUpperRailStat() 
 
 void UWeaponAttachmentComponent::OnAttachmentAdded(EAttachmentSlot AttachmentSlot, const FEquippedAttachment& EquippedAttachment)
 {
-	Super::OnAttachmentAdded(AttachmentSlot, EquippedAttachment);
-	
 	// 추가된 부착물 액터를 변환해 배열에 저장
 	if (TScriptInterface<IWeaponAttachmentInterface> Interface = EquippedAttachment.AttachmentActor)
 	{
 		WeaponAttachmentInterfaces.Add(Interface);
 	}
+	
+	Super::OnAttachmentAdded(AttachmentSlot, EquippedAttachment);
 }
 
 void UWeaponAttachmentComponent::OnAttachmentRemoved(EAttachmentSlot AttachmentSlot, const FEquippedAttachment& EquippedAttachment)
 {
-	Super::OnAttachmentRemoved(AttachmentSlot, EquippedAttachment);
-	
 	// 제거된 부착물 액터를 배열에서 제거
 	if (TScriptInterface<IWeaponAttachmentInterface> Interface = EquippedAttachment.AttachmentActor)
 	{
 		WeaponAttachmentInterfaces.RemoveSingleSwap(Interface, EAllowShrinking::No);
 	}
+	
+	Super::OnAttachmentRemoved(AttachmentSlot, EquippedAttachment);
 }

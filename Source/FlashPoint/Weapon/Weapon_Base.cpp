@@ -271,28 +271,48 @@ void AWeapon_Base::ShowWeapon(bool bShow)
 
 void AWeapon_Base::OnAttachmentAdded(EAttachmentSlot AttachmentSlot, AActor* AttachmentActor)
 {
+	if (!IsValid(AttachmentActor))
+	{
+		return;
+	}
+	
 	if (CustomFovComponent)
 	{
-		if (IsValid(AttachmentActor))
+		// 추가된 부착물 메시 등록
+		AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
 		{
-			AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
-			{
-				CustomFovComponent->RegisterMesh(Component);
-			});
-		}
+			CustomFovComponent->RegisterMesh(Component);
+		});
+	}
+
+	// Visibility 동기화
+	if (IWeaponAttachmentInterface* Interface = Cast<IWeaponAttachmentInterface>(AttachmentActor))
+	{
+		const bool bShow = !WeaponMeshComponent->bHiddenInGame;
+		Interface->ShowWeaponAttachment(bShow);
 	}
 }
 
 void AWeapon_Base::OnAttachmentRemoved(EAttachmentSlot AttachmentSlot, AActor* AttachmentActor)
 {
+	if (!IsValid(AttachmentActor))
+	{
+		return;
+	}
+	
 	if (CustomFovComponent)
 	{
-		if (IsValid(AttachmentActor))
+		// 제거된 부착물 메시 등록 해제
+		AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
 		{
-			AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
-			{
-				CustomFovComponent->UnRegisterMesh(Component);
-			});
-		}
+			CustomFovComponent->UnRegisterMesh(Component);
+		});
+	}
+	
+	// Visibility 동기화
+	if (IWeaponAttachmentInterface* Interface = Cast<IWeaponAttachmentInterface>(AttachmentActor))
+	{
+		const bool bShow = !WeaponMeshComponent->bHiddenInGame;
+		Interface->ShowWeaponAttachment(bShow);
 	}
 }
