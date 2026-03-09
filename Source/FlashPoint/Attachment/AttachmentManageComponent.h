@@ -113,6 +113,15 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UFPAttachmentData* GetAttachmentData(EAttachmentSlot AttachmentSlot) const;
 	
+	// AttachmentSlot에 장착된 부착물 액터를 반환한다.
+	AActor* GetAttachmentActor(EAttachmentSlot AttachmentSlot) const;
+	
+	template <class T>
+	T* GetAttachmentActor(EAttachmentSlot AttachmentSlot) const
+	{
+		return Cast<T>(GetAttachmentActor(AttachmentSlot));
+	}
+	
 	// 현재 장착중인 부착물의 모든 MeshComponent를 OutArray에 추가한다.
 	// OutArray를 초기화하지 않고 Add()로 추가한다.
 	void GetAllEquippedAttachmentMeshes(TArray<UMeshComponent*>& OutArray) const;

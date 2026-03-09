@@ -94,6 +94,11 @@ UFPAttachmentData* UAttachmentManageComponent::GetAttachmentData(EAttachmentSlot
 	return EquippedAttachments.FindRef(AttachmentSlot).AttachmentData;
 }
 
+AActor* UAttachmentManageComponent::GetAttachmentActor(EAttachmentSlot AttachmentSlot) const
+{
+	return EquippedAttachments.FindRef(AttachmentSlot).AttachmentActor;
+}
+
 void UAttachmentManageComponent::GetAllEquippedAttachmentMeshes(TArray<UMeshComponent*>& OutArray) const
 {
 	for (const auto& Pair : EquippedAttachments)
