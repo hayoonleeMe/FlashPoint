@@ -94,6 +94,35 @@ UFPAttachmentData* UAttachmentManageComponent::GetAttachmentData(EAttachmentSlot
 	return EquippedAttachments.FindRef(AttachmentSlot).AttachmentData;
 }
 
+AActor* UAttachmentManageComponent::GetAttachmentActor(EAttachmentSlot AttachmentSlot) const
+{
+	return EquippedAttachments.FindRef(AttachmentSlot).AttachmentActor;
+}
+
+void UAttachmentManageComponent::GetAllEquippedAttachmentMeshes(TArray<UMeshComponent*>& OutArray) const
+{
+	for (const auto& Pair : EquippedAttachments)
+	{
+		if (AAttachmentBase* AttachmentActor = Pair.Value.AttachmentActor)
+		{
+			AttachmentActor->ForEachComponent<UMeshComponent>(false, [&](UMeshComponent* Component)
+			{
+				OutArray.Add(Component);
+			});
+		}
+	}
+}
+
+bool UAttachmentManageComponent::GetAttachmentSocketTransform(FTransform& OutTransform, EAttachmentSlot AttachmentSlot, const FName& SocketName, ERelativeTransformSpace TransformSpace) const
+{
+	if (const AAttachmentBase* AttachmentActor = EquippedAttachments.FindRef(AttachmentSlot).AttachmentActor)
+	{
+		OutTransform = AttachmentActor->GetAttachmentSocketTransform(SocketName, TransformSpace);
+		return true;
+	}
+	return false;
+}
+
 void UAttachmentManageComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -121,6 +150,8 @@ void UAttachmentManageComponent::OnAttachmentAdded(EAttachmentSlot AttachmentSlo
 	{
 		OnAttachmentAddedDelegate.Broadcast(AttachmentSlot, EquippedAttachment.AttachmentActor);
 	}
+	
+	UpdateOwnerMeshBoneVisibility(AttachmentSlot, true);
 }
 
 void UAttachmentManageComponent::OnAttachmentRemoved(EAttachmentSlot AttachmentSlot, const FEquippedAttachment& EquippedAttachment)
@@ -129,6 +160,8 @@ void UAttachmentManageComponent::OnAttachmentRemoved(EAttachmentSlot AttachmentS
 	{
 		OnAttachmentRemovedDelegate.Broadcast(AttachmentSlot, EquippedAttachment.AttachmentActor);
 	}
+	
+	UpdateOwnerMeshBoneVisibility(AttachmentSlot, false);
 }
 
 void UAttachmentManageComponent::AddReplicatedEquipData(EAttachmentSlot AttachmentSlot, const FGameplayTag& AttachmentTypeTag)
@@ -224,6 +257,49 @@ void UAttachmentManageComponent::RemoveAttachment_Internal(EAttachmentSlot Attac
 			OnAttachmentRemoved(AttachmentSlot, Removed);
 			
 			Removed.AttachmentActor->Destroy();
+		}
+	}
+}
+
+void UAttachmentManageComponent::UpdateOwnerMeshBoneVisibility(EAttachmentSlot AttachmentSlot, bool bAttachmentAdded) const
+{
+	// Bone - SKM only
+	USkeletalMeshComponent* OwnerSKM = Cast<USkeletalMeshComponent>(OwnerMeshComponent);
+	if (!OwnerSKM)
+	{
+		return;
+	}
+	
+	// 설정이 없으면 early return
+	const auto* Config = BoneVisibilityConfigs.Find(AttachmentSlot);
+	if (!Config)
+	{
+		return;
+	}
+	
+	// 숨김/표시
+	for (const FName& BoneName : Config->BonesToHide)
+	{
+		if (bAttachmentAdded)
+		{
+			OwnerSKM->HideBoneByName(BoneName, PBO_None);
+		}
+		else
+		{
+			OwnerSKM->UnHideBoneByName(BoneName);
+		}
+	}
+			
+	// 표시/숨김
+	for (const FName& BoneName : Config->BonesToShow)
+	{
+		if (bAttachmentAdded)
+		{
+			OwnerSKM->UnHideBoneByName(BoneName);
+		}
+		else
+		{
+			OwnerSKM->HideBoneByName(BoneName, PBO_None);
 		}
 	}
 }

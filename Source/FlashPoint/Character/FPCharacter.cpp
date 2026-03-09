@@ -8,6 +8,7 @@
 #include "FPGameplayTags.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Component/DynamicMaterial/CustomFovComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Data/FPCosmeticData.h"
 #include "Weapon/WeaponManageComponent.h"
@@ -190,6 +191,12 @@ void AFPCharacter::SetCharacterMesh()
 			}
 		}
 	}
+	
+	// 로컬 클라이언트에서 CustomFovComponent 등록
+	if (IsLocallyControlled() && !CustomFovComponent)
+	{
+		CustomFovComponent = UCustomFovComponent::CreateComponent(this, TEXT("Custom FOV Component"), AbilitySystemComponent, { GetMesh() });
+	}
 }
 
 void AFPCharacter::InitAbilitySystem()
@@ -251,7 +258,7 @@ void AFPCharacter::UpdateAimDownSight(float DeltaSeconds)
 	ThirdPersonCameraComponent->SetFieldOfView(CurrentFOV);
 }
 
-void AFPCharacter::StartAimDownSight(float CameraFOV, float InTimeToADS)
+void AFPCharacter::StartAimDownSight(float CameraFOV, float WeaponFOV, float TimeToADS)
 {
 	GetCharacterMovement<UFPCharacterMovementComponent>()->StartAimDownSight();
 	
@@ -262,12 +269,17 @@ void AFPCharacter::StartAimDownSight(float CameraFOV, float InTimeToADS)
 	}
 	
 	bAimDownSightStarted = true;
-	CachedTimeToADS = InTimeToADS;
+	CachedTimeToADS = TimeToADS;
 	CachedAimDownSightFOV = CameraFOV;
 	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = true;
+	
+	if (CustomFovComponent)
+	{
+		CustomFovComponent->SetCustomFOV(WeaponFOV);
+	}
 }
 
-void AFPCharacter::StopAimDownSight()
+void AFPCharacter::StopAimDownSight(float WeaponFOV)
 {
 	GetCharacterMovement<UFPCharacterMovementComponent>()->StopAimDownSight();
 	
@@ -278,6 +290,11 @@ void AFPCharacter::StopAimDownSight()
 	
 	bAimDownSightStarted = false;
 	FirstPersonCameraComponent->PostProcessSettings.bOverride_VignetteIntensity = false;
+	
+	if (CustomFovComponent)
+	{
+		CustomFovComponent->SetCustomFOV(WeaponFOV);
+	}
 }
 
 bool AFPCharacter::CanStartAimDownSight() const

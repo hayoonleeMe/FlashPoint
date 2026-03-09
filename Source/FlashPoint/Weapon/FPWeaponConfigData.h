@@ -64,9 +64,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Animation")
 	FName AimDownSightSocketName;
 	
+	// 1인칭 시점일 때 기본적으로 무기에 적용할 FOV
+	UPROPERTY(EditAnywhere, Category="FOV")
+	float FirstPersonDefaultWeaponFOV;
+	
 	// AimDownSight 시 카메라에 적용할 FOV
 	UPROPERTY(EditAnywhere, Category="FOV")
 	float AimDownSightFOV;
+	
+	// AimDownSight 시 무기에 적용할 FOV
+	UPROPERTY(EditAnywhere, Category="FOV")
+	float AimDownSightWeaponFOV;
 	
 	// HUD에 표시할 무기 이름
 	UPROPERTY(EditDefaultsOnly, Category="UI")

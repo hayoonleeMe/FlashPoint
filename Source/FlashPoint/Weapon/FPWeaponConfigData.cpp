@@ -9,5 +9,7 @@ UFPWeaponConfigData::UFPWeaponConfigData()
 {
 	LeftHandAttachSocketName = TEXT("LeftHandAttach");
 	AimDownSightSocketName = TEXT("AimDownSight");
+	FirstPersonDefaultWeaponFOV = 90.f;
 	AimDownSightFOV = 70.f;
+	AimDownSightWeaponFOV = 70.f;
 }

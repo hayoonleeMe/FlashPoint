@@ -103,7 +103,23 @@ namespace FPGameplayTags
 			UE_DEFINE_GAMEPLAY_TAG(Ammo, "Weapon.Data.Ammo");
 		}
 	}
+	
+	namespace Attachment
+	{
+		namespace UpperRail
+		{
+			namespace Scope
+			{
+				UE_DEFINE_GAMEPLAY_TAG(x8, "Attachment.UpperRail.Scope.x8");
+			}
 
+			namespace Sight
+			{
+				UE_DEFINE_GAMEPLAY_TAG(RedDot, "Attachment.UpperRail.Sight.RedDot");
+			}
+		}
+	}
+	
 	namespace Attributes
 	{
 		UE_DEFINE_GAMEPLAY_TAG(IncomingDamage, "Attributes.IncomingDamage");

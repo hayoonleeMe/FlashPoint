@@ -10,3 +10,8 @@ AWeaponAttachmentBase::AWeaponAttachmentBase()
 	// 무기 부착물은 무기와 같이 초기에 숨겨져야 함
 	PrimaryMesh->SetHiddenInGame(true);
 }
+
+void AWeaponAttachmentBase::ShowWeaponAttachment(bool bShow)
+{
+	PrimaryMesh->SetHiddenInGame(!bShow);
+}

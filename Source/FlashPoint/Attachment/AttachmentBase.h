@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "AttachmentBase.generated.h"
 
+class UAbilitySystemComponent;
 class UFPAttachmentData;
 
 /**
@@ -33,4 +34,8 @@ protected:
 	// 해당 액터 생성 시 주입
 	UPROPERTY()
 	TObjectPtr<UFPAttachmentData> AttachmentData;
+	
+	bool IsPlayerLocallyControlled() const;
+	
+	UAbilitySystemComponent* GetASC() const;
 };

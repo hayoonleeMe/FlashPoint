@@ -17,4 +17,8 @@ class FLASHPOINT_API AWeaponAttachmentBase : public AAttachmentBase, public IWea
 
 public:
 	AWeaponAttachmentBase();
+	
+	// Begin IWeaponAttachmentInterface
+	virtual void ShowWeaponAttachment(bool bShow) override;
+	// End IWeaponAttachmentInterface
 };

@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "FPCharacter.generated.h"
 
+class UCustomFovComponent;
 class UWeaponManageComponent;
 class UCameraComponent;
 class USpringArmComponent;
@@ -111,12 +112,19 @@ protected:
 	void UpdateAimDownSight(float DeltaSeconds);
 	
 public:
-	void StartAimDownSight(float CameraFOV, float InTimeToADS);
-	void StopAimDownSight();
+	void StartAimDownSight(float CameraFOV, float WeaponFOV, float TimeToADS);
+	void StopAimDownSight(float WeaponFOV);
 	
 	float GetAimDownSightAlpha() const { return AimDownSightAlpha; }
 	
 	// ADS가 완전히 끝나 다시 시작할 수 있을지 여부를 반환
 	bool CanStartAimDownSight() const;
 
+	// ============================================================================
+	// CustomFOV
+	// ============================================================================
+	
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="CustomFOV")
+	TObjectPtr<UCustomFovComponent> CustomFovComponent;
 };

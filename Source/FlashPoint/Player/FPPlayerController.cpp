@@ -8,17 +8,18 @@
 #include "FPGameplayTags.h"
 #include "FPPlayerState.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
+#include "Attachment/AttachmentManageComponent.h"
+#include "Attachment/Weapon/Attachment_Scope.h"
 #include "Component/UIManageComponent.h"
 #include "Data/FPInputData.h"
 #include "Game/FPGameState.h"
-#include "GameFramework/Character.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Input/FPInputComponent.h"
 #include "System/FPAssetManager.h"
 #include "UI/Gameplay/MatchResult.h"
 #include "UI/Gameplay/PauseMenu.h"
 #include "UI/Gameplay/Scoreboard/Scoreboard.h"
 #include "Weapon/WeaponManageComponent.h"
+#include "Weapon/Weapon_Base.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPPlayerController)
 
@@ -104,7 +105,31 @@ void AFPPlayerController::Input_Move(const FInputActionValue& InputValue)
 
 void AFPPlayerController::Input_Look(const FInputActionValue& InputValue)
 {
-	const FVector2D LookAxisVector = InputValue.Get<FVector2D>();
+	float Sensitivity = 1.f;
+	// HACK : 임시 ads 감도
+	// todo : 특정 스코프 별 배율 적용? & ADS인지 캐싱해서?, see) notion
+	{
+		if (UFPAbilitySystemComponent* ASC = GetFPAbilitySystemComponent())
+		{
+			if (ASC->HasMatchingGameplayTag(FPGameplayTags::CharacterState::IsAimingDownSight))
+			{
+				Sensitivity = 0.5f;	// ads
+				if (UWeaponManageComponent* WeaponManageComponent = FPUtils::GetComponent<UWeaponManageComponent>(GetPawn()))
+				{
+					if (UAttachmentManageComponent* AttachmentManageComponent = FPUtils::GetComponent<UAttachmentManageComponent>(WeaponManageComponent->GetEquippedWeapon()))
+					{
+						AActor* AttachmentActor = AttachmentManageComponent->GetAttachmentActor(EAttachmentSlot::UpperRail);
+						if (AttachmentActor && AttachmentActor->IsA<AAttachment_Scope>())
+						{
+							Sensitivity = 0.2f;	// scope
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	const FVector2D LookAxisVector = InputValue.Get<FVector2D>() * Sensitivity;
 	AddYawInput(LookAxisVector.X);
 	AddPitchInput(-LookAxisVector.Y);
 }
