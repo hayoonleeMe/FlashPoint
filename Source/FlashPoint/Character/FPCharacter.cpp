@@ -7,7 +7,7 @@
 #include "FPCharacterMovementComponent.h"
 #include "FPGameplayTags.h"
 #include "AbilitySystem/FPAbilitySystemComponent.h"
-#include "Camera/CameraComponent.h"
+#include "Camera/FPCameraComponent.h"
 #include "Component/DynamicMaterial/CustomFovComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Data/FPCosmeticData.h"
@@ -16,6 +16,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Player/FPPlayerState.h"
 #include "System/FPAssetManager.h"
+#include "Weapon/FPWeaponConfigData.h"
+#include "Weapon/Weapon_Base.h"
 
 #include UE_INLINE_GENERATED_CPP_BY_NAME(FPCharacter)
 
@@ -67,7 +69,7 @@ AFPCharacter::AFPCharacter(const FObjectInitializer& ObjectInitializer)
 	ThirdPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Third Person Camera Component"));
 	ThirdPersonCameraComponent->SetupAttachment(SpringArmComponent);
 
-	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("First Person Camera Component"));
+	FirstPersonCameraComponent = CreateDefaultSubobject<UFPCameraComponent>(TEXT("First Person Camera Component"));
 	FirstPersonCameraComponent->SetupAttachment(GetMesh(), TEXT("CameraSocket"));
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 	FirstPersonCameraComponent->bAutoActivate = false;
@@ -125,6 +127,11 @@ void AFPCharacter::OnRep_PlayerState()
 
 	InitAbilitySystem();
 	SetCharacterMesh();
+	
+	if (IsLocallyControlled())
+	{
+		FirstPersonCameraComponent->DetermineCameraOffsetDelegate.BindUObject(this, &ThisClass::DetermineCameraOffset);
+	}
 }
 
 void AFPCharacter::PawnClientRestart()
@@ -214,6 +221,21 @@ void AFPCharacter::InitAbilitySystem()
 	}
 }
 
+TSubclassOf<UFPCameraOffset> AFPCharacter::DetermineCameraOffset() const
+{
+	if (const AWeapon_Base* EquippedWeapon = WeaponManageComponent->GetEquippedWeapon())
+	{
+		return EquippedWeapon->GetWeaponConfigData()->FirstPersonCameraOffsetClass;
+	}
+
+	if (const UFPWeaponConfigData* UnarmedWeaponConfigData = WeaponManageComponent->GetUnarmedWeaponConfigData())
+	{
+		return UnarmedWeaponConfigData->FirstPersonCameraOffsetClass;
+	}
+	
+	return nullptr;
+}
+
 void AFPCharacter::ToggleCamera() const
 {
 	if (!AbilitySystemComponent)
@@ -239,6 +261,11 @@ void AFPCharacter::ToggleCamera() const
 		// local only
 		AbilitySystemComponent->AddLooseGameplayTag(FPGameplayTags::CharacterState::IsFirstPerson);
 	}
+}
+
+UCameraComponent* AFPCharacter::GetFirstPersonCameraComponent() const
+{
+	return FirstPersonCameraComponent;
 }
 
 void AFPCharacter::UpdateAimDownSight(float DeltaSeconds)

@@ -8,6 +8,7 @@
 #include "System/GameplayTagStackContainer.h"
 #include "WeaponManageComponent.generated.h"
 
+class UFPWeaponConfigData;
 class UAbilitySystemComponent;
 class UCharacterMovementComponent;
 class UFPRecoilData;
@@ -43,6 +44,8 @@ public:
 	virtual void InitializeComponent() override;
 	
 	void InitializeWithAbilitySystem(UAbilitySystemComponent* ASC);
+	
+	UFPWeaponConfigData* GetUnarmedWeaponConfigData() const { return UnarmedWeaponConfigData; }
 
 	UFUNCTION(BlueprintCallable)
 	AWeapon_Base* GetEquippedWeapon() const { return EquippedWeapon; }
@@ -200,6 +203,9 @@ private:
 	
 	UPROPERTY()
 	TSubclassOf<UAnimInstance> CurrentWeaponAnimLayerClass;
+	
+	UPROPERTY()
+	TObjectPtr<UFPWeaponConfigData> UnarmedWeaponConfigData;
 
 	// 현재 장착한 무기의 RecoilData
 	UPROPERTY()

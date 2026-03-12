@@ -87,7 +87,7 @@ private:
 	TArray<UImage*> WeaponSlotImages;
 
 	// 무기를 장착하지 않은 슬롯에 표시할 아이콘
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY()
 	TObjectPtr<UTexture2D> UnarmedIcon;
 
 	UPROPERTY(meta=(BindWidget))

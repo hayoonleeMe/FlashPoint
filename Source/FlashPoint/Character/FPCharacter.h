@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "FPCharacter.generated.h"
 
+class UFPCameraOffset;
+class UFPCameraComponent;
 class UCustomFovComponent;
 class UWeaponManageComponent;
 class UCameraComponent;
@@ -80,13 +82,16 @@ protected:
 	
 	// 1인칭 카메라
 	UPROPERTY(VisibleAnywhere)
-	TObjectPtr<UCameraComponent> FirstPersonCameraComponent;
+	TObjectPtr<UFPCameraComponent> FirstPersonCameraComponent;
+	
+	// First Person Camera에 적용할 Camera Offset을 결정한다.
+	TSubclassOf<UFPCameraOffset> DetermineCameraOffset() const;
 	
 public:
 	// 카메라를 전환한다. (1인칭 - 3인칭)
 	void ToggleCamera() const;
 	
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	UCameraComponent* GetFirstPersonCameraComponent() const;
 
 	// ============================================================================
 	// Weapon

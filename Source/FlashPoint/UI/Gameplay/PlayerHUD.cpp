@@ -45,7 +45,13 @@ void UPlayerHUD::NativeOnInitialized()
 		// PlayerState가 유효해질 때 초기화 로직 수행
 		BasePC->OnPlayerStateReplicatedDelegate.AddUObject(this, &ThisClass::OnPlayerStateReplicated);
 	}
-
+	
+	// Caching UnarmedIcon
+	if (const UFPWeaponConfigData* UnarmedWeaponConfigData = UFPWeaponConfigData::Get(FPGameplayTags::Weapon::Type::Unarmed))
+	{
+		UnarmedIcon = UnarmedWeaponConfigData->DisplayIcon;
+	}
+	
 	WeaponSlotImages = {	Image_WeaponSlot1, Image_WeaponSlot2, Image_WeaponSlot3	};
 	for (UImage* Image : WeaponSlotImages)
 	{

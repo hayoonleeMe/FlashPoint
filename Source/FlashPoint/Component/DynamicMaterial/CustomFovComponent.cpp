@@ -23,6 +23,7 @@ UCustomFovComponent::UCustomFovComponent()
 	ScalarMatParamConfigs.Add({ ScaleInDepthName, true });
 	VectorMatParamConfigs.Add({ ScreenOffsetName, true });
 	DefaultRequiredTags.AddTag(FPGameplayTags::CharacterState::IsFirstPerson);
+	DefaultRequiredTags.AddTag(FPGameplayTags::CharacterState::IsEquippingWeapon);
 	MaterialActivationConfigs.Add({ EnableCustomFOVName, 1.f, 0.f });
 }
 

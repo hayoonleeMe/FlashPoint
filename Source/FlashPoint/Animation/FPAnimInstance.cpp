@@ -41,6 +41,13 @@ UFPAnimInstance::UFPAnimInstance()
 	JumpSwayAmplitude = 0.01f;
 	MaxJumpSway = 2.f;
 	ADSJumpSwayMultiplier = 0.05f;
+	
+	AlphaSpine3 = 0.1f;
+	AlphaSpine4 = 0.1f;
+	AlphaSpine5 = 0.4f;
+	AlphaNeck1 = 0.15f;
+	AlphaNeck2 = 0.15f;
+	AlphaHead = 0.1f;
 }
 
 void UFPAnimInstance::NativeInitializeAnimation()

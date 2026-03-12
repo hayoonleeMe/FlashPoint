@@ -319,4 +319,26 @@ protected:
 	void ApplyRecoil();
 	
 	void UpdateRecoil(float DeltaSeconds);
+
+	// ============================================================================
+	// First Person
+	// ============================================================================
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AlphaSpine3;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AlphaSpine4;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AlphaSpine5;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AlphaNeck1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AlphaNeck2;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float AlphaHead;
 };

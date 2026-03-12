@@ -7,6 +7,7 @@
 #include "Engine/DataAsset.h"
 #include "FPWeaponConfigData.generated.h"
 
+class UFPCameraOffset;
 class UNiagaraSystem;
 
 /**
@@ -18,6 +19,9 @@ class FLASHPOINT_API UFPWeaponConfigData : public UDataAsset
 	GENERATED_BODY()
 	
 public:
+	// AssetManager에서 WeaponTypeTag에 해당하는 데이터 애셋을 반환하는 헬퍼 함수
+	static UFPWeaponConfigData* Get(const FGameplayTag& WeaponTypeTag);
+	
 	UFPWeaponConfigData();
 	
 	// 한 번에 발사되는 총알 수 
@@ -63,6 +67,10 @@ public:
 	// AimDownSight 시 카메라 앞에 위치시킬 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category="Animation")
 	FName AimDownSightSocketName;
+	
+	// 1인칭 시점일 때 카메라에 적용할 CameraOffset 오브젝트 클래스
+	UPROPERTY(EditDefaultsOnly, Category="Camera")
+	TSubclassOf<UFPCameraOffset> FirstPersonCameraOffsetClass;
 	
 	// 1인칭 시점일 때 기본적으로 무기에 적용할 FOV
 	UPROPERTY(EditAnywhere, Category="FOV")
