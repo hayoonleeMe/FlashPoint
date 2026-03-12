@@ -7,6 +7,7 @@
 #include "Engine/DataAsset.h"
 #include "FPWeaponConfigData.generated.h"
 
+class UFPCameraOffset;
 class UNiagaraSystem;
 
 /**
@@ -66,6 +67,10 @@ public:
 	// AimDownSight 시 카메라 앞에 위치시킬 소켓 이름
 	UPROPERTY(EditDefaultsOnly, Category="Animation")
 	FName AimDownSightSocketName;
+	
+	// 1인칭 시점일 때 카메라에 적용할 CameraOffset 오브젝트 클래스
+	UPROPERTY(EditDefaultsOnly, Category="Camera")
+	TSubclassOf<UFPCameraOffset> FirstPersonCameraOffsetClass;
 	
 	// 1인칭 시점일 때 기본적으로 무기에 적용할 FOV
 	UPROPERTY(EditAnywhere, Category="FOV")
