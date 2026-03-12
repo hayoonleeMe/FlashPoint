@@ -18,6 +18,9 @@ class FLASHPOINT_API UFPWeaponConfigData : public UDataAsset
 	GENERATED_BODY()
 	
 public:
+	// AssetManager에서 WeaponTypeTag에 해당하는 데이터 애셋을 반환하는 헬퍼 함수
+	static UFPWeaponConfigData* Get(const FGameplayTag& WeaponTypeTag);
+	
 	UFPWeaponConfigData();
 	
 	// 한 번에 발사되는 총알 수 

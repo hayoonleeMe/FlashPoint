@@ -179,6 +179,9 @@ void UWeaponManageComponent::BeginPlay()
 	UFPCosmeticData* CosmeticData = UFPAssetManager::GetAssetByTag<UFPCosmeticData>(FPGameplayTags::Asset::CosmeticData);
 	check(CosmeticData);
 	HandleWeaponEquip(nullptr, EWeaponEquipMethod::Initial);
+	
+	// Unarmed Data 캐싱
+	UnarmedWeaponConfigData = UFPWeaponConfigData::Get(FPGameplayTags::Weapon::Type::Unarmed);
 
 	// Bind Callback
 	AmmoTagStacks.OnTagStackChangedDelegate.AddUObject(this, &ThisClass::OnAmmoTagStackChanged);
